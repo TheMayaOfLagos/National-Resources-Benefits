@@ -71,10 +71,27 @@ if (!empty($config['allowed_ips']) && !in_array($_SERVER['REMOTE_ADDR'], $config
 // ============================================
 // HELPER FUNCTIONS
 // ============================================
+
+// Check which shell functions are available
+function getAvailableShellFunction() {
+    $functions = ['proc_open', 'shell_exec', 'passthru', 'system', 'exec'];
+    $disabled = array_map('trim', explode(',', ini_get('disable_functions')));
+    
+    foreach ($functions as $func) {
+        if (function_exists($func) && !in_array($func, $disabled)) {
+            return $func;
+        }
+    }
+    return null;
+}
+
 function findBinary($paths, $basePath) {
+    $shellFunc = getAvailableShellFunction();
+    
     foreach ($paths as $path) {
         // Expand home directory
-        $path = str_replace('~', getenv('HOME') ?: '/home/' . get_current_user(), $path);
+        $home = getenv('HOME') ?: (isset($_SERVER['HOME']) ? $_SERVER['HOME'] : '/home/' . get_current_user());
+        $path = str_replace('~', $home, $path);
         
         // Handle glob patterns
         if (strpos($path, '*') !== false) {
@@ -86,15 +103,23 @@ function findBinary($paths, $basePath) {
         
         // Check if it's a direct command or a path
         if (strpos($path, '/') === false) {
-            // It's a command, check if it exists
-            $output = [];
-            @exec("which $path 2>/dev/null", $output);
-            if (!empty($output[0])) {
-                return $path;
+            // It's a command name - try to find it
+            if ($shellFunc) {
+                $result = runCommandInternal("which $path 2>/dev/null", $basePath);
+                if (!empty(trim($result['output']))) {
+                    return $path;
+                }
+            }
+            // Also check common paths directly
+            $commonPaths = ['/usr/bin/', '/usr/local/bin/', '/opt/cpanel/composer/bin/'];
+            foreach ($commonPaths as $prefix) {
+                if (file_exists($prefix . $path)) {
+                    return $prefix . $path;
+                }
             }
         } else {
             // It's a path, check if file exists
-            if (file_exists($path) && is_executable($path)) {
+            if (file_exists($path)) {
                 return $path;
             }
         }
@@ -102,44 +127,75 @@ function findBinary($paths, $basePath) {
     return null;
 }
 
-function runCommand($cmd, $basePath, $timeout = 300) {
-    $descriptors = [
-        0 => ['pipe', 'r'],
-        1 => ['pipe', 'w'],
-        2 => ['pipe', 'w'],
-    ];
-    
+function runCommandInternal($cmd, $basePath) {
+    $shellFunc = getAvailableShellFunction();
     $fullCmd = "cd " . escapeshellarg($basePath) . " && $cmd 2>&1";
     
-    $process = @proc_open($fullCmd, $descriptors, $pipes);
-    
-    if (!is_resource($process)) {
-        // Fallback to exec
-        $output = [];
-        $returnCode = 0;
-        @exec($fullCmd, $output, $returnCode);
+    if (!$shellFunc) {
         return [
-            'success' => $returnCode === 0,
-            'output' => implode("\n", $output),
-            'return_code' => $returnCode,
+            'success' => false,
+            'output' => 'No shell functions available (exec, shell_exec, proc_open are disabled)',
+            'return_code' => -1,
         ];
     }
     
-    fclose($pipes[0]);
+    $output = '';
+    $returnCode = 0;
     
-    $output = stream_get_contents($pipes[1]);
-    fclose($pipes[1]);
-    
-    $error = stream_get_contents($pipes[2]);
-    fclose($pipes[2]);
-    
-    $returnCode = proc_close($process);
+    switch ($shellFunc) {
+        case 'proc_open':
+            $descriptors = [
+                0 => ['pipe', 'r'],
+                1 => ['pipe', 'w'],
+                2 => ['pipe', 'w'],
+            ];
+            $process = @proc_open($fullCmd, $descriptors, $pipes);
+            if (is_resource($process)) {
+                fclose($pipes[0]);
+                $output = stream_get_contents($pipes[1]);
+                fclose($pipes[1]);
+                $error = stream_get_contents($pipes[2]);
+                fclose($pipes[2]);
+                $returnCode = proc_close($process);
+                $output .= $error;
+            }
+            break;
+            
+        case 'shell_exec':
+            $output = @shell_exec($fullCmd);
+            $output = $output ?: '';
+            // shell_exec doesn't return exit code, assume success if output exists
+            $returnCode = 0;
+            break;
+            
+        case 'passthru':
+            ob_start();
+            @passthru($fullCmd, $returnCode);
+            $output = ob_get_clean();
+            break;
+            
+        case 'system':
+            ob_start();
+            @system($fullCmd, $returnCode);
+            $output = ob_get_clean();
+            break;
+            
+        case 'exec':
+            $outputArr = [];
+            @exec($fullCmd, $outputArr, $returnCode);
+            $output = implode("\n", $outputArr);
+            break;
+    }
     
     return [
         'success' => $returnCode === 0,
-        'output' => $output . ($error ? "\n$error" : ''),
+        'output' => $output,
         'return_code' => $returnCode,
     ];
+}
+
+function runCommand($cmd, $basePath, $timeout = 300) {
+    return runCommandInternal($cmd, $basePath);
 }
 
 function downloadComposer($basePath) {
@@ -182,11 +238,19 @@ function checkEnvironment($config) {
     $basePath = $config['base_path'];
     $checks = [];
     
+    // Check available shell function
+    $shellFunc = getAvailableShellFunction();
+    $checks['Shell Function'] = $shellFunc ? "✅ $shellFunc" : '❌ All disabled (exec, shell_exec, proc_open)';
+    
     // PHP
     $checks['PHP Version'] = PHP_VERSION;
     $checks['PHP SAPI'] = php_sapi_name();
     $checks['Memory Limit'] = ini_get('memory_limit');
     $checks['Max Execution Time'] = ini_get('max_execution_time');
+    
+    // Disabled functions
+    $disabled = ini_get('disable_functions');
+    $checks['Disabled Functions'] = $disabled ? substr($disabled, 0, 100) . '...' : 'None';
     
     // Paths
     $checks['Base Path'] = $basePath;
@@ -209,38 +273,47 @@ function checkEnvironment($config) {
     $checks['bootstrap/cache/'] = is_dir("$basePath/bootstrap/cache") ? '✅ Yes' : '❌ No';
     $checks['bootstrap/cache/ writable'] = is_writable("$basePath/bootstrap/cache") ? '✅ Yes' : '❌ No';
     
-    // Find binaries
-    $phpBin = findBinary($config['php_paths'], $basePath);
-    $composerBin = findBinary($config['composer_paths'], $basePath);
-    $npmBin = findBinary($config['npm_paths'], $basePath);
-    $nodeBin = findBinary($config['node_paths'], $basePath);
+    // Find binaries (only if shell functions available)
+    $phpBin = null;
+    $composerBin = null;
+    $npmBin = null;
+    $nodeBin = null;
+    
+    if ($shellFunc) {
+        $phpBin = findBinary($config['php_paths'], $basePath);
+        $composerBin = findBinary($config['composer_paths'], $basePath);
+        $npmBin = findBinary($config['npm_paths'], $basePath);
+        $nodeBin = findBinary($config['node_paths'], $basePath);
+    }
     
     // Check for local composer.phar
     if (!$composerBin && file_exists("$basePath/composer.phar")) {
-        $composerBin = "$phpBin $basePath/composer.phar";
+        $composerBin = ($phpBin ?: 'php') . " $basePath/composer.phar";
     }
     
-    $checks['PHP Binary'] = $phpBin ?: '❌ Not found';
-    $checks['Composer Binary'] = $composerBin ?: '❌ Not found (click "Download Composer")';
+    $checks['PHP Binary'] = $phpBin ?: ($shellFunc ? '❌ Not found' : '⚠️ Cannot detect (shell disabled)');
+    $checks['Composer Binary'] = $composerBin ?: ($shellFunc ? '❌ Not found (click "Download Composer")' : '⚠️ Cannot detect');
     $checks['NPM Binary'] = $npmBin ?: '❌ Not found';
     $checks['Node Binary'] = $nodeBin ?: '❌ Not found';
     
-    // Get versions
-    if ($phpBin) {
-        $result = runCommand("$phpBin -v | head -1", $basePath);
-        $checks['PHP Binary Version'] = trim($result['output']) ?: 'Unknown';
-    }
-    if ($composerBin) {
-        $result = runCommand("$composerBin --version 2>/dev/null | head -1", $basePath);
-        $checks['Composer Version'] = trim($result['output']) ?: 'Unknown';
-    }
-    if ($nodeBin) {
-        $result = runCommand("$nodeBin --version 2>/dev/null", $basePath);
-        $checks['Node Version'] = trim($result['output']) ?: 'Unknown';
-    }
-    if ($npmBin) {
-        $result = runCommand("$npmBin --version 2>/dev/null", $basePath);
-        $checks['NPM Version'] = trim($result['output']) ?: 'Unknown';
+    // Get versions only if shell functions available
+    if ($shellFunc) {
+        if ($phpBin) {
+            $result = runCommand("$phpBin -v | head -1", $basePath);
+            $checks['PHP Binary Version'] = trim($result['output']) ?: 'Unknown';
+        }
+        if ($composerBin) {
+            $result = runCommand("$composerBin --version 2>/dev/null | head -1", $basePath);
+            $checks['Composer Version'] = trim($result['output']) ?: 'Unknown';
+        }
+        if ($nodeBin) {
+            $result = runCommand("$nodeBin --version 2>/dev/null", $basePath);
+            $checks['Node Version'] = trim($result['output']) ?: 'Unknown';
+        }
+        if ($npmBin) {
+            $result = runCommand("$npmBin --version 2>/dev/null", $basePath);
+            $checks['NPM Version'] = trim($result['output']) ?: 'Unknown';
+        }
     }
     
     return [
@@ -249,6 +322,7 @@ function checkEnvironment($config) {
         'composer' => $composerBin,
         'npm' => $npmBin,
         'node' => $nodeBin,
+        'shell_available' => $shellFunc !== null,
     ];
 }
 

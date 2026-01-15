@@ -163,6 +163,7 @@ class UserControls extends Component implements HasForms, HasActions
             ->color('danger')
             ->fillForm([
                 'withdrawal_status' => $this->record->withdrawal_status,
+                'withdrawal_message' => $this->record->withdrawal_message,
             ])
             ->form([
                 Forms\Components\Select::make('withdrawal_status')
@@ -172,9 +173,21 @@ class UserControls extends Component implements HasForms, HasActions
                         'hold' => 'On Hold',
                         'under_review' => 'Under Review',
                     ])
-                    ->required(),
+                    ->required()
+                    ->live()
+                    ->helperText('Controls whether user can make withdrawals.'),
+                Forms\Components\Textarea::make('withdrawal_message')
+                    ->label('Custom Message for User')
+                    ->rows(4)
+                    ->placeholder('Enter a custom message to display to the user when they attempt to withdraw...')
+                    ->helperText('This message will be shown to the user on the withdrawal page. Leave empty for default status messages.')
+                    ->visible(fn ($get) => $get('withdrawal_status') !== 'approved'),
             ])
             ->action(function (array $data) {
+                // Clear message if status is approved
+                if ($data['withdrawal_status'] === 'approved') {
+                    $data['withdrawal_message'] = null;
+                }
                 $this->record->update($data);
                 $this->notify('Withdrawal status updated.');
             });

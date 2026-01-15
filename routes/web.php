@@ -30,6 +30,15 @@ Route::get('/', function () {
     ]);
 });
 
+// Public Pages
+Route::get('/about', function () {
+    return Inertia::render('About');
+})->name('about');
+
+Route::get('/faq', function () {
+    return Inertia::render('Faq');
+})->name('faq');
+
 // Dashboard - uses controller for data
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'otp.verified', 'verified'])

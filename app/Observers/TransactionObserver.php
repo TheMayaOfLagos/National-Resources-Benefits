@@ -145,8 +145,7 @@ class TransactionObserver
     protected function notifyAdminsOfManualDeposit(Transaction $transaction)
     {
         try {
-            $admins = User::whereHas('roles', fn($q) => $q->where('name', 'admin'))
-                       ->orWhere('email', 'admin@admin.com')
+            $admins = User::whereHas('roles', fn($q) => $q->whereIn('name', ['admin', 'super_admin']))
                        ->get();
             
             foreach ($admins as $admin) {
@@ -165,8 +164,7 @@ class TransactionObserver
     protected function notifyAdminsOfWithdrawalRequest(Transaction $transaction)
     {
         try {
-            $admins = User::whereHas('roles', fn($q) => $q->where('name', 'admin'))
-                       ->orWhere('email', 'admin@admin.com')
+            $admins = User::whereHas('roles', fn($q) => $q->whereIn('name', ['admin', 'super_admin']))
                        ->get();
             
             foreach ($admins as $admin) {

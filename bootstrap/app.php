@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+            \App\Http\Middleware\CheckMaintenanceMode::class,
             \App\Http\Middleware\CheckUserActive::class,
         ]);
 
@@ -22,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'kyc.verified' => \App\Http\Middleware\EnsureKycVerified::class,
             'feature' => \App\Http\Middleware\CheckFeatureEnabled::class,
             'otp.verified' => \App\Http\Middleware\EnsureLoginOtpIsVerified::class,
+            'maintenance' => \App\Http\Middleware\CheckMaintenanceMode::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

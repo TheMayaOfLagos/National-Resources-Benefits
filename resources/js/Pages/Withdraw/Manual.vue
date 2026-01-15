@@ -39,6 +39,18 @@ const props = defineProps({
         type: Number,
         default: 3,
     },
+    canWithdraw: {
+        type: Boolean,
+        default: true,
+    },
+    withdrawalStatus: {
+        type: String,
+        default: 'approved',
+    },
+    withdrawalMessage: {
+        type: String,
+        default: null,
+    },
 });
 
 const page = usePage();
@@ -70,9 +82,24 @@ const steps = computed(() => {
 });
 
 // Check if user can withdraw (has linked accounts or admin methods)
-const canWithdraw = computed(() => {
+const canWithdrawMethods = computed(() => {
     return props.methods.length > 0 || props.linkedAccounts.length > 0;
 });
+
+// Check if withdrawals are blocked due to status or permission
+const isWithdrawalBlocked = computed(() => {
+    return !props.canWithdraw || props.withdrawalStatus !== 'approved';
+});
+
+// Default messages for each status
+const getDefaultStatusMessage = (status) => {
+    const messages = {
+        suspended: 'Your withdrawal privileges have been suspended. Please contact support for assistance.',
+        hold: 'Your withdrawal request is currently on hold. This is typically a temporary measure.',
+        under_review: 'Your account is currently under review by our compliance team.',
+    };
+    return messages[status] || 'Please contact support for more information.';
+};
 
 // Step indices - dynamic based on flow
 const hasAdminMethods = computed(() => props.methods.length > 0);
@@ -199,7 +226,7 @@ const maxLimit = computed(() => {
 const maxWithdrawable = computed(() => {
     if (!selectedAccount.value) return 0;
     const balance = selectedAccount.value.balance;
-    
+
     if (selectedMethod.value) {
         // Account for fee when calculating max
         const feeFixed = selectedMethod.value.fee_fixed || 0;
@@ -207,7 +234,7 @@ const maxWithdrawable = computed(() => {
         const maxFromBalance = (balance - feeFixed) / (1 + feePercentage / 100);
         return Math.min(Math.max(0, maxFromBalance), maxLimit.value);
     }
-    
+
     // No method fees for linked account withdrawals
     return Math.min(balance, maxLimit.value);
 });
@@ -217,9 +244,9 @@ const canProceedStep2 = computed(() => form.gateway_id !== null);
 
 // Step validation for amount - works with or without admin methods
 const canProceedAmount = computed(() => {
-    return form.amount >= minLimit.value && 
-           form.amount <= maxLimit.value &&
-           totalDeduction.value <= (selectedAccount.value?.balance || 0);
+    return form.amount >= minLimit.value &&
+        form.amount <= maxLimit.value &&
+        totalDeduction.value <= (selectedAccount.value?.balance || 0);
 });
 
 // For backward compatibility when admin methods exist
@@ -231,9 +258,9 @@ const canProceedBankDetails = computed(() => {
         return form.linked_account_id !== null;
     }
     // Manual entry requires bank details
-    return form.bank_details.bank_name && 
-           form.bank_details.account_name && 
-           form.bank_details.account_number;
+    return form.bank_details.bank_name &&
+        form.bank_details.account_name &&
+        form.bank_details.account_number;
 });
 
 // For backward compatibility
@@ -279,31 +306,122 @@ const submitWithdrawal = () => {
 </script>
 
 <template>
+
     <Head title="Bank Withdrawal" />
 
     <div class="max-w-3xl mx-auto">
         <!-- Page Header -->
         <div class="mb-6">
-            <Link :href="route('withdraw.index')" class="text-primary-600 hover:text-primary-700 text-sm mb-2 inline-flex items-center">
-                <i class="pi pi-arrow-left mr-2"></i>
-                Back to Withdraw
+            <Link :href="route('withdraw.index')"
+                class="inline-flex items-center mb-2 text-sm text-primary-600 hover:text-primary-700">
+            <i class="mr-2 pi pi-arrow-left"></i>
+            Back to Withdraw
             </Link>
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Bank Withdrawal</h1>
-            <p class="text-gray-500 dark:text-gray-400 mt-1">Request a withdrawal to your bank account</p>
+            <p class="mt-1 text-gray-500 dark:text-gray-400">Request a withdrawal to your bank account</p>
         </div>
 
         <!-- Verification Required -->
-        <Message v-if="requiresVerification" severity="warn" :closable="false" class="mb-6">
+        <Message v-if="requiresVerification && !isWithdrawalBlocked" severity="warn" :closable="false" class="mb-6">
             <div class="flex items-center justify-between w-full">
                 <div class="flex items-center gap-2">
                     <i class="pi pi-shield"></i>
                     <span>Please complete verification before withdrawing.</span>
                 </div>
                 <Link :href="route('withdraw.verify')">
-                    <Button label="Verify Now" size="small" severity="warn" />
+                <Button label="Verify Now" size="small" severity="warn" />
                 </Link>
             </div>
         </Message>
+
+        <!-- Withdrawal Blocked Status Templates -->
+        <!-- Permission Disabled -->
+        <Card v-if="!canWithdraw" class="mb-6 border-l-4 border-red-500">
+            <template #content>
+                <div class="flex items-start gap-4">
+                    <div
+                        class="flex items-center justify-center flex-shrink-0 w-12 h-12 bg-red-100 rounded-full dark:bg-red-900/30">
+                        <i class="text-2xl text-red-600 pi pi-ban dark:text-red-400"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <h3 class="mb-2 text-lg font-semibold text-red-700 dark:text-red-400">Withdrawal Disabled</h3>
+                        <p class="mb-4 text-gray-600 dark:text-gray-400">
+                            {{ withdrawalMessage || 'Your withdrawal capability has been disabled. Please contact support.' }}
+                        </p>
+                        <Link :href="route('support.index')">
+                        <Button label="Contact Support" icon="pi pi-envelope" severity="danger" outlined />
+                        </Link>
+                    </div>
+                </div>
+            </template>
+        </Card>
+
+        <!-- Suspended Status -->
+        <Card v-else-if="withdrawalStatus === 'suspended'" class="mb-6 border-l-4 border-red-500">
+            <template #content>
+                <div class="flex items-start gap-4">
+                    <div
+                        class="flex items-center justify-center flex-shrink-0 w-12 h-12 bg-red-100 rounded-full dark:bg-red-900/30">
+                        <i class="text-2xl text-red-600 pi pi-ban dark:text-red-400"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <h3 class="mb-2 text-lg font-semibold text-red-700 dark:text-red-400">Account Suspended</h3>
+                        <p class="mb-4 text-gray-600 dark:text-gray-400">
+                            {{ withdrawalMessage || getDefaultStatusMessage('suspended') }}
+                        </p>
+                        <Link :href="route('support.index')">
+                        <Button label="Contact Support" icon="pi pi-envelope" severity="danger" />
+                        </Link>
+                    </div>
+                </div>
+            </template>
+        </Card>
+
+        <!-- On Hold Status -->
+        <Card v-else-if="withdrawalStatus === 'hold'" class="mb-6 border-l-4 border-yellow-500">
+            <template #content>
+                <div class="flex items-start gap-4">
+                    <div
+                        class="flex items-center justify-center flex-shrink-0 w-12 h-12 bg-yellow-100 rounded-full dark:bg-yellow-900/30">
+                        <i class="text-2xl text-yellow-600 pi pi-clock dark:text-yellow-400"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <h3 class="mb-2 text-lg font-semibold text-yellow-700 dark:text-yellow-400">Withdrawal On Hold
+                        </h3>
+                        <p class="mb-4 text-gray-600 dark:text-gray-400">
+                            {{ withdrawalMessage || getDefaultStatusMessage('hold') }}
+                        </p>
+                        <Link :href="route('support.index')">
+                        <Button label="Contact Support" icon="pi pi-envelope" severity="warn" outlined />
+                        </Link>
+                    </div>
+                </div>
+            </template>
+        </Card>
+
+        <!-- Under Review Status -->
+        <Card v-else-if="withdrawalStatus === 'under_review'" class="mb-6 border-l-4 border-blue-500">
+            <template #content>
+                <div class="flex items-start gap-4">
+                    <div
+                        class="flex items-center justify-center flex-shrink-0 w-12 h-12 bg-blue-100 rounded-full dark:bg-blue-900/30">
+                        <i class="text-2xl text-blue-600 pi pi-search dark:text-blue-400"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <h3 class="mb-2 text-lg font-semibold text-blue-700 dark:text-blue-400">Account Under Review
+                        </h3>
+                        <p class="mb-4 text-gray-600 dark:text-gray-400">
+                            {{ withdrawalMessage || getDefaultStatusMessage('under_review') }}
+                        </p>
+                        <div class="flex gap-3">
+                            <Link :href="route('support.index')">
+                            <Button label="Contact Support" icon="pi pi-envelope" severity="info" outlined />
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </Card>
 
         <!-- Flash Messages -->
         <Message v-if="flash.success" severity="success" :closable="true" class="mb-6">
@@ -320,8 +438,8 @@ const submitWithdrawal = () => {
             </ul>
         </Message>
 
-        <!-- No Withdrawal Options Available -->
-        <Message v-if="!canWithdraw" severity="info" :closable="false" class="mb-6">
+        <!-- No Withdrawal Options Available (only show if not blocked) -->
+        <Message v-if="!isWithdrawalBlocked && !canWithdrawMethods" severity="info" :closable="false" class="mb-6">
             <div class="flex flex-col gap-4">
                 <div class="flex items-center gap-2">
                     <i class="pi pi-info-circle"></i>
@@ -329,18 +447,19 @@ const submitWithdrawal = () => {
                 </div>
                 <div class="flex items-center gap-3">
                     <Link :href="route('linked-accounts.index')">
-                        <Button label="Link Bank Account" icon="pi pi-plus" size="small" />
+                    <Button label="Link Bank Account" icon="pi pi-plus" size="small" />
                     </Link>
                 </div>
             </div>
         </Message>
 
-        <!-- Wizard Content - Show if user has linked accounts OR admin methods -->
-        <div v-if="canWithdraw && !requiresVerification">
+        <!-- Wizard Content - Show if user has linked accounts OR admin methods AND not blocked -->
+        <div v-if="!isWithdrawalBlocked && canWithdrawMethods && !requiresVerification">
             <!-- Steps Indicator -->
             <Card class="mb-6">
                 <template #content>
-                    <Steps :model="steps" :activeStep="currentStep" :readonly="false" @step-change="(e) => goToStep(e.index)" />
+                    <Steps :model="steps" :activeStep="currentStep" :readonly="false"
+                        @step-change="(e) => goToStep(e.index)" />
                 </template>
             </Card>
 
@@ -355,16 +474,17 @@ const submitWithdrawal = () => {
                 <template #content>
                     <div class="space-y-3">
                         <div v-for="account in accounts" :key="account.id"
-                             class="p-4 border-2 rounded-lg cursor-pointer transition-all duration-300 ease-in-out"
-                             :class="form.account_id === account.id 
-                                 ? 'border-green-500 bg-green-50 dark:bg-green-900/20 shadow-md shadow-green-500/20' 
-                                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'"
-                             @click="form.account_id = account.id">
+                            class="p-4 transition-all duration-300 ease-in-out border-2 rounded-lg cursor-pointer"
+                            :class="form.account_id === account.id
+                                ? 'border-green-500 bg-green-50 dark:bg-green-900/20 shadow-md shadow-green-500/20'
+                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'"
+                            @click="form.account_id = account.id">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300"
-                                         :class="form.account_id === account.id ? 'bg-green-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500'">
-                                        <i :class="form.account_id === account.id ? 'pi pi-check' : 'pi pi-wallet'" class="transition-all duration-300"></i>
+                                    <div class="flex items-center justify-center w-10 h-10 transition-all duration-300 rounded-full"
+                                        :class="form.account_id === account.id ? 'bg-green-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500'">
+                                        <i :class="form.account_id === account.id ? 'pi pi-check' : 'pi pi-wallet'"
+                                            class="transition-all duration-300"></i>
                                     </div>
                                     <div>
                                         <p class="font-medium text-gray-900 dark:text-white">{{ account.name }}</p>
@@ -372,7 +492,8 @@ const submitWithdrawal = () => {
                                     </div>
                                 </div>
                                 <div class="text-right">
-                                    <p class="text-lg font-bold" :class="form.account_id === account.id ? 'text-green-600' : 'text-gray-900 dark:text-white'">
+                                    <p class="text-lg font-bold"
+                                        :class="form.account_id === account.id ? 'text-green-600' : 'text-gray-900 dark:text-white'">
                                         {{ settings.currency_symbol }}{{ account.formatted_balance }}
                                     </p>
                                     <p class="text-xs text-gray-500">Available</p>
@@ -382,8 +503,8 @@ const submitWithdrawal = () => {
                     </div>
 
                     <div class="flex justify-end mt-6">
-                        <Button label="Continue" icon="pi pi-arrow-right" iconPos="right" 
-                                :disabled="!canProceedStep1" @click="nextStep" />
+                        <Button label="Continue" icon="pi pi-arrow-right" iconPos="right" :disabled="!canProceedStep1"
+                            @click="nextStep" />
                     </div>
                 </template>
             </Card>
@@ -399,32 +520,36 @@ const submitWithdrawal = () => {
                 <template #content>
                     <div class="space-y-3">
                         <div v-for="method in methods" :key="method.id"
-                             class="p-4 border-2 rounded-lg cursor-pointer transition-all duration-300 ease-in-out"
-                             :class="form.gateway_id === method.id 
-                                 ? 'border-green-500 bg-green-50 dark:bg-green-900/20 shadow-md shadow-green-500/20' 
-                                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'"
-                             @click="form.gateway_id = method.id">
+                            class="p-4 transition-all duration-300 ease-in-out border-2 rounded-lg cursor-pointer"
+                            :class="form.gateway_id === method.id
+                                ? 'border-green-500 bg-green-50 dark:bg-green-900/20 shadow-md shadow-green-500/20'
+                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'"
+                            @click="form.gateway_id = method.id">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-12 h-12 rounded-lg flex items-center justify-center transition-all duration-300"
-                                         :class="form.gateway_id === method.id ? 'bg-green-500' : 'bg-gray-100 dark:bg-gray-700'">
-                                        <i v-if="form.gateway_id === method.id" class="pi pi-check text-xl text-white"></i>
-                                        <img v-else-if="method.logo" :src="method.logo" :alt="method.name" class="w-8 h-8 object-contain" />
-                                        <i v-else class="pi pi-building text-xl text-gray-500"></i>
+                                    <div class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-lg"
+                                        :class="form.gateway_id === method.id ? 'bg-green-500' : 'bg-gray-100 dark:bg-gray-700'">
+                                        <i v-if="form.gateway_id === method.id"
+                                            class="text-xl text-white pi pi-check"></i>
+                                        <img v-else-if="method.logo" :src="method.logo" :alt="method.name"
+                                            class="object-contain w-8 h-8" />
+                                        <i v-else class="text-xl text-gray-500 pi pi-building"></i>
                                     </div>
                                     <div>
                                         <p class="font-medium text-gray-900 dark:text-white">{{ method.name }}</p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ method.processing_time }}</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ method.processing_time }}
+                                        </p>
                                     </div>
                                 </div>
-                                <div class="text-right text-sm">
+                                <div class="text-sm text-right">
                                     <p v-if="method.fee_fixed > 0 || method.fee_percentage > 0" class="text-orange-600">
                                         Fee: {{ settings.currency_symbol }}{{ method.fee_fixed }}
                                         <span v-if="method.fee_percentage > 0"> + {{ method.fee_percentage }}%</span>
                                     </p>
                                     <p v-else class="text-green-600">No fees</p>
-                                    <p class="text-xs text-gray-500 mt-1">
-                                        Limit: {{ settings.currency_symbol }}{{ method.min_limit }} - {{ settings.currency_symbol }}{{ method.max_limit || 'No limit' }}
+                                    <p class="mt-1 text-xs text-gray-500">
+                                        Limit: {{ settings.currency_symbol }}{{ method.min_limit }} - {{
+                                            settings.currency_symbol }}{{ method.max_limit || 'No limit' }}
                                     </p>
                                 </div>
                             </div>
@@ -433,8 +558,8 @@ const submitWithdrawal = () => {
 
                     <div class="flex justify-between mt-6">
                         <Button label="Back" icon="pi pi-arrow-left" severity="secondary" outlined @click="prevStep" />
-                        <Button label="Continue" icon="pi pi-arrow-right" iconPos="right" 
-                                :disabled="!canProceedStep2" @click="nextStep" />
+                        <Button label="Continue" icon="pi pi-arrow-right" iconPos="right" :disabled="!canProceedStep2"
+                            @click="nextStep" />
                     </div>
                 </template>
             </Card>
@@ -448,59 +573,60 @@ const submitWithdrawal = () => {
                     </div>
                 </template>
                 <template #content>
-                    <div class="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div class="flex justify-between text-sm mb-2">
+                    <div class="p-4 mb-6 rounded-lg bg-gray-50 dark:bg-gray-800">
+                        <div class="flex justify-between mb-2 text-sm">
                             <span class="text-gray-500">Available Balance:</span>
-                            <span class="font-medium">{{ settings.currency_symbol }}{{ selectedAccount?.formatted_balance }}</span>
+                            <span class="font-medium">{{ settings.currency_symbol }}{{
+                                selectedAccount?.formatted_balance }}</span>
                         </div>
-                        <div class="flex justify-between text-sm mb-2">
+                        <div class="flex justify-between mb-2 text-sm">
                             <span class="text-gray-500">Minimum Withdrawal:</span>
-                            <span class="font-medium">{{ settings.currency_symbol }}{{ minLimit.toLocaleString() }}</span>
+                            <span class="font-medium">{{ settings.currency_symbol }}{{ minLimit.toLocaleString()
+                            }}</span>
                         </div>
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-500">Maximum Withdrawal:</span>
-                            <span class="font-medium">{{ settings.currency_symbol }}{{ maxLimit.toLocaleString() }}</span>
+                            <span class="font-medium">{{ settings.currency_symbol }}{{ maxLimit.toLocaleString()
+                            }}</span>
                         </div>
                     </div>
 
                     <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                             Withdrawal Amount
                         </label>
                         <div class="flex gap-2">
-                            <InputNumber v-model="form.amount" 
-                                         :min="minLimit" 
-                                         :max="maxLimit"
-                                         mode="currency" 
-                                         currency="USD" 
-                                         locale="en-US"
-                                         class="flex-1"
-                                         placeholder="Enter amount" />
+                            <InputNumber v-model="form.amount" :min="minLimit" :max="maxLimit" mode="currency"
+                                currency="USD" locale="en-US" class="flex-1" placeholder="Enter amount" />
                             <Button label="Max" severity="secondary" outlined @click="setMaxAmount" />
                         </div>
-                        <p v-if="form.errors.amount" class="text-red-500 text-sm mt-1">{{ form.errors.amount }}</p>
+                        <p v-if="form.errors.amount" class="mt-1 text-sm text-red-500">{{ form.errors.amount }}</p>
                     </div>
 
                     <!-- Fee Breakdown -->
-                    <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg mb-6">
-                        <h4 class="font-medium text-gray-900 dark:text-white mb-3">Transaction Summary</h4>
+                    <div class="p-4 mb-6 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                        <h4 class="mb-3 font-medium text-gray-900 dark:text-white">Transaction Summary</h4>
                         <div class="space-y-2 text-sm">
                             <div class="flex justify-between">
                                 <span class="text-gray-600 dark:text-gray-400">Withdrawal Amount:</span>
-                                <span class="font-medium">{{ settings.currency_symbol }}{{ (form.amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</span>
+                                <span class="font-medium">{{ settings.currency_symbol }}{{ (form.amount ||
+                                    0).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-600 dark:text-gray-400">Processing Fee:</span>
-                                <span class="font-medium text-orange-600">-{{ settings.currency_symbol }}{{ calculatedFee.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</span>
+                                <span class="font-medium text-orange-600">-{{ settings.currency_symbol }}{{
+                                    calculatedFee.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</span>
                             </div>
                             <Divider />
                             <div class="flex justify-between text-base">
                                 <span class="font-semibold text-gray-900 dark:text-white">Total Deduction:</span>
-                                <span class="font-bold text-primary-600">{{ settings.currency_symbol }}{{ totalDeduction.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</span>
+                                <span class="font-bold text-primary-600">{{ settings.currency_symbol }}{{
+                                    totalDeduction.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</span>
                             </div>
                             <div class="flex justify-between text-base">
                                 <span class="font-semibold text-gray-900 dark:text-white">You'll Receive:</span>
-                                <span class="font-bold text-green-600">{{ settings.currency_symbol }}{{ netAmount.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</span>
+                                <span class="font-bold text-green-600">{{ settings.currency_symbol }}{{
+                                    netAmount.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</span>
                             </div>
                         </div>
                     </div>
@@ -511,8 +637,8 @@ const submitWithdrawal = () => {
 
                     <div class="flex justify-between mt-6">
                         <Button label="Back" icon="pi pi-arrow-left" severity="secondary" outlined @click="prevStep" />
-                        <Button label="Continue" icon="pi pi-arrow-right" iconPos="right" 
-                                :disabled="!canProceedStep3" @click="nextStep" />
+                        <Button label="Continue" icon="pi pi-arrow-right" iconPos="right" :disabled="!canProceedStep3"
+                            @click="nextStep" />
                     </div>
                 </template>
             </Card>
@@ -535,130 +661,123 @@ const submitWithdrawal = () => {
                             <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Use Linked Account
                             </label>
-                            <Button 
-                                v-if="canAddMoreLinkedAccounts"
-                                label="Link New Account" 
-                                icon="pi pi-plus" 
-                                size="small"
-                                severity="secondary"
-                                outlined
-                                @click="openLinkAccountDialog"
-                            />
+                            <Button v-if="canAddMoreLinkedAccounts" label="Link New Account" icon="pi pi-plus"
+                                size="small" severity="secondary" outlined @click="openLinkAccountDialog" />
                         </div>
-                        
-                        <div class="space-y-2 mb-4">
+
+                        <div class="mb-4 space-y-2">
                             <div v-for="account in linkedAccounts" :key="account.id"
-                                 class="p-3 border-2 rounded-lg cursor-pointer transition-all"
-                                 :class="form.linked_account_id === account.id 
-                                     ? 'border-green-500 bg-green-50 dark:bg-green-900/20' 
-                                     : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'"
-                                 @click="form.linked_account_id = account.id; useLinkedAccount = true">
+                                class="p-3 transition-all border-2 rounded-lg cursor-pointer" :class="form.linked_account_id === account.id
+                                    ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'"
+                                @click="form.linked_account_id = account.id; useLinkedAccount = true">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-full flex items-center justify-center"
-                                             :class="form.linked_account_id === account.id ? 'bg-green-500 text-white' : 'bg-gray-100 dark:bg-gray-700'">
-                                            <i :class="form.linked_account_id === account.id ? 'pi pi-check' : 'pi pi-building'" class="text-sm"></i>
+                                        <div class="flex items-center justify-center w-8 h-8 rounded-full"
+                                            :class="form.linked_account_id === account.id ? 'bg-green-500 text-white' : 'bg-gray-100 dark:bg-gray-700'">
+                                            <i :class="form.linked_account_id === account.id ? 'pi pi-check' : 'pi pi-building'"
+                                                class="text-sm"></i>
                                         </div>
                                         <div>
-                                            <p class="font-medium text-gray-900 dark:text-white text-sm">{{ account.account_name }}</p>
+                                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{
+                                                account.account_name }}</p>
                                             <p class="text-xs text-gray-500">{{ account.display_name }}</p>
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <Badge v-if="account.is_default" value="Default" severity="success" />
-                                        <Badge :value="account.is_verified ? 'Verified' : 'Pending'" 
-                                               :severity="account.is_verified ? 'info' : 'warn'" />
+                                        <Badge :value="account.is_verified ? 'Verified' : 'Pending'"
+                                            :severity="account.is_verified ? 'info' : 'warn'" />
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="text-center mb-4">
-                            <Button 
-                                :label="useLinkedAccount ? 'Enter Bank Details Manually' : 'Use Linked Account'"
-                                severity="secondary" 
-                                text
-                                size="small"
-                                @click="useLinkedAccount = !useLinkedAccount; if(useLinkedAccount) form.linked_account_id = linkedAccounts[0]?.id"
-                            />
+                        <div class="mb-4 text-center">
+                            <Button :label="useLinkedAccount ? 'Enter Bank Details Manually' : 'Use Linked Account'"
+                                severity="secondary" text size="small"
+                                @click="useLinkedAccount = !useLinkedAccount; if (useLinkedAccount) form.linked_account_id = linkedAccounts[0]?.id" />
                         </div>
                     </div>
 
                     <!-- No Linked Accounts Message -->
-                    <div v-else class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <div v-else class="p-4 mb-6 rounded-lg bg-blue-50 dark:bg-blue-900/20">
                         <div class="flex items-start gap-3">
                             <i class="pi pi-info-circle text-blue-500 mt-0.5"></i>
                             <div class="flex-1">
-                                <p class="text-sm text-gray-700 dark:text-gray-300 mb-2">
-                                    You don't have any linked withdrawal accounts yet. Link an account to save your bank details for faster withdrawals.
+                                <p class="mb-2 text-sm text-gray-700 dark:text-gray-300">
+                                    You don't have any linked withdrawal accounts yet. Link an account to save your bank
+                                    details for faster withdrawals.
                                 </p>
-                                <Button 
-                                    v-if="canAddMoreLinkedAccounts"
-                                    label="Link Bank Account" 
-                                    icon="pi pi-plus" 
-                                    size="small"
-                                    @click="openLinkAccountDialog"
-                                />
+                                <Button v-if="canAddMoreLinkedAccounts" label="Link Bank Account" icon="pi pi-plus"
+                                    size="small" @click="openLinkAccountDialog" />
                             </div>
                         </div>
                     </div>
 
                     <!-- Manual Entry Form (shown when not using linked account or no linked accounts) -->
-                    <div v-if="!useLinkedAccount || linkedAccounts.length === 0" class="grid md:grid-cols-2 gap-4">
+                    <div v-if="!useLinkedAccount || linkedAccounts.length === 0" class="grid gap-4 md:grid-cols-2">
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Bank Name <span class="text-red-500">*</span>
                             </label>
-                            <InputText v-model="form.bank_details.bank_name" class="w-full" placeholder="e.g., Chase Bank" />
+                            <InputText v-model="form.bank_details.bank_name" class="w-full"
+                                placeholder="e.g., Chase Bank" />
                         </div>
 
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Account Holder Name <span class="text-red-500">*</span>
                             </label>
-                            <InputText v-model="form.bank_details.account_name" class="w-full" placeholder="Name as it appears on account" />
+                            <InputText v-model="form.bank_details.account_name" class="w-full"
+                                placeholder="Name as it appears on account" />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Account Number <span class="text-red-500">*</span>
                             </label>
-                            <InputText v-model="form.bank_details.account_number" class="w-full" placeholder="Account number" />
+                            <InputText v-model="form.bank_details.account_number" class="w-full"
+                                placeholder="Account number" />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Routing Number
                             </label>
-                            <InputText v-model="form.bank_details.routing_number" class="w-full" placeholder="9-digit routing number" maxlength="9" />
+                            <InputText v-model="form.bank_details.routing_number" class="w-full"
+                                placeholder="9-digit routing number" maxlength="9" />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 SWIFT/BIC Code
                             </label>
-                            <InputText v-model="form.bank_details.swift_code" class="w-full" placeholder="For international transfers" />
+                            <InputText v-model="form.bank_details.swift_code" class="w-full"
+                                placeholder="For international transfers" />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 IBAN
                             </label>
-                            <InputText v-model="form.bank_details.iban" class="w-full" placeholder="International Bank Account Number" />
+                            <InputText v-model="form.bank_details.iban" class="w-full"
+                                placeholder="International Bank Account Number" />
                         </div>
 
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Bank Address
                             </label>
-                            <InputText v-model="form.bank_details.bank_address" class="w-full" placeholder="Bank branch address (optional)" />
+                            <InputText v-model="form.bank_details.bank_address" class="w-full"
+                                placeholder="Bank branch address (optional)" />
                         </div>
                     </div>
 
                     <div class="flex justify-between mt-6">
                         <Button label="Back" icon="pi pi-arrow-left" severity="secondary" outlined @click="prevStep" />
-                        <Button label="Review Withdrawal" icon="pi pi-arrow-right" iconPos="right" 
-                                :disabled="!canProceedStep4" @click="nextStep" />
+                        <Button label="Review Withdrawal" icon="pi pi-arrow-right" iconPos="right"
+                            :disabled="!canProceedStep4" @click="nextStep" />
                     </div>
                 </template>
             </Card>
@@ -674,75 +793,87 @@ const submitWithdrawal = () => {
                 <template #content>
                     <div class="space-y-4">
                         <!-- Account Info -->
-                        <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                            <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Source Account</h4>
+                        <div class="p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
+                            <h4 class="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">Source Account</h4>
                             <p class="font-semibold text-gray-900 dark:text-white">{{ selectedAccount?.name }}</p>
-                            <p class="text-sm text-gray-500">Balance: {{ settings.currency_symbol }}{{ selectedAccount?.formatted_balance }}</p>
+                            <p class="text-sm text-gray-500">Balance: {{ settings.currency_symbol }}{{
+                                selectedAccount?.formatted_balance }}</p>
                         </div>
 
                         <!-- Method Info (Admin Method) -->
-                        <div v-if="selectedMethod" class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                            <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Withdrawal Method</h4>
+                        <div v-if="selectedMethod" class="p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
+                            <h4 class="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">Withdrawal Method</h4>
                             <p class="font-semibold text-gray-900 dark:text-white">{{ selectedMethod?.name }}</p>
                             <p class="text-sm text-gray-500">{{ selectedMethod?.processing_time }}</p>
                         </div>
 
                         <!-- Linked Account Info -->
-                        <div v-else-if="selectedLinkedAccount" class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                            <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Withdrawal Method</h4>
+                        <div v-else-if="selectedLinkedAccount" class="p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
+                            <h4 class="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">Withdrawal Method</h4>
                             <p class="font-semibold text-gray-900 dark:text-white">Bank Transfer (Linked Account)</p>
                             <p class="text-sm text-gray-500">1-3 business days</p>
                         </div>
 
                         <!-- Bank Details (from linked account or manual entry) -->
-                        <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                            <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Bank Details</h4>
+                        <div class="p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
+                            <h4 class="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">Bank Details</h4>
                             <div v-if="useLinkedAccount && selectedLinkedAccount" class="space-y-1 text-sm">
-                                <p class="font-medium text-gray-900 dark:text-white">{{ selectedLinkedAccount.account_name }}</p>
+                                <p class="font-medium text-gray-900 dark:text-white">{{
+                                    selectedLinkedAccount.account_name }}</p>
                                 <p class="text-gray-500">{{ selectedLinkedAccount.display_name }}</p>
                             </div>
                             <div v-else class="grid grid-cols-2 gap-2 text-sm">
                                 <p class="text-gray-500">Bank:</p>
-                                <p class="font-medium text-gray-900 dark:text-white">{{ form.bank_details.bank_name }}</p>
+                                <p class="font-medium text-gray-900 dark:text-white">{{ form.bank_details.bank_name }}
+                                </p>
                                 <p class="text-gray-500">Account Name:</p>
-                                <p class="font-medium text-gray-900 dark:text-white">{{ form.bank_details.account_name }}</p>
+                                <p class="font-medium text-gray-900 dark:text-white">{{ form.bank_details.account_name
+                                }}</p>
                                 <p class="text-gray-500">Account Number:</p>
-                                <p class="font-medium text-gray-900 dark:text-white">****{{ form.bank_details.account_number?.slice(-4) }}</p>
+                                <p class="font-medium text-gray-900 dark:text-white">****{{
+                                    form.bank_details.account_number?.slice(-4) }}</p>
                                 <p v-if="form.bank_details.routing_number" class="text-gray-500">Routing:</p>
-                                <p v-if="form.bank_details.routing_number" class="font-medium text-gray-900 dark:text-white">{{ form.bank_details.routing_number }}</p>
+                                <p v-if="form.bank_details.routing_number"
+                                    class="font-medium text-gray-900 dark:text-white">{{
+                                        form.bank_details.routing_number }}</p>
                             </div>
                         </div>
 
                         <!-- Amount Summary -->
-                        <div class="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                            <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">Transaction Summary</h4>
+                        <div class="p-4 rounded-lg bg-green-50 dark:bg-green-900/20">
+                            <h4 class="mb-3 text-sm font-medium text-gray-500 dark:text-gray-400">Transaction Summary
+                            </h4>
                             <div class="space-y-2">
                                 <div class="flex justify-between">
                                     <span class="text-gray-600 dark:text-gray-400">Withdrawal Amount:</span>
-                                    <span class="font-medium">{{ settings.currency_symbol }}{{ form.amount.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</span>
+                                    <span class="font-medium">{{ settings.currency_symbol }}{{
+                                        form.amount.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</span>
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-gray-600 dark:text-gray-400">Fee:</span>
-                                    <span class="font-medium text-orange-600">-{{ settings.currency_symbol }}{{ calculatedFee.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</span>
+                                    <span class="font-medium text-orange-600">-{{ settings.currency_symbol }}{{
+                                        calculatedFee.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</span>
                                 </div>
                                 <Divider />
                                 <div class="flex justify-between text-lg">
                                     <span class="font-bold text-gray-900 dark:text-white">You'll Receive:</span>
-                                    <span class="font-bold text-green-600">{{ settings.currency_symbol }}{{ netAmount.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</span>
+                                    <span class="font-bold text-green-600">{{ settings.currency_symbol }}{{
+                                        netAmount.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <Message severity="info" :closable="false" class="mt-4">
-                        <i class="pi pi-info-circle mr-2"></i>
-                        By proceeding, you agree that the funds will be deducted from your account and transferred to the provided bank details.
+                        <i class="mr-2 pi pi-info-circle"></i>
+                        By proceeding, you agree that the funds will be deducted from your account and transferred to
+                        the provided bank details.
                     </Message>
 
                     <div class="flex justify-between mt-6">
                         <Button label="Back" icon="pi pi-arrow-left" severity="secondary" outlined @click="prevStep" />
-                        <Button label="Submit Withdrawal" icon="pi pi-check" severity="success" 
-                                :loading="form.processing" @click="showConfirmDialog = true" />
+                        <Button label="Submit Withdrawal" icon="pi pi-check" severity="success"
+                            :loading="form.processing" @click="showConfirmDialog = true" />
                     </div>
                 </template>
             </Card>
@@ -751,10 +882,11 @@ const submitWithdrawal = () => {
         <!-- Confirmation Dialog -->
         <Dialog v-model:visible="showConfirmDialog" modal header="Confirm Withdrawal" :style="{ width: '450px' }">
             <div class="text-center">
-                <i class="pi pi-exclamation-triangle text-5xl text-yellow-500 mb-4"></i>
+                <i class="mb-4 text-5xl text-yellow-500 pi pi-exclamation-triangle"></i>
                 <p class="mb-4 text-gray-600 dark:text-gray-400">
-                    Are you sure you want to withdraw 
-                    <strong class="text-gray-900 dark:text-white">{{ settings.currency_symbol }}{{ form.amount?.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</strong>?
+                    Are you sure you want to withdraw
+                    <strong class="text-gray-900 dark:text-white">{{ settings.currency_symbol }}{{
+                        form.amount?.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</strong>?
                 </p>
                 <p class="text-sm text-gray-500">
                     This action cannot be undone. The funds will be sent to your bank account.
@@ -762,86 +894,59 @@ const submitWithdrawal = () => {
             </div>
             <template #footer>
                 <Button label="Cancel" severity="secondary" outlined @click="showConfirmDialog = false" />
-                <Button label="Confirm Withdrawal" severity="success" :loading="form.processing" @click="submitWithdrawal" />
+                <Button label="Confirm Withdrawal" severity="success" :loading="form.processing"
+                    @click="submitWithdrawal" />
             </template>
         </Dialog>
 
         <!-- Link Account Dialog -->
-        <Dialog 
-            v-model:visible="showLinkAccountDialog" 
-            modal 
-            header="Link Withdrawal Account" 
-            :style="{ width: '500px' }"
-            :closable="!linkAccountForm.processing"
-        >
+        <Dialog v-model:visible="showLinkAccountDialog" modal header="Link Withdrawal Account"
+            :style="{ width: '500px' }" :closable="!linkAccountForm.processing">
             <form @submit.prevent="submitLinkAccount" class="space-y-4">
                 <!-- Account Nickname -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
                         Account Nickname *
                     </label>
-                    <InputText 
-                        v-model="linkAccountForm.account_name" 
-                        class="w-full" 
+                    <InputText v-model="linkAccountForm.account_name" class="w-full"
                         placeholder="e.g., My Chase Account"
-                        :class="{ 'p-invalid': linkAccountForm.errors.account_name }"
-                    />
+                        :class="{ 'p-invalid': linkAccountForm.errors.account_name }" />
                     <small class="text-gray-500">A friendly name to identify this account</small>
-                    <small v-if="linkAccountForm.errors.account_name" class="p-error block mt-1">
+                    <small v-if="linkAccountForm.errors.account_name" class="block mt-1 p-error">
                         {{ linkAccountForm.errors.account_name }}
                     </small>
                 </div>
 
                 <!-- Dynamic Form Fields -->
                 <div v-for="field in withdrawalFormFields" :key="field.id">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
                         {{ field.label }} {{ field.is_required ? '*' : '' }}
                     </label>
-                    
+
                     <!-- Text Input -->
-                    <InputText 
-                        v-if="field.type === 'text' || field.type === 'email' || field.type === 'tel'"
-                        v-model="linkAccountForm.account_data[field.name]" 
-                        class="w-full" 
-                        :placeholder="field.placeholder || ''"
-                        :type="field.type"
-                        :class="{ 'p-invalid': linkAccountForm.errors[`account_data.${field.name}`] }"
-                    />
+                    <InputText v-if="field.type === 'text' || field.type === 'email' || field.type === 'tel'"
+                        v-model="linkAccountForm.account_data[field.name]" class="w-full"
+                        :placeholder="field.placeholder || ''" :type="field.type"
+                        :class="{ 'p-invalid': linkAccountForm.errors[`account_data.${field.name}`] }" />
 
                     <!-- Number Input -->
-                    <InputText 
-                        v-else-if="field.type === 'number'"
-                        v-model="linkAccountForm.account_data[field.name]" 
-                        class="w-full" 
-                        :placeholder="field.placeholder || ''"
-                        type="number"
-                        :class="{ 'p-invalid': linkAccountForm.errors[`account_data.${field.name}`] }"
-                    />
+                    <InputText v-else-if="field.type === 'number'" v-model="linkAccountForm.account_data[field.name]"
+                        class="w-full" :placeholder="field.placeholder || ''" type="number"
+                        :class="{ 'p-invalid': linkAccountForm.errors[`account_data.${field.name}`] }" />
 
                     <!-- Select Dropdown -->
-                    <Dropdown 
-                        v-else-if="field.type === 'select'"
-                        v-model="linkAccountForm.account_data[field.name]" 
-                        :options="field.options" 
-                        optionLabel="label"
-                        optionValue="value"
-                        :placeholder="field.placeholder || 'Select...'"
-                        class="w-full"
-                        :class="{ 'p-invalid': linkAccountForm.errors[`account_data.${field.name}`] }"
-                    />
+                    <Dropdown v-else-if="field.type === 'select'" v-model="linkAccountForm.account_data[field.name]"
+                        :options="field.options" optionLabel="label" optionValue="value"
+                        :placeholder="field.placeholder || 'Select...'" class="w-full"
+                        :class="{ 'p-invalid': linkAccountForm.errors[`account_data.${field.name}`] }" />
 
                     <!-- Textarea -->
-                    <Textarea 
-                        v-else-if="field.type === 'textarea'"
-                        v-model="linkAccountForm.account_data[field.name]" 
-                        class="w-full" 
-                        :placeholder="field.placeholder || ''"
-                        rows="3"
-                        :class="{ 'p-invalid': linkAccountForm.errors[`account_data.${field.name}`] }"
-                    />
+                    <Textarea v-else-if="field.type === 'textarea'" v-model="linkAccountForm.account_data[field.name]"
+                        class="w-full" :placeholder="field.placeholder || ''" rows="3"
+                        :class="{ 'p-invalid': linkAccountForm.errors[`account_data.${field.name}`] }" />
 
                     <small v-if="field.help_text" class="text-gray-500">{{ field.help_text }}</small>
-                    <small v-if="linkAccountForm.errors[`account_data.${field.name}`]" class="p-error block mt-1">
+                    <small v-if="linkAccountForm.errors[`account_data.${field.name}`]" class="block mt-1 p-error">
                         {{ linkAccountForm.errors[`account_data.${field.name}`] }}
                     </small>
                 </div>
@@ -853,24 +958,16 @@ const submitWithdrawal = () => {
 
                 <!-- Info -->
                 <Message severity="info" :closable="false">
-                    <i class="pi pi-info-circle mr-2"></i>
+                    <i class="mr-2 pi pi-info-circle"></i>
                     Linked accounts require verification before use. This typically takes 1-2 business days.
                 </Message>
             </form>
 
             <template #footer>
-                <Button 
-                    label="Cancel" 
-                    severity="secondary" 
-                    @click="closeLinkAccountDialog" 
-                    :disabled="linkAccountForm.processing"
-                />
-                <Button 
-                    label="Link Account" 
-                    icon="pi pi-link" 
-                    @click="submitLinkAccount"
-                    :loading="linkAccountForm.processing"
-                />
+                <Button label="Cancel" severity="secondary" @click="closeLinkAccountDialog"
+                    :disabled="linkAccountForm.processing" />
+                <Button label="Link Account" icon="pi pi-link" @click="submitLinkAccount"
+                    :loading="linkAccountForm.processing" />
             </template>
         </Dialog>
     </div>

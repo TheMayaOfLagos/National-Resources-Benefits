@@ -37,6 +37,7 @@ class WithdrawController extends Controller
         // Check withdrawal permissions
         $canWithdraw = $user->can_withdraw ?? true;
         $withdrawalStatus = $user->withdrawal_status ?? 'approved';
+        $withdrawalMessage = $user->withdrawal_message;
         
         // Get withdrawal limits from settings
         $settings = [
@@ -75,6 +76,7 @@ class WithdrawController extends Controller
             'accounts' => $accounts,
             'canWithdraw' => $canWithdraw,
             'withdrawalStatus' => $withdrawalStatus,
+            'withdrawalMessage' => $withdrawalMessage,
             'settings' => $settings,
             'manualMethodsCount' => $manualMethodsCount,
             'automaticMethodsCount' => $automaticMethodsCount,
@@ -152,6 +154,11 @@ class WithdrawController extends Controller
         $canAddMoreLinkedAccounts = !LinkedWithdrawalAccount::hasReachedLimit($user->id);
         $accountLimit = LinkedWithdrawalAccount::getAccountLimit();
         
+        // Get withdrawal status info
+        $canWithdraw = $user->can_withdraw ?? true;
+        $withdrawalStatus = $user->withdrawal_status ?? 'approved';
+        $withdrawalMessage = $user->withdrawal_message;
+        
         return Inertia::render('Withdraw/Manual', [
             'accounts' => $accounts,
             'methods' => $methods,
@@ -162,6 +169,9 @@ class WithdrawController extends Controller
             'withdrawalFormFields' => $withdrawalFormFields,
             'canAddMoreLinkedAccounts' => $canAddMoreLinkedAccounts,
             'accountLimit' => $accountLimit,
+            'canWithdraw' => $canWithdraw,
+            'withdrawalStatus' => $withdrawalStatus,
+            'withdrawalMessage' => $withdrawalMessage,
         ]);
     }
     
@@ -210,12 +220,20 @@ class WithdrawController extends Controller
         $requiresVerification = $this->checkVerificationRequired($user);
         $verificationStatus = $this->getVerificationStatus($user);
         
+        // Get withdrawal status info
+        $canWithdraw = $user->can_withdraw ?? true;
+        $withdrawalStatus = $user->withdrawal_status ?? 'approved';
+        $withdrawalMessage = $user->withdrawal_message;
+        
         return Inertia::render('Withdraw/Automatic', [
             'accounts' => $accounts,
             'gateways' => $gateways,
             'settings' => $settings,
             'requiresVerification' => $requiresVerification,
             'verificationStatus' => $verificationStatus,
+            'canWithdraw' => $canWithdraw,
+            'withdrawalStatus' => $withdrawalStatus,
+            'withdrawalMessage' => $withdrawalMessage,
         ]);
     }
     

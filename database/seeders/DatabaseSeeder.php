@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             ShieldSeeder::class,
+            WalletTypeSeeder::class, // Must run before user creation
         ]);
 
         $user = User::factory()->create([

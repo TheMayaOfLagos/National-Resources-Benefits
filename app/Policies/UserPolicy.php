@@ -12,7 +12,7 @@ class UserPolicy
      */
     public function before(User $user, string $ability): bool|null
     {
-        if ($user->hasRole('admin') || $user->email === 'admin@admin.com') {
+        if ($user->hasRole(['admin', 'super_admin'])) {
             return true;
         }
         return null;

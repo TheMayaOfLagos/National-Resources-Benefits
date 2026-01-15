@@ -189,27 +189,27 @@ const submit = () => {
 
         <div class="max-w-4xl mx-auto space-y-6">
             <!-- Profile Navigation Tabs -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <div class="bg-white border border-gray-100 shadow-sm dark:bg-gray-800 rounded-xl dark:border-gray-700">
                 <div class="flex border-b border-gray-100 dark:border-gray-700">
                     <Link 
                         :href="route('profile.edit')"
-                        class="px-6 py-4 text-sm font-medium border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
+                        class="px-6 py-4 text-sm font-medium text-blue-600 border-b-2 border-blue-500 dark:text-blue-400"
                     >
-                        <i class="pi pi-user mr-2"></i>
+                        <i class="mr-2 pi pi-user"></i>
                         Profile
                     </Link>
                     <Link 
                         :href="route('profile.security')"
-                        class="px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 border-b-2 border-transparent hover:border-gray-300"
+                        class="px-6 py-4 text-sm font-medium text-gray-500 border-b-2 border-transparent dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300"
                     >
-                        <i class="pi pi-shield mr-2"></i>
+                        <i class="mr-2 pi pi-shield"></i>
                         Security
                     </Link>
                     <Link 
                         :href="route('linked-accounts.index')"
-                        class="px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 border-b-2 border-transparent hover:border-gray-300"
+                        class="px-6 py-4 text-sm font-medium text-gray-500 border-b-2 border-transparent dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300"
                     >
-                        <i class="pi pi-link mr-2"></i>
+                        <i class="mr-2 pi pi-link"></i>
                         Linked Accounts
                     </Link>
                 </div>
@@ -221,10 +221,10 @@ const submit = () => {
             </Message>
 
             <!-- Avatar Section -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Profile Photo</h3>
+            <div class="p-6 bg-white border border-gray-100 shadow-sm dark:bg-gray-800 rounded-xl dark:border-gray-700">
+                <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Profile Photo</h3>
                 
-                <div class="flex items-center gap-6">
+                <div class="flex items-center gap-6 profile-avatar-section">
                     <div class="relative">
                         <Avatar 
                             v-if="displayAvatar"
@@ -238,14 +238,14 @@ const submit = () => {
                             :label="userInitials"
                             size="xlarge"
                             shape="circle"
-                            class="w-24 h-24 bg-blue-500 text-white text-2xl"
+                            class="w-24 h-24 text-2xl text-white bg-blue-500"
                         />
                         
                         <button 
                             @click="triggerAvatarUpload"
-                            class="absolute bottom-0 right-0 w-8 h-8 bg-blue-500 hover:bg-blue-600 text-white rounded-full flex items-center justify-center shadow-lg transition-colors"
+                            class="absolute bottom-0 right-0 flex items-center justify-center w-8 h-8 text-white transition-colors bg-blue-500 rounded-full shadow-lg hover:bg-blue-600"
                         >
-                            <i class="pi pi-camera text-sm"></i>
+                            <i class="text-sm pi pi-camera"></i>
                         </button>
                     </div>
                     
@@ -275,7 +275,7 @@ const submit = () => {
                                 @click="removeAvatar"
                             />
                         </div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
                             JPG, PNG or GIF. Max 2MB.
                         </p>
                     </div>
@@ -284,13 +284,13 @@ const submit = () => {
 
             <!-- Personal Information -->
             <form @submit.prevent="submit">
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">Personal Information</h3>
+                <div class="p-6 bg-white border border-gray-100 shadow-sm dark:bg-gray-800 rounded-xl dark:border-gray-700">
+                    <h3 class="mb-6 text-lg font-semibold text-gray-900 dark:text-white">Personal Information</h3>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <!-- Full Name -->
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Full Name *
                             </label>
                             <InputText 
@@ -304,7 +304,7 @@ const submit = () => {
 
                         <!-- Email -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Email Address *
                             </label>
                             <InputText 
@@ -318,13 +318,13 @@ const submit = () => {
                             
                             <div v-if="mustVerifyEmail && !user.email_verified_at" class="mt-2">
                                 <p class="text-sm text-yellow-600 dark:text-yellow-400">
-                                    <i class="pi pi-exclamation-triangle mr-1"></i>
+                                    <i class="mr-1 pi pi-exclamation-triangle"></i>
                                     Your email address is not verified.
                                     <Link
                                         :href="route('verification.send')"
                                         method="post"
                                         as="button"
-                                        class="underline hover:text-yellow-700 dark:hover:text-yellow-300 ml-1"
+                                        class="ml-1 underline hover:text-yellow-700 dark:hover:text-yellow-300"
                                     >
                                         Resend verification email
                                     </Link>
@@ -334,7 +334,7 @@ const submit = () => {
 
                         <!-- Phone -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Phone Number
                             </label>
                             <InputText 
@@ -348,7 +348,7 @@ const submit = () => {
 
                         <!-- Gender -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Gender
                             </label>
                             <Dropdown 
@@ -363,7 +363,7 @@ const submit = () => {
 
                         <!-- Age Range -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Age Range
                             </label>
                             <Dropdown 
@@ -378,7 +378,7 @@ const submit = () => {
 
                         <!-- Citizenship Status -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Citizenship Status
                             </label>
                             <Dropdown 
@@ -393,7 +393,7 @@ const submit = () => {
 
                         <!-- Ethnicity -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Ethnicity
                             </label>
                             <Dropdown 
@@ -408,7 +408,7 @@ const submit = () => {
 
                         <!-- Employment Status -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Employment Status
                             </label>
                             <Dropdown 
@@ -424,13 +424,13 @@ const submit = () => {
                 </div>
 
                 <!-- Funding Information -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 mt-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">Funding Information</h3>
+                <div class="p-6 mt-6 bg-white border border-gray-100 shadow-sm dark:bg-gray-800 rounded-xl dark:border-gray-700">
+                    <h3 class="mb-6 text-lg font-semibold text-gray-900 dark:text-white">Funding Information</h3>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <!-- Funding Type -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Type of Funding Needed
                             </label>
                             <Dropdown 
@@ -445,7 +445,7 @@ const submit = () => {
 
                         <!-- Funding Amount -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 How Much Do You Need?
                             </label>
                             <Dropdown 
@@ -461,13 +461,13 @@ const submit = () => {
                 </div>
 
                 <!-- Address Information -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 mt-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">Address Information</h3>
+                <div class="p-6 mt-6 bg-white border border-gray-100 shadow-sm dark:bg-gray-800 rounded-xl dark:border-gray-700">
+                    <h3 class="mb-6 text-lg font-semibold text-gray-900 dark:text-white">Address Information</h3>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
                         <!-- City -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 City
                             </label>
                             <InputText 
@@ -479,7 +479,7 @@ const submit = () => {
 
                         <!-- State -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 State
                             </label>
                             <Dropdown 
@@ -495,7 +495,7 @@ const submit = () => {
 
                         <!-- Zip Code -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 ZIP Code
                             </label>
                             <InputText 
@@ -520,10 +520,10 @@ const submit = () => {
             </form>
 
             <!-- Account Info -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Account Information</h3>
+            <div class="p-6 bg-white border border-gray-100 shadow-sm dark:bg-gray-800 rounded-xl dark:border-gray-700">
+                <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Account Information</h3>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div class="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
                     <div>
                         <span class="text-gray-500 dark:text-gray-400">Account ID:</span>
                         <span class="ml-2 font-mono text-gray-900 dark:text-white">{{ user.id }}</span>
@@ -550,12 +550,12 @@ const submit = () => {
 </template>
 
 <style scoped>
-:deep(.p-avatar) {
+.profile-avatar-section :deep(.p-avatar) {
     width: 6rem !important;
     height: 6rem !important;
 }
 
-:deep(.p-avatar img) {
+.profile-avatar-section :deep(.p-avatar img) {
     width: 100%;
     height: 100%;
     object-fit: cover;

@@ -23,7 +23,7 @@ class EmailVerificationCodeController extends Controller
         $user = $request->user();
 
         if ($user->hasVerifiedEmail()) {
-            return Inertia::location(route('dashboard') . '?verified=1');
+            return redirect()->route('dashboard')->with('verified', true);
         }
 
         if (!$user->verifyEmailCode($request->code)) {
@@ -35,15 +35,15 @@ class EmailVerificationCodeController extends Controller
         // Check if login OTP is required and not verified
         $loginOtpEnabled = \App\Models\Setting::get('login_otp_enabled', true);
         if ($loginOtpEnabled && !$user->login_otp_verified) {
-            return Inertia::location(route('auth.login-otp.show'));
+            return redirect()->route('auth.login-otp.show');
         }
 
         // Check if ID.me verification is required
         if (config('services.idme.required', false) && !$user->idme_verified_at) {
-            return Inertia::location(route('auth.idme.verify'));
+            return redirect()->route('auth.idme.verify');
         }
 
-        return Inertia::location(route('dashboard') . '?verified=1');
+        return redirect()->route('dashboard')->with('verified', true);
     }
 
     /**

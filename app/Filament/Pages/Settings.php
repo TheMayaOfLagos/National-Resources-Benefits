@@ -126,6 +126,7 @@ class Settings extends Page
             // Payment
             'currency_symbol' => Setting::get('currency_symbol', '$'),
             'maintenance_mode' => Setting::get('maintenance_mode', false),
+            'maintenance_message' => Setting::get('maintenance_message', 'We are currently performing scheduled maintenance. Please check back soon.'),
         ]);
     }
 
@@ -771,8 +772,16 @@ class Settings extends Page
                                             
                                         Forms\Components\Toggle::make('maintenance_mode')
                                             ->label('Maintenance Mode')
-                                            ->helperText('Put the site into maintenance mode (users cannot login).')
-                                            ->onColor('danger'),
+                                            ->helperText('Put the site into maintenance mode (users cannot access the site).')
+                                            ->onColor('danger')
+                                            ->live(),
+                                            
+                                        Forms\Components\Textarea::make('maintenance_message')
+                                            ->label('Maintenance Message')
+                                            ->helperText('Custom message shown to users during maintenance.')
+                                            ->rows(3)
+                                            ->visible(fn ($get) => $get('maintenance_mode'))
+                                            ->default('We are currently performing scheduled maintenance. Please check back soon.'),
                                     ]),
                             ]),
                     ])->columnSpanFull(),
@@ -887,6 +896,7 @@ class Settings extends Page
         // System
         Setting::set('currency_symbol', $state['currency_symbol'] ?? '$', 'system');
         Setting::set('maintenance_mode', $state['maintenance_mode'] ?? false, 'system', 'boolean');
+        Setting::set('maintenance_message', $state['maintenance_message'] ?? 'We are currently performing scheduled maintenance. Please check back soon.', 'system');
         
         Notification::make() 
             ->title('Settings Saved')

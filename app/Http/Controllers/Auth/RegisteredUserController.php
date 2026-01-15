@@ -4,13 +4,11 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Notifications\EmailVerificationCodeNotification;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -82,21 +80,13 @@ class RegisteredUserController extends Controller
             ]);
         }
 
-        event(new Registered($user));
-
         Auth::login($user);
 
         // Mark OTP as verified for registration (OTP will be required on next login)
         $user->update(['login_otp_verified' => true]);
 
-        // Generate and send email verification code
-        $code = $user->generateEmailVerificationCode();
-        $verificationUrl = URL::temporarySignedRoute(
-            'verification.verify',
-            now()->addMinutes(30),
-            ['id' => $user->id, 'hash' => sha1($user->email)]
-        );
-        $user->notify(new EmailVerificationCodeNotification($code, $verificationUrl));
+        // Fire the Registered event - this will trigger sendEmailVerificationNotification()
+        event(new Registered($user));
 
         // Redirect to email verification
         return redirect()->route('verification.notice');

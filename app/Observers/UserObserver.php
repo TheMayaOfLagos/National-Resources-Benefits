@@ -9,21 +9,36 @@ class UserObserver
 {
     /**
      * Handle the User "created" event.
+     * Auto-assigns the first two active wallet types to new users.
      */
     public function created(User $user): void
     {
-        // Find default wallet types
-        $defaultWallets = WalletType::where('is_default', true)->where('is_active', true)->get();
+        // Get the first two active wallet types ordered by display_order
+        // These are the default wallets assigned to all users
+        $defaultWallets = WalletType::where('is_active', true)
+            ->orderBy('display_order')
+            ->orderBy('id')
+            ->take(2)
+            ->get();
 
         foreach ($defaultWallets as $walletType) {
             $user->accounts()->create([
                 'wallet_type_id' => $walletType->id,
-                'account_number' => 'ACC-' . strtoupper(uniqid()), // Simple generation for now, can be improved
+                'account_number' => $this->generateAccountNumber($walletType),
                 'currency' => $walletType->currency_code,
                 'balance' => 0,
-                'account_type' => 'checking', // Fallback for legacy schema
+                'account_type' => 'checking',
             ]);
         }
+    }
+
+    /**
+     * Generate a unique account number for the wallet.
+     */
+    private function generateAccountNumber(WalletType $walletType): string
+    {
+        $prefix = strtoupper(substr($walletType->slug, 0, 3));
+        return $prefix . '-' . strtoupper(uniqid()) . '-' . rand(1000, 9999);
     }
 
     /**

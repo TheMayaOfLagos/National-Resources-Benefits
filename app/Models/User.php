@@ -58,10 +58,12 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         'tax_code',
         'cot_code',
         'withdrawal_status',
+        'withdrawal_message',
         
         // Verification codes
         'email_verification_code',
         'email_verification_code_expires_at',
+        'email_verified_at',
         'login_otp',
         'login_otp_expires_at',
         'login_otp_verified',
@@ -210,7 +212,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->hasRole('admin') || $this->email === 'admin@admin.com';
+        return $this->hasRole(['admin', 'super_admin']);
     }
 
     public function accounts(): \Illuminate\Database\Eloquent\Relations\HasMany

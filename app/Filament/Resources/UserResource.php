@@ -254,29 +254,62 @@ class UserResource extends Resource
                                     ->icon('heroicon-o-plus')
                                     ->color('primary')
                                     ->modalWidth('md')
-                                    ->form([
-                                        Forms\Components\Select::make('wallet_type_id')
-                                            ->label('Wallet Type')
-                                            ->options(\App\Models\WalletType::where('is_active', true)->pluck('name', 'id'))
-                                            ->required()
-                                            ->searchable(),
-                                        Forms\Components\TextInput::make('initial_balance')
-                                            ->numeric()
-                                            ->default(0),
-                                    ])
+                                    ->form(function (User $record) {
+                                        // Get wallet types that user doesn't already have
+                                        $existingWalletTypeIds = $record->accounts()->pluck('wallet_type_id')->toArray();
+                                        $availableWalletTypes = \App\Models\WalletType::where('is_active', true)
+                                            ->whereNotIn('id', $existingWalletTypeIds)
+                                            ->pluck('name', 'id');
+
+                                        return [
+                                            Forms\Components\Select::make('wallet_type_id')
+                                                ->label('Wallet Type')
+                                                ->options($availableWalletTypes)
+                                                ->required()
+                                                ->searchable()
+                                                ->helperText($availableWalletTypes->isEmpty() 
+                                                    ? 'User already has all available wallet types.' 
+                                                    : 'Select a wallet type to assign to this user.'),
+                                            Forms\Components\TextInput::make('initial_balance')
+                                                ->label('Initial Balance')
+                                                ->numeric()
+                                                ->default(0)
+                                                ->prefix(\App\Helpers\Currency::getSymbol()),
+                                        ];
+                                    })
                                     ->action(function (array $data, User $record) {
                                         $walletType = \App\Models\WalletType::find($data['wallet_type_id']);
+                                        
+                                        if (!$walletType) {
+                                            \Filament\Notifications\Notification::make()
+                                                ->title('Invalid wallet type')
+                                                ->danger()
+                                                ->send();
+                                            return;
+                                        }
+
+                                        // Check if user already has this wallet
+                                        if ($record->accounts()->where('wallet_type_id', $walletType->id)->exists()) {
+                                            \Filament\Notifications\Notification::make()
+                                                ->title('User already has this wallet type')
+                                                ->warning()
+                                                ->send();
+                                            return;
+                                        }
+
+                                        $prefix = strtoupper(substr($walletType->slug, 0, 3));
                                         $record->accounts()->create([
                                             'wallet_type_id' => $walletType->id,
                                             'currency' => $walletType->currency_code,
-                                            'balance' => $data['initial_balance'],
-                                            'account_number' => 'ACC-' . strtoupper(uniqid()),
+                                            'balance' => $data['initial_balance'] ?? 0,
+                                            'account_number' => $prefix . '-' . strtoupper(uniqid()) . '-' . rand(1000, 9999),
                                             'status' => 'active',
-                                            'account_type' => 'checking', // Fallback for legacy schema
+                                            'account_type' => 'checking',
                                         ]);
                                         
                                         \Filament\Notifications\Notification::make()
                                             ->title('Wallet assigned successfully')
+                                            ->body("{$walletType->name} has been assigned to {$record->name}.")
                                             ->success()
                                             ->send();
                                     }),

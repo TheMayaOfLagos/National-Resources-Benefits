@@ -631,24 +631,28 @@ class Settings extends Page
                                                 ->label('Send to User')
                                                 ->helperText('Transfer to other users')
                                                 ->default(true)
+                                                ->dehydrated(true)
                                                 ->disabled(fn ($get) => !$get('feature_transfer')),
                                                 
                                             Forms\Components\Toggle::make('feature_transfer_own')
                                                 ->label('Between Accounts')
                                                 ->helperText('Transfer between own wallets')
                                                 ->default(true)
+                                                ->dehydrated(true)
                                                 ->disabled(fn ($get) => !$get('feature_transfer')),
                                                 
                                             Forms\Components\Toggle::make('feature_transfer_domestic')
                                                 ->label('Domestic Transfer')
                                                 ->helperText('Local bank transfers')
                                                 ->default(true)
+                                                ->dehydrated(true)
                                                 ->disabled(fn ($get) => !$get('feature_transfer')),
                                                 
                                             Forms\Components\Toggle::make('feature_transfer_wire')
                                                 ->label('Wire Transfer')
                                                 ->helperText('International wire transfers')
                                                 ->default(true)
+                                                ->dehydrated(true)
                                                 ->disabled(fn ($get) => !$get('feature_transfer')),
                                         ]),
                                     ]),
@@ -674,18 +678,21 @@ class Settings extends Page
                                                 ->label('Bank Withdrawal')
                                                 ->helperText('Manual bank withdrawals')
                                                 ->default(true)
+                                                ->dehydrated(true)
                                                 ->disabled(fn ($get) => !$get('feature_withdraw')),
                                                 
                                             Forms\Components\Toggle::make('feature_withdraw_express')
                                                 ->label('Express Withdrawal')
                                                 ->helperText('Automatic/instant withdrawals')
                                                 ->default(true)
+                                                ->dehydrated(true)
                                                 ->disabled(fn ($get) => !$get('feature_withdraw')),
                                                 
                                             Forms\Components\Toggle::make('feature_withdraw_verification')
                                                 ->label('Withdrawal Verification')
                                                 ->helperText('Verification codes for withdrawal')
                                                 ->default(true)
+                                                ->dehydrated(true)
                                                 ->disabled(fn ($get) => !$get('feature_withdraw')),
                                         ]),
                                     ]),
@@ -854,29 +861,32 @@ class Settings extends Page
         Setting::set('payment_manual_gateways_enabled', $state['payment_manual_gateways_enabled'], 'payment', 'boolean');
         
         // Feature Toggles
-        Setting::set('feature_deposit', $state['feature_deposit'], 'features', 'boolean');
-        Setting::set('feature_withdraw', $state['feature_withdraw'], 'features', 'boolean');
-        Setting::set('feature_transfer', $state['feature_transfer'], 'features', 'boolean');
-        Setting::set('feature_transfer_internal', $state['feature_transfer_internal'], 'features', 'boolean');
-        Setting::set('feature_transfer_own', $state['feature_transfer_own'], 'features', 'boolean');
-        Setting::set('feature_transfer_domestic', $state['feature_transfer_domestic'], 'features', 'boolean');
-        Setting::set('feature_transfer_wire', $state['feature_transfer_wire'], 'features', 'boolean');
-        Setting::set('feature_voucher', $state['feature_voucher'], 'features', 'boolean');
-        Setting::set('feature_loans', $state['feature_loans'], 'features', 'boolean');
-        Setting::set('feature_grants', $state['feature_grants'], 'features', 'boolean');
-        Setting::set('feature_funding_sources', $state['feature_funding_sources'], 'features', 'boolean');
-        Setting::set('feature_applications', $state['feature_applications'], 'features', 'boolean');
-        Setting::set('feature_kyc', $state['feature_kyc'], 'features', 'boolean');
-        Setting::set('feature_support', $state['feature_support'], 'features', 'boolean');
-        Setting::set('feature_ranks', $state['feature_ranks'], 'features', 'boolean');
-        Setting::set('feature_referrals', $state['feature_referrals'], 'features', 'boolean');
-        Setting::set('feature_notifications', $state['feature_notifications'], 'features', 'boolean');
-        Setting::set('feature_transactions', $state['feature_transactions'], 'features', 'boolean');
-        Setting::set('feature_accounts', $state['feature_accounts'], 'features', 'boolean');
+        Setting::set('feature_deposit', $state['feature_deposit'] ?? false, 'features', 'boolean');
+        Setting::set('feature_withdraw', $state['feature_withdraw'] ?? false, 'features', 'boolean');
+        Setting::set('feature_transfer', $state['feature_transfer'] ?? false, 'features', 'boolean');
+        Setting::set('feature_transfer_internal', $state['feature_transfer_internal'] ?? false, 'features', 'boolean');
+        Setting::set('feature_transfer_own', $state['feature_transfer_own'] ?? false, 'features', 'boolean');
+        Setting::set('feature_transfer_domestic', $state['feature_transfer_domestic'] ?? false, 'features', 'boolean');
+        Setting::set('feature_transfer_wire', $state['feature_transfer_wire'] ?? false, 'features', 'boolean');
+        Setting::set('feature_voucher', $state['feature_voucher'] ?? false, 'features', 'boolean');
+        Setting::set('feature_loans', $state['feature_loans'] ?? false, 'features', 'boolean');
+        Setting::set('feature_grants', $state['feature_grants'] ?? false, 'features', 'boolean');
+        Setting::set('feature_funding_sources', $state['feature_funding_sources'] ?? false, 'features', 'boolean');
+        Setting::set('feature_applications', $state['feature_applications'] ?? false, 'features', 'boolean');
+        Setting::set('feature_kyc', $state['feature_kyc'] ?? false, 'features', 'boolean');
+        Setting::set('feature_support', $state['feature_support'] ?? false, 'features', 'boolean');
+        Setting::set('feature_ranks', $state['feature_ranks'] ?? false, 'features', 'boolean');
+        Setting::set('feature_referrals', $state['feature_referrals'] ?? false, 'features', 'boolean');
+        Setting::set('feature_notifications', $state['feature_notifications'] ?? false, 'features', 'boolean');
+        Setting::set('feature_transactions', $state['feature_transactions'] ?? false, 'features', 'boolean');
+        Setting::set('feature_accounts', $state['feature_accounts'] ?? false, 'features', 'boolean');
+        Setting::set('feature_withdraw_bank', $state['feature_withdraw_bank'] ?? false, 'features', 'boolean');
+        Setting::set('feature_withdraw_express', $state['feature_withdraw_express'] ?? false, 'features', 'boolean');
+        Setting::set('feature_withdraw_verification', $state['feature_withdraw_verification'] ?? false, 'features', 'boolean');
         
         // System
-        Setting::set('currency_symbol', $state['currency_symbol'], 'system');
-        Setting::set('maintenance_mode', $state['maintenance_mode'], 'system', 'boolean');
+        Setting::set('currency_symbol', $state['currency_symbol'] ?? '$', 'system');
+        Setting::set('maintenance_mode', $state['maintenance_mode'] ?? false, 'system', 'boolean');
         
         Notification::make() 
             ->title('Settings Saved')

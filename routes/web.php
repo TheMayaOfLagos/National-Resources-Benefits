@@ -17,6 +17,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\TransferController;
 use App\Http\Controllers\VoucherController;
 use App\Http\Controllers\WithdrawController;
+use App\Models\Testimonial;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -27,6 +28,7 @@ Route::get('/', function () {
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
+        'testimonials' => Testimonial::active()->ordered()->get(['id', 'name', 'quote']),
     ]);
 });
 

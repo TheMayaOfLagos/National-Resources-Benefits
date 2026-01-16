@@ -2,7 +2,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 
-defineProps({
+const props = defineProps({
     canLogin: {
         type: Boolean,
     },
@@ -16,6 +16,10 @@ defineProps({
     phpVersion: {
         type: String,
         required: true,
+    },
+    testimonials: {
+        type: Array,
+        default: () => [],
     },
 });
 
@@ -55,14 +59,14 @@ const randomInRange = (min, max) => Math.floor(Math.random() * (max - min + 1)) 
 const calculateIncrement = (hoursAway, config) => {
     // Base increment
     let increment = randomInRange(config.incrementMin, config.incrementMax);
-    
+
     // Multiply based on hours away (capped at reasonable growth)
     if (hoursAway > 0) {
         // Every hour away adds a multiplier
         const multiplier = Math.min(hoursAway * 0.5, 10); // Cap at 10x
         increment = Math.floor(increment * (1 + multiplier));
     }
-    
+
     return increment;
 };
 
@@ -70,22 +74,22 @@ const calculateIncrement = (hoursAway, config) => {
 const initializeCounters = () => {
     const now = Date.now();
     const storedData = localStorage.getItem(STORAGE_KEY);
-    
+
     if (storedData) {
         try {
             const parsed = JSON.parse(storedData);
             const lastVisit = parsed.lastVisit || now;
             const hoursAway = (now - lastVisit) / (1000 * 60 * 60); // Convert ms to hours
-            
+
             // Check if it's a new day - reset "today" counter but keep it progressive
             const lastVisitDate = new Date(lastVisit).toDateString();
             const todayDate = new Date(now).toDateString();
             const isNewDay = lastVisitDate !== todayDate;
-            
+
             if (isNewDay) {
                 // It's a new day - "today" resets to a new base, but yesterday and 7-day continue growing
                 const daysAway = Math.floor(hoursAway / 24);
-                
+
                 applicationCounts.value = {
                     today: randomInRange(counterConfig.today.min, counterConfig.today.min + 100),
                     yesterday: parsed.counts.yesterday + calculateIncrement(hoursAway, counterConfig.yesterday),
@@ -107,10 +111,10 @@ const initializeCounters = () => {
         // First visit ever - initialize with random base values
         initializeFreshCounters();
     }
-    
+
     // Save current state
     saveCounterState();
-    
+
     // Start live increment simulation
     startLiveIncrement();
 };
@@ -140,29 +144,29 @@ const startLiveIncrement = () => {
     // Every 15-45 seconds, increment "today" by 1-3
     const scheduleNextIncrement = () => {
         const delay = randomInRange(15000, 45000); // 15-45 seconds
-        
+
         liveIncrementInterval = setTimeout(() => {
             // Small increment to "today"
             applicationCounts.value.today += randomInRange(1, 3);
-            
+
             // Occasionally increment yesterday (less frequently)
             if (Math.random() > 0.7) {
                 applicationCounts.value.yesterday += randomInRange(1, 5);
             }
-            
+
             // Rarely increment 7-day (even less frequently)
             if (Math.random() > 0.85) {
                 applicationCounts.value.last7Days += randomInRange(5, 15);
             }
-            
+
             // Save state
             saveCounterState();
-            
+
             // Schedule next increment
             scheduleNextIncrement();
         }, delay);
     };
-    
+
     scheduleNextIncrement();
 };
 
@@ -200,8 +204,8 @@ const howItWorksSteps = [
     }
 ];
 
-// Testimonials - What people are saying
-const testimonials = [
+// Testimonials - What people are saying (from backend or fallback defaults)
+const defaultTestimonials = [
     {
         quote: 'It is simple and easy to use. The wording is great and understandable.',
         name: 'Karen R.'
@@ -228,16 +232,23 @@ const testimonials = [
     }
 ];
 
+// Use backend testimonials if available, otherwise use defaults
+const testimonials = computed(() => {
+    return props.testimonials && props.testimonials.length > 0
+        ? props.testimonials
+        : defaultTestimonials;
+});
+
 // Testimonial carousel state
 const currentTestimonialIndex = ref(0);
 let testimonialInterval = null;
 
 const nextTestimonial = () => {
-    currentTestimonialIndex.value = (currentTestimonialIndex.value + 1) % testimonials.length;
+    currentTestimonialIndex.value = (currentTestimonialIndex.value + 1) % testimonials.value.length;
 };
 
 const prevTestimonial = () => {
-    currentTestimonialIndex.value = (currentTestimonialIndex.value - 1 + testimonials.length) % testimonials.length;
+    currentTestimonialIndex.value = (currentTestimonialIndex.value - 1 + testimonials.value.length) % testimonials.value.length;
 };
 
 const goToTestimonial = (index) => {
@@ -622,19 +633,25 @@ const navItems = [
                     <div
                         class="p-4 text-center bg-white border border-gray-200 rounded-lg sm:p-6 dark:bg-zinc-800 dark:border-zinc-700">
                         <div class="text-xs font-medium text-gray-500 sm:text-sm dark:text-gray-400">Today:</div>
-                        <div class="text-xl font-bold sm:text-2xl text-[#112e51] dark:text-[#02bfe7] transition-all duration-300">{{ formatNumber(applicationCounts.today) }}</div>
+                        <div
+                            class="text-xl font-bold sm:text-2xl text-[#112e51] dark:text-[#02bfe7] transition-all duration-300">
+                            {{ formatNumber(applicationCounts.today) }}</div>
                         <div class="text-xs text-gray-600 sm:text-sm dark:text-gray-400">new applications</div>
                     </div>
                     <div
                         class="p-4 text-center bg-white border border-gray-200 rounded-lg sm:p-6 dark:bg-zinc-800 dark:border-zinc-700">
                         <div class="text-xs font-medium text-gray-500 sm:text-sm dark:text-gray-400">Yesterday:</div>
-                        <div class="text-xl font-bold sm:text-2xl text-[#112e51] dark:text-[#02bfe7] transition-all duration-300">{{ formatNumber(applicationCounts.yesterday) }}</div>
+                        <div
+                            class="text-xl font-bold sm:text-2xl text-[#112e51] dark:text-[#02bfe7] transition-all duration-300">
+                            {{ formatNumber(applicationCounts.yesterday) }}</div>
                         <div class="text-xs text-gray-600 sm:text-sm dark:text-gray-400">new applications</div>
                     </div>
                     <div
                         class="p-4 text-center bg-white border border-gray-200 rounded-lg sm:p-6 dark:bg-zinc-800 dark:border-zinc-700">
                         <div class="text-xs font-medium text-gray-500 sm:text-sm dark:text-gray-400">Last 7 Days:</div>
-                        <div class="text-xl font-bold sm:text-2xl text-[#112e51] dark:text-[#02bfe7] transition-all duration-300">{{ formatNumber(applicationCounts.last7Days) }}</div>
+                        <div
+                            class="text-xl font-bold sm:text-2xl text-[#112e51] dark:text-[#02bfe7] transition-all duration-300">
+                            {{ formatNumber(applicationCounts.last7Days) }}</div>
                         <div class="text-xs text-gray-600 sm:text-sm dark:text-gray-400">new applications</div>
                     </div>
                 </div>

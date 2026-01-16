@@ -74,9 +74,11 @@ const twoFactorEnabled = computed(() => props.user?.two_factor_enabled && props.
 const enableTwoFactor = () => {
     enableTwoFactorForm.post(route('auth.two-factor.enable'), {
         preserveScroll: true,
-        onSuccess: (response) => {
-            twoFactorQrCode.value = response.props.flash?.qr_code_svg;
-            twoFactorSecret.value = response.props.flash?.secret;
+        onSuccess: () => {
+            // Access flash data from usePage after the request completes
+            const flash = usePage().props.flash;
+            twoFactorQrCode.value = flash?.qr_code_svg;
+            twoFactorSecret.value = flash?.secret;
             showEnableTwoFactorDialog.value = false;
             showConfirmTwoFactorDialog.value = true;
             enableTwoFactorForm.reset();
@@ -90,8 +92,9 @@ const enableTwoFactor = () => {
 const confirmTwoFactor = () => {
     confirmTwoFactorForm.post(route('auth.two-factor.confirm'), {
         preserveScroll: true,
-        onSuccess: (response) => {
-            recoveryCodes.value = response.props.flash?.recovery_codes || [];
+        onSuccess: () => {
+            const flash = usePage().props.flash;
+            recoveryCodes.value = flash?.recovery_codes || [];
             showConfirmTwoFactorDialog.value = false;
             showRecoveryCodesDialog.value = true;
             confirmTwoFactorForm.reset();
@@ -124,8 +127,9 @@ const regenerateRecoveryCodes = () => {
     twoFactorLoading.value = true;
     router.post(route('auth.two-factor.recovery-codes'), {}, {
         preserveScroll: true,
-        onSuccess: (response) => {
-            recoveryCodes.value = response.props.flash?.recovery_codes || [];
+        onSuccess: () => {
+            const flash = usePage().props.flash;
+            recoveryCodes.value = flash?.recovery_codes || [];
             showRecoveryCodesDialog.value = true;
             toast.add({ severity: 'success', summary: 'Success', detail: 'Recovery codes regenerated', life: 3000 });
         },

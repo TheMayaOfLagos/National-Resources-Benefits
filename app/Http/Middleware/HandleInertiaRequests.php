@@ -126,6 +126,10 @@ class HandleInertiaRequests extends Middleware
                 'error' => fn () => $request->session()->get('error'),
                 'warning' => fn () => $request->session()->get('warning'),
                 'info' => fn () => $request->session()->get('info'),
+                // Two-factor authentication
+                'secret' => fn () => $request->session()->get('secret'),
+                'qr_code_svg' => fn () => $request->session()->get('qr_code_svg'),
+                'recovery_codes' => fn () => $request->session()->get('recovery_codes'),
             ],
             'unreadNotifications' => fn () => $user ? $user->unreadNotifications()->count() : 0,
             'ziggy' => fn () => [

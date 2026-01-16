@@ -29,6 +29,158 @@ const siteLogoDark = computed(() => settings.value.site_logo_dark || settings.va
 const mobileMenuOpen = ref(false);
 const showGovBanner = ref(false);
 
+// ============================================
+// SMART APPLICATION COUNTER SYSTEM
+// ============================================
+const STORAGE_KEY = 'nrb_app_counter_state';
+
+// Base ranges for each period
+const counterConfig = {
+    today: { min: 150, max: 450, incrementMin: 1, incrementMax: 5 },
+    yesterday: { min: 1200, max: 3500, incrementMin: 10, incrementMax: 50 },
+    last7Days: { min: 12000, max: 18000, incrementMin: 50, incrementMax: 200 }
+};
+
+// Reactive counter values
+const applicationCounts = ref({
+    today: 0,
+    yesterday: 0,
+    last7Days: 0
+});
+
+// Get random number in range
+const randomInRange = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+// Calculate time-based increment (more time away = bigger increment)
+const calculateIncrement = (hoursAway, config) => {
+    // Base increment
+    let increment = randomInRange(config.incrementMin, config.incrementMax);
+    
+    // Multiply based on hours away (capped at reasonable growth)
+    if (hoursAway > 0) {
+        // Every hour away adds a multiplier
+        const multiplier = Math.min(hoursAway * 0.5, 10); // Cap at 10x
+        increment = Math.floor(increment * (1 + multiplier));
+    }
+    
+    return increment;
+};
+
+// Initialize or restore counter state
+const initializeCounters = () => {
+    const now = Date.now();
+    const storedData = localStorage.getItem(STORAGE_KEY);
+    
+    if (storedData) {
+        try {
+            const parsed = JSON.parse(storedData);
+            const lastVisit = parsed.lastVisit || now;
+            const hoursAway = (now - lastVisit) / (1000 * 60 * 60); // Convert ms to hours
+            
+            // Check if it's a new day - reset "today" counter but keep it progressive
+            const lastVisitDate = new Date(lastVisit).toDateString();
+            const todayDate = new Date(now).toDateString();
+            const isNewDay = lastVisitDate !== todayDate;
+            
+            if (isNewDay) {
+                // It's a new day - "today" resets to a new base, but yesterday and 7-day continue growing
+                const daysAway = Math.floor(hoursAway / 24);
+                
+                applicationCounts.value = {
+                    today: randomInRange(counterConfig.today.min, counterConfig.today.min + 100),
+                    yesterday: parsed.counts.yesterday + calculateIncrement(hoursAway, counterConfig.yesterday),
+                    last7Days: parsed.counts.last7Days + calculateIncrement(hoursAway, counterConfig.last7Days)
+                };
+            } else {
+                // Same day - increment all counters based on time away
+                applicationCounts.value = {
+                    today: parsed.counts.today + calculateIncrement(hoursAway, counterConfig.today),
+                    yesterday: parsed.counts.yesterday + calculateIncrement(hoursAway, counterConfig.yesterday),
+                    last7Days: parsed.counts.last7Days + calculateIncrement(hoursAway, counterConfig.last7Days)
+                };
+            }
+        } catch (e) {
+            // Corrupted data, start fresh
+            initializeFreshCounters();
+        }
+    } else {
+        // First visit ever - initialize with random base values
+        initializeFreshCounters();
+    }
+    
+    // Save current state
+    saveCounterState();
+    
+    // Start live increment simulation
+    startLiveIncrement();
+};
+
+// Initialize fresh counters for first-time visitors
+const initializeFreshCounters = () => {
+    applicationCounts.value = {
+        today: randomInRange(counterConfig.today.min, counterConfig.today.max),
+        yesterday: randomInRange(counterConfig.yesterday.min, counterConfig.yesterday.max),
+        last7Days: randomInRange(counterConfig.last7Days.min, counterConfig.last7Days.max)
+    };
+};
+
+// Save counter state to localStorage
+const saveCounterState = () => {
+    const state = {
+        counts: applicationCounts.value,
+        lastVisit: Date.now()
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+};
+
+// Live increment simulation (while user is on page)
+let liveIncrementInterval = null;
+
+const startLiveIncrement = () => {
+    // Every 15-45 seconds, increment "today" by 1-3
+    const scheduleNextIncrement = () => {
+        const delay = randomInRange(15000, 45000); // 15-45 seconds
+        
+        liveIncrementInterval = setTimeout(() => {
+            // Small increment to "today"
+            applicationCounts.value.today += randomInRange(1, 3);
+            
+            // Occasionally increment yesterday (less frequently)
+            if (Math.random() > 0.7) {
+                applicationCounts.value.yesterday += randomInRange(1, 5);
+            }
+            
+            // Rarely increment 7-day (even less frequently)
+            if (Math.random() > 0.85) {
+                applicationCounts.value.last7Days += randomInRange(5, 15);
+            }
+            
+            // Save state
+            saveCounterState();
+            
+            // Schedule next increment
+            scheduleNextIncrement();
+        }, delay);
+    };
+    
+    scheduleNextIncrement();
+};
+
+const stopLiveIncrement = () => {
+    if (liveIncrementInterval) {
+        clearTimeout(liveIncrementInterval);
+    }
+};
+
+// Format number with commas
+const formatNumber = (num) => {
+    return num.toLocaleString('en-US');
+};
+
+// ============================================
+// END COUNTER SYSTEM
+// ============================================
+
 // How it works steps
 const howItWorksSteps = [
     {
@@ -106,10 +258,12 @@ const stopAutoSlide = () => {
 
 onMounted(() => {
     startAutoSlide();
+    initializeCounters();
 });
 
 onUnmounted(() => {
     stopAutoSlide();
+    stopLiveIncrement();
 });
 
 // Navigation menu items
@@ -467,20 +621,20 @@ const navItems = [
                 <div class="grid max-w-3xl grid-cols-1 gap-3 mx-auto sm:gap-4 sm:grid-cols-3">
                     <div
                         class="p-4 text-center bg-white border border-gray-200 rounded-lg sm:p-6 dark:bg-zinc-800 dark:border-zinc-700">
+                        <div class="text-xs font-medium text-gray-500 sm:text-sm dark:text-gray-400">Today:</div>
+                        <div class="text-xl font-bold sm:text-2xl text-[#112e51] dark:text-[#02bfe7] transition-all duration-300">{{ formatNumber(applicationCounts.today) }}</div>
+                        <div class="text-xs text-gray-600 sm:text-sm dark:text-gray-400">new applications</div>
+                    </div>
+                    <div
+                        class="p-4 text-center bg-white border border-gray-200 rounded-lg sm:p-6 dark:bg-zinc-800 dark:border-zinc-700">
+                        <div class="text-xs font-medium text-gray-500 sm:text-sm dark:text-gray-400">Yesterday:</div>
+                        <div class="text-xl font-bold sm:text-2xl text-[#112e51] dark:text-[#02bfe7] transition-all duration-300">{{ formatNumber(applicationCounts.yesterday) }}</div>
+                        <div class="text-xs text-gray-600 sm:text-sm dark:text-gray-400">new applications</div>
+                    </div>
+                    <div
+                        class="p-4 text-center bg-white border border-gray-200 rounded-lg sm:p-6 dark:bg-zinc-800 dark:border-zinc-700">
                         <div class="text-xs font-medium text-gray-500 sm:text-sm dark:text-gray-400">Last 7 Days:</div>
-                        <div class="text-xl font-bold sm:text-2xl text-[#112e51] dark:text-[#02bfe7]">1,310</div>
-                        <div class="text-xs text-gray-600 sm:text-sm dark:text-gray-400">new applications</div>
-                    </div>
-                    <div
-                        class="p-4 text-center bg-white border border-gray-200 rounded-lg sm:p-6 dark:bg-zinc-800 dark:border-zinc-700">
-                        <div class="text-xs font-medium text-gray-500 sm:text-sm dark:text-gray-400">Last 30 Days:</div>
-                        <div class="text-xl font-bold sm:text-2xl text-[#112e51] dark:text-[#02bfe7]">6,068</div>
-                        <div class="text-xs text-gray-600 sm:text-sm dark:text-gray-400">new applications</div>
-                    </div>
-                    <div
-                        class="p-4 text-center bg-white border border-gray-200 rounded-lg sm:p-6 dark:bg-zinc-800 dark:border-zinc-700">
-                        <div class="text-xs font-medium text-gray-500 sm:text-sm dark:text-gray-400">Last 90 Days:</div>
-                        <div class="text-xl font-bold sm:text-2xl text-[#112e51] dark:text-[#02bfe7]">15,785</div>
+                        <div class="text-xl font-bold sm:text-2xl text-[#112e51] dark:text-[#02bfe7] transition-all duration-300">{{ formatNumber(applicationCounts.last7Days) }}</div>
                         <div class="text-xs text-gray-600 sm:text-sm dark:text-gray-400">new applications</div>
                     </div>
                 </div>

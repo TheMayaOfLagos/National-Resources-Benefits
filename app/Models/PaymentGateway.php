@@ -212,7 +212,7 @@ class PaymentGateway extends Model
     public function getLogoUrlAttribute(): ?string
     {
         if ($this->logo) {
-            return asset('storage/' . $this->logo);
+            return asset('uploads/' . $this->logo);
         }
         
         // Return default logo based on provider

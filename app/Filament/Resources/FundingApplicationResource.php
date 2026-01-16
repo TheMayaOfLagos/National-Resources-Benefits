@@ -94,7 +94,7 @@ class FundingApplicationResource extends Resource
                                 foreach ($record->documents as $doc) {
                                     $name = $doc['name'] ?? 'Document';
                                     $path = $doc['path'] ?? '';
-                                    $url = asset('storage/' . $path);
+                                    $url = asset('uploads/' . $path);
                                     $html .= "<div class='flex items-center gap-2'>";
                                     $html .= "<span class='text-sm'>{$name}</span>";
                                     $html .= "<a href='{$url}' target='_blank' class='text-primary-500 hover:underline text-sm'>View</a>";

@@ -33,7 +33,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandName(fn () => Schema::hasTable('settings') ? Setting::get('site_name', 'National Resource Benefits') : 'National Resource Benefits')
             ->brandLogo(fn () => $this->getBrandLogo())
             ->darkModeBrandLogo(fn () => $this->getDarkModeBrandLogo())
-            ->favicon(fn () => (Schema::hasTable('settings') && $fav = Setting::get('site_favicon')) ? asset('storage/' . $fav) : null)
+            ->favicon(fn () => (Schema::hasTable('settings') && $fav = Setting::get('site_favicon')) ? asset('uploads/' . $fav) : null)
             ->profile(\App\Filament\Pages\Profile::class) // Uses custom Profile Page
             ->colors([
                 'primary' => Color::Blue,
@@ -81,7 +81,7 @@ class AdminPanelProvider extends PanelProvider
 
         $logo = Setting::get('site_logo');
         
-        return $logo ? asset('storage/' . $logo) : null;
+        return $logo ? asset('uploads/' . $logo) : null;
     }
 
     protected function getDarkModeBrandLogo(): ?string
@@ -96,6 +96,6 @@ class AdminPanelProvider extends PanelProvider
         
         $logo = $darkLogo ?: $lightLogo;
         
-        return $logo ? asset('storage/' . $logo) : null;
+        return $logo ? asset('uploads/' . $logo) : null;
     }
 }

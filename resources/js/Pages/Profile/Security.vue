@@ -149,6 +149,14 @@ const copyRecoveryCodes = () => {
     });
 };
 
+const copySecret = () => {
+    if (twoFactorSecret.value) {
+        navigator.clipboard.writeText(twoFactorSecret.value).then(() => {
+            toast.add({ severity: 'success', summary: 'Copied', detail: 'Secret key copied to clipboard', life: 3000 });
+        });
+    }
+};
+
 const downloadRecoveryCodes = () => {
     const codes = recoveryCodes.value.join('\n');
     const blob = new Blob([codes], { type: 'text/plain' });
@@ -233,21 +241,21 @@ const getBrowserIcon = (browser) => {
 
         <div class="max-w-4xl mx-auto space-y-6">
             <!-- Profile Navigation Tabs -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <div class="bg-white border border-gray-100 shadow-sm dark:bg-gray-800 rounded-xl dark:border-gray-700">
                 <div class="flex border-b border-gray-100 dark:border-gray-700">
                     <Link :href="route('profile.edit')"
-                        class="px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 border-b-2 border-transparent hover:border-gray-300">
-                    <i class="pi pi-user mr-2"></i>
+                        class="px-6 py-4 text-sm font-medium text-gray-500 border-b-2 border-transparent dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300">
+                    <i class="mr-2 pi pi-user"></i>
                     Profile
                     </Link>
                     <Link :href="route('profile.security')"
-                        class="px-6 py-4 text-sm font-medium border-b-2 border-blue-500 text-blue-600 dark:text-blue-400">
-                    <i class="pi pi-shield mr-2"></i>
+                        class="px-6 py-4 text-sm font-medium text-blue-600 border-b-2 border-blue-500 dark:text-blue-400">
+                    <i class="mr-2 pi pi-shield"></i>
                     Security
                     </Link>
                     <Link :href="route('linked-accounts.index')"
-                        class="px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 border-b-2 border-transparent hover:border-gray-300">
-                    <i class="pi pi-link mr-2"></i>
+                        class="px-6 py-4 text-sm font-medium text-gray-500 border-b-2 border-transparent dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300">
+                    <i class="mr-2 pi pi-link"></i>
                     Linked Accounts
                     </Link>
                 </div>
@@ -259,23 +267,23 @@ const getBrowserIcon = (browser) => {
             </Message>
 
             <!-- Change Password -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+            <div class="p-6 bg-white border border-gray-100 shadow-sm dark:bg-gray-800 rounded-xl dark:border-gray-700">
                 <div class="flex items-start justify-between mb-6">
                     <div>
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Change Password</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                             Ensure your account is using a long, random password to stay secure.
                         </p>
                     </div>
                     <div
-                        class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
-                        <i class="pi pi-lock text-blue-600 dark:text-blue-400"></i>
+                        class="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-full dark:bg-blue-900/50">
+                        <i class="text-blue-600 pi pi-lock dark:text-blue-400"></i>
                     </div>
                 </div>
 
-                <form @submit.prevent="updatePassword" class="space-y-4 max-w-md">
+                <form @submit.prevent="updatePassword" class="max-w-md space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                             Current Password
                         </label>
                         <Password v-model="passwordForm.current_password" class="w-full"
@@ -287,7 +295,7 @@ const getBrowserIcon = (browser) => {
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                             New Password
                         </label>
                         <Password v-model="passwordForm.password" class="w-full"
@@ -300,7 +308,7 @@ const getBrowserIcon = (browser) => {
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                             Confirm New Password
                         </label>
                         <Password v-model="passwordForm.password_confirmation" class="w-full" :feedback="false"
@@ -315,25 +323,25 @@ const getBrowserIcon = (browser) => {
             </div>
 
             <!-- Browser Sessions -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+            <div class="p-6 bg-white border border-gray-100 shadow-sm dark:bg-gray-800 rounded-xl dark:border-gray-700">
                 <div class="flex items-start justify-between mb-6">
                     <div>
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Browser Sessions</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                             Manage and logout your active sessions on other browsers and devices.
                         </p>
                     </div>
                     <div
-                        class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center">
-                        <i class="pi pi-globe text-green-600 dark:text-green-400"></i>
+                        class="flex items-center justify-center w-10 h-10 bg-green-100 rounded-full dark:bg-green-900/50">
+                        <i class="text-green-600 pi pi-globe dark:text-green-400"></i>
                     </div>
                 </div>
 
                 <div v-if="sessions && sessions.length > 0" class="space-y-4">
                     <div v-for="session in sessions" :key="session.id"
-                        class="flex items-center justify-between p-4 rounded-lg border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                        class="flex items-center justify-between p-4 transition-colors border border-gray-100 rounded-lg dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-full flex items-center justify-center"
+                            <div class="flex items-center justify-center w-12 h-12 rounded-full"
                                 :class="session.is_current ? 'bg-green-100 dark:bg-green-900/50' : 'bg-gray-100 dark:bg-gray-700'">
                                 <i :class="getDeviceIcon(session.device)" class="text-xl"
                                     :style="{ color: session.is_current ? '#22c55e' : '#6b7280' }"></i>
@@ -345,7 +353,7 @@ const getBrowserIcon = (browser) => {
                                     </span>
                                     <Tag v-if="session.is_current" value="Current" severity="success" class="text-xs" />
                                 </div>
-                                <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                <div class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                     <span>{{ session.ip_address }}</span>
                                     <span class="mx-2">•</span>
                                     <span>{{ session.last_active }}</span>
@@ -360,10 +368,10 @@ const getBrowserIcon = (browser) => {
                     </div>
                 </div>
 
-                <div v-else class="text-center py-8">
+                <div v-else class="py-8 text-center">
                     <div
-                        class="w-16 h-16 mx-auto rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4">
-                        <i class="pi pi-desktop text-2xl text-gray-400"></i>
+                        class="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full dark:bg-gray-700">
+                        <i class="text-2xl text-gray-400 pi pi-desktop"></i>
                     </div>
                     <p class="text-gray-500 dark:text-gray-400">
                         Session tracking requires database session driver.
@@ -372,34 +380,34 @@ const getBrowserIcon = (browser) => {
             </div>
 
             <!-- Two-Factor Authentication -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+            <div class="p-6 bg-white border border-gray-100 shadow-sm dark:bg-gray-800 rounded-xl dark:border-gray-700">
                 <div class="flex items-start justify-between">
                     <div>
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Two-Factor Authentication</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                             Add additional security to your account using two-factor authentication.
                         </p>
                     </div>
                     <div
-                        class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center">
-                        <i class="pi pi-mobile text-purple-600 dark:text-purple-400"></i>
+                        class="flex items-center justify-center w-10 h-10 bg-purple-100 rounded-full dark:bg-purple-900/50">
+                        <i class="text-purple-600 pi pi-mobile dark:text-purple-400"></i>
                     </div>
                 </div>
 
                 <!-- 2FA Enabled State -->
                 <div v-if="twoFactorEnabled" class="mt-6">
                     <div
-                        class="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 mb-4">
+                        class="p-4 mb-4 border border-green-200 rounded-lg bg-green-50 dark:bg-green-900/20 dark:border-green-800">
                         <div class="flex items-center gap-3">
                             <div
-                                class="w-8 h-8 rounded-full bg-green-200 dark:bg-green-800 flex items-center justify-center">
-                                <i class="pi pi-shield text-green-600 dark:text-green-400"></i>
+                                class="flex items-center justify-center w-8 h-8 bg-green-200 rounded-full dark:bg-green-800">
+                                <i class="text-green-600 pi pi-shield dark:text-green-400"></i>
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-green-700 dark:text-green-300">
                                     Two-factor authentication is enabled
                                 </p>
-                                <p class="text-xs text-green-600 dark:text-green-400 mt-1">
+                                <p class="mt-1 text-xs text-green-600 dark:text-green-400">
                                     Your account is secured with an authenticator app.
                                 </p>
                             </div>
@@ -417,17 +425,17 @@ const getBrowserIcon = (browser) => {
                 <!-- 2FA Not Enabled State -->
                 <div v-else class="mt-6">
                     <div
-                        class="p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 mb-4">
+                        class="p-4 mb-4 border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-700/50 dark:border-gray-600">
                         <div class="flex items-start gap-3">
                             <div
-                                class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center flex-shrink-0">
-                                <i class="pi pi-info-circle text-gray-500 dark:text-gray-400"></i>
+                                class="flex items-center justify-center flex-shrink-0 w-8 h-8 bg-gray-200 rounded-full dark:bg-gray-600">
+                                <i class="text-gray-500 pi pi-info-circle dark:text-gray-400"></i>
                             </div>
                             <div>
                                 <p class="text-sm text-gray-600 dark:text-gray-300">
                                     Two-factor authentication is not enabled yet.
                                 </p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                                     When enabled, you'll be prompted for a secure code during authentication.
                                     You can retrieve this code from your phone's authenticator app (Google
                                     Authenticator, Authy,
@@ -444,25 +452,25 @@ const getBrowserIcon = (browser) => {
 
             <!-- Delete Account -->
             <div
-                class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-red-200 dark:border-red-900/50 p-6">
+                class="p-6 bg-white border border-red-200 shadow-sm dark:bg-gray-800 rounded-xl dark:border-red-900/50">
                 <div class="flex items-start justify-between mb-6">
                     <div>
                         <h3 class="text-lg font-semibold text-red-600 dark:text-red-400">Delete Account</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                             Permanently delete your account and all associated data.
                         </p>
                     </div>
-                    <div class="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center">
-                        <i class="pi pi-trash text-red-600 dark:text-red-400"></i>
+                    <div class="flex items-center justify-center w-10 h-10 bg-red-100 rounded-full dark:bg-red-900/50">
+                        <i class="text-red-600 pi pi-trash dark:text-red-400"></i>
                     </div>
                 </div>
 
-                <div class="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 mb-6">
+                <div class="p-4 mb-6 border border-red-200 rounded-lg bg-red-50 dark:bg-red-900/20 dark:border-red-800">
                     <div class="flex items-start gap-3">
                         <i class="pi pi-exclamation-triangle text-red-500 mt-0.5"></i>
                         <div>
-                            <p class="text-sm text-red-700 dark:text-red-300 font-medium">Warning</p>
-                            <p class="text-sm text-red-600 dark:text-red-400 mt-1">
+                            <p class="text-sm font-medium text-red-700 dark:text-red-300">Warning</p>
+                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">
                                 Once your account is deleted, all of its resources and data will be permanently deleted.
                                 Before deleting your account, please download any data or information that you wish to
                                 retain.
@@ -479,7 +487,7 @@ const getBrowserIcon = (browser) => {
         <!-- Logout Other Sessions Dialog -->
         <Dialog v-model:visible="showLogoutOthersDialog" header="Log Out Other Browser Sessions" :modal="true"
             :style="{ width: '400px' }">
-            <p class="text-gray-600 dark:text-gray-300 mb-4">
+            <p class="mb-4 text-gray-600 dark:text-gray-300">
                 Please enter your password to confirm you would like to log out of your other browser sessions.
             </p>
 
@@ -501,10 +509,10 @@ const getBrowserIcon = (browser) => {
         <!-- Delete Account Dialog -->
         <Dialog v-model:visible="showDeleteAccountDialog" header="Delete Account" :modal="true"
             :style="{ width: '450px' }">
-            <div class="text-center mb-4">
+            <div class="mb-4 text-center">
                 <div
-                    class="w-16 h-16 mx-auto rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center mb-4">
-                    <i class="pi pi-exclamation-triangle text-3xl text-red-500"></i>
+                    class="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full dark:bg-red-900/50">
+                    <i class="text-3xl text-red-500 pi pi-exclamation-triangle"></i>
                 </div>
                 <p class="text-gray-600 dark:text-gray-300">
                     Are you sure you want to delete your account? This action cannot be undone.
@@ -512,7 +520,7 @@ const getBrowserIcon = (browser) => {
             </div>
 
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                     Enter your password to confirm
                 </label>
                 <Password v-model="deleteForm.password" class="w-full" :feedback="false" toggleMask inputClass="w-full"
@@ -532,10 +540,10 @@ const getBrowserIcon = (browser) => {
         <!-- Enable Two-Factor Dialog -->
         <Dialog v-model:visible="showEnableTwoFactorDialog" header="Enable Two-Factor Authentication" :modal="true"
             :style="{ width: '450px' }">
-            <div class="text-center mb-4">
+            <div class="mb-4 text-center">
                 <div
-                    class="w-16 h-16 mx-auto rounded-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center mb-4">
-                    <i class="pi pi-shield text-3xl text-purple-600 dark:text-purple-400"></i>
+                    class="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-purple-100 rounded-full dark:bg-purple-900/50">
+                    <i class="text-3xl text-purple-600 pi pi-shield dark:text-purple-400"></i>
                 </div>
                 <p class="text-gray-600 dark:text-gray-300">
                     Enter your password to begin setting up two-factor authentication.
@@ -543,7 +551,7 @@ const getBrowserIcon = (browser) => {
             </div>
 
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                     Current Password
                 </label>
                 <Password v-model="enableTwoFactorForm.password" class="w-full" :feedback="false" toggleMask
@@ -564,12 +572,12 @@ const getBrowserIcon = (browser) => {
         <Dialog v-model:visible="showConfirmTwoFactorDialog" header="Setup Authenticator App" :modal="true"
             :closable="false" :style="{ width: '500px' }">
             <div class="space-y-4">
-                <div class="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                <div class="p-4 border border-blue-200 rounded-lg bg-blue-50 dark:bg-blue-900/20 dark:border-blue-800">
                     <div class="flex items-start gap-3">
                         <i class="pi pi-info-circle text-blue-500 mt-0.5"></i>
                         <div class="text-sm text-blue-700 dark:text-blue-300">
-                            <p class="font-medium mb-1">Setup Instructions:</p>
-                            <ol class="list-decimal list-inside space-y-1 text-blue-600 dark:text-blue-400">
+                            <p class="mb-1 font-medium">Setup Instructions:</p>
+                            <ol class="space-y-1 text-blue-600 list-decimal list-inside dark:text-blue-400">
                                 <li>Download an authenticator app (Google Authenticator, Authy, etc.)</li>
                                 <li>Scan the QR code below or enter the secret key manually</li>
                                 <li>Enter the 6-digit code from your app to confirm</li>
@@ -580,24 +588,29 @@ const getBrowserIcon = (browser) => {
 
                 <!-- QR Code -->
                 <div class="text-center" v-if="twoFactorQrCode">
-                    <div class="inline-block p-4 bg-white rounded-lg border border-gray-200">
+                    <div class="inline-block p-4 bg-white border border-gray-200 rounded-lg">
                         <div v-html="twoFactorQrCode" class="qr-code"></div>
                     </div>
                 </div>
 
                 <!-- Secret Key -->
                 <div v-if="twoFactorSecret"
-                    class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600">
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Manual entry key:</p>
-                    <code class="text-sm font-mono text-gray-900 dark:text-white break-all">{{ twoFactorSecret }}</code>
+                    class="p-3 border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-700/50 dark:border-gray-600">
+                    <p class="mb-1 text-xs text-gray-500 dark:text-gray-400">Manual entry key:</p>
+                    <div class="flex items-center justify-between gap-2">
+                        <code
+                            class="font-mono text-sm text-gray-900 break-all dark:text-white">{{ twoFactorSecret }}</code>
+                        <Button icon="pi pi-copy" severity="secondary" text rounded size="small"
+                            v-tooltip.top="'Copy to clipboard'" @click="copySecret" />
+                    </div>
                 </div>
 
                 <!-- Confirmation Code Input -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         Enter the 6-digit code from your app
                     </label>
-                    <InputText v-model="confirmTwoFactorForm.code" class="w-full text-center text-xl tracking-widest"
+                    <InputText v-model="confirmTwoFactorForm.code" class="w-full text-xl tracking-widest text-center"
                         placeholder="000000" maxlength="6" />
                     <small v-if="confirmTwoFactorForm.errors.code" class="text-red-500">
                         {{ confirmTwoFactorForm.errors.code }}
@@ -619,11 +632,11 @@ const getBrowserIcon = (browser) => {
             :style="{ width: '500px' }">
             <div class="space-y-4">
                 <div
-                    class="p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+                    class="p-4 border border-yellow-200 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-800">
                     <div class="flex items-start gap-3">
                         <i class="pi pi-exclamation-triangle text-yellow-500 mt-0.5"></i>
                         <div class="text-sm text-yellow-700 dark:text-yellow-300">
-                            <p class="font-medium mb-1">Important: Save these recovery codes!</p>
+                            <p class="mb-1 font-medium">Important: Save these recovery codes!</p>
                             <p class="text-yellow-600 dark:text-yellow-400">
                                 Store these codes in a safe place. They can be used to access your account if you lose
                                 access to
@@ -636,9 +649,9 @@ const getBrowserIcon = (browser) => {
 
                 <!-- Recovery Codes Grid -->
                 <div
-                    class="grid grid-cols-2 gap-2 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
+                    class="grid grid-cols-2 gap-2 p-4 border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-700/50 dark:border-gray-600">
                     <div v-for="(code, index) in recoveryCodes" :key="index"
-                        class="font-mono text-sm p-2 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-600 text-center">
+                        class="p-2 font-mono text-sm text-center bg-white border border-gray-200 rounded dark:bg-gray-800 dark:border-gray-600">
                         {{ code }}
                     </div>
                 </div>
@@ -660,10 +673,10 @@ const getBrowserIcon = (browser) => {
         <!-- Disable Two-Factor Dialog -->
         <Dialog v-model:visible="showDisableTwoFactorDialog" header="Disable Two-Factor Authentication" :modal="true"
             :style="{ width: '450px' }">
-            <div class="text-center mb-4">
+            <div class="mb-4 text-center">
                 <div
-                    class="w-16 h-16 mx-auto rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center mb-4">
-                    <i class="pi pi-shield text-3xl text-red-500"></i>
+                    class="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full dark:bg-red-900/50">
+                    <i class="text-3xl text-red-500 pi pi-shield"></i>
                 </div>
                 <p class="text-gray-600 dark:text-gray-300">
                     Are you sure you want to disable two-factor authentication? This will make your account less secure.
@@ -671,7 +684,7 @@ const getBrowserIcon = (browser) => {
             </div>
 
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                     Enter your password to confirm
                 </label>
                 <Password v-model="disableTwoFactorForm.password" class="w-full" :feedback="false" toggleMask

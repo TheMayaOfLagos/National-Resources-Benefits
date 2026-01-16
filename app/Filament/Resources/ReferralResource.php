@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ReferralResource\Pages;
 use App\Models\Referral;
+use App\Models\Setting;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -18,6 +19,11 @@ class ReferralResource extends Resource
     
     protected static ?string $navigationGroup = 'User Management';
     protected static ?int $navigationSort = 3;
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return (bool) Setting::get('feature_referrals', true);
+    }
 
     public static function form(Form $form): Form
     {

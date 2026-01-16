@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\VoucherResource\Pages;
+use App\Models\Setting;
 use App\Models\Voucher;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -19,6 +20,11 @@ class VoucherResource extends Resource
     protected static ?string $navigationGroup = 'Content Management';
     protected static ?string $navigationLabel = 'Vouchers';
     protected static ?int $navigationSort = 5;
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return (bool) Setting::get('feature_voucher', true);
+    }
 
     public static function form(Form $form): Form
     {

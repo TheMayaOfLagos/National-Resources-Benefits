@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\NotificationResource\Pages;
 use App\Filament\Resources\NotificationResource\RelationManagers;
 use App\Models\Notification;
+use App\Models\Setting;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -24,6 +25,11 @@ class NotificationResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-bell';
     protected static ?string $navigationGroup = 'Financial Management';
     protected static ?int $navigationSort = 1;
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return (bool) Setting::get('feature_notifications', true);
+    }
 
     public static function form(Form $form): Form
     {

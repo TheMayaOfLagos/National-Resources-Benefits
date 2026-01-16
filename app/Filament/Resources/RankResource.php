@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\RankResource\Pages;
 use App\Models\Rank;
+use App\Models\Setting;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -19,6 +20,11 @@ class RankResource extends Resource
     
     protected static ?string $navigationGroup = 'User Management';
     protected static ?int $navigationSort = 2;
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return (bool) Setting::get('feature_ranks', true);
+    }
 
     public static function form(Form $form): Form
     {

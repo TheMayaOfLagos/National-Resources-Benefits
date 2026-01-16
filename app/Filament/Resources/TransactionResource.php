@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\TransactionResource\Pages;
 use App\Filament\Resources\TransactionResource\RelationManagers;
+use App\Models\Setting;
 use App\Models\Transaction;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -24,6 +25,11 @@ class TransactionResource extends Resource
     
     protected static ?string $navigationGroup = 'Financial Management';
     protected static ?int $navigationSort = 2;
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return (bool) Setting::get('feature_transactions', true);
+    }
 
     public static function form(Form $form): Form
     {

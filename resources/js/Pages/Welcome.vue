@@ -764,50 +764,6 @@ const navItems = [
             </div>
         </section>
 
-        <!-- Grant Application Services Section -->
-        <section
-            class="py-10 border-t border-gray-200 sm:py-12 bg-gray-50 dark:bg-zinc-900 md:py-16 dark:border-zinc-700">
-            <div class="grid-container">
-                <div class="max-w-3xl mx-auto">
-                    <h2
-                        class="mb-4 text-xl font-bold text-center text-gray-900 sm:mb-6 sm:text-2xl md:text-3xl dark:text-white">
-                        Grant Application Services
-                    </h2>
-                    <p class="mb-4 text-sm leading-relaxed text-gray-600 sm:mb-6 sm:text-base dark:text-gray-400">
-                        In order for us to pay for the expenses we have incurred compiling this information, we are
-                        forced to charge a small fee to cover our costs. The information also comes with a guarantee.
-                    </p>
-                    <p class="mb-4 text-sm leading-relaxed text-gray-600 sm:mb-6 sm:text-base dark:text-gray-400">
-                        If you apply for funding using one of the applications you find on our website and you don't
-                        receive funding, your membership fees will be refunded to you immediately. All you have to do
-                        is provide us with the name of the funding opportunity you applied for and a copy of the
-                        rejection letter you received from the funder.
-                    </p>
-                    <p class="mb-4 text-sm leading-relaxed text-gray-600 sm:mb-6 sm:text-base dark:text-gray-400">
-                        With your membership fee, you will have access to the applications and online training
-                        information through our members-only site. You can also cancel your membership at any time.
-                    </p>
-                    <p class="mb-4 text-sm leading-relaxed text-gray-600 sm:mb-6 sm:text-base dark:text-gray-400">
-                        How serious are you? Are you like most people and needed the money yesterday? If so, get
-                        registered today. Don't procrastinate. We are here to help you get the info you need today,
-                        not next year. <strong>"Change your future in 2026."</strong>
-                    </p>
-                    <p class="mb-6 text-sm leading-relaxed text-gray-600 sm:mb-8 sm:text-base dark:text-gray-400">
-                        If FREE FUNDING to start a new business, expand your business or complete a worthwhile project
-                        would change your life and benefit you for the rest of your life, what are you waiting for?
-                        Get registered TODAY. We can help you find and apply for the money you need to change your
-                        life forever. We are Funding Seeking Specialists.
-                    </p>
-                    <div class="text-center">
-                        <a :href="route('register')"
-                            class="inline-block px-5 py-2.5 sm:px-8 sm:py-3 text-sm sm:text-base bg-[#112e51] text-white font-semibold rounded hover:bg-[#205493] transition-colors">
-                            Begin the process now!
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <!-- Footer -->
         <footer class="bg-[#112e51] text-white mt-10 sm:mt-16">
             <!-- Main Footer -->

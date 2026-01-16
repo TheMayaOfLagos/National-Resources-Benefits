@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\FundingSourceResource\Pages;
 use App\Filament\Resources\FundingSourceResource\RelationManagers;
 use App\Models\FundingSource;
+use App\Models\Setting;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -20,6 +21,11 @@ class FundingSourceResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
     protected static ?string $navigationGroup = 'Content Management';
     protected static ?int $navigationSort = 6;
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return (bool) Setting::get('feature_funding_sources', true);
+    }
 
     public static function form(Form $form): Form
     {

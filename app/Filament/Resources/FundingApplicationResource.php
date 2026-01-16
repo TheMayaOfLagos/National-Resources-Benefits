@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\FundingApplicationResource\Pages;
 use App\Models\FundingApplication;
 use App\Models\FundingSource;
+use App\Models\Setting;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -25,8 +26,16 @@ class FundingApplicationResource extends Resource
     protected static ?string $navigationLabel = 'Funding Applications';
     protected static ?int $navigationSort = 7;
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return (bool) Setting::get('feature_applications', true);
+    }
+
     public static function getNavigationBadge(): ?string
     {
+        if (!static::shouldRegisterNavigation()) {
+            return null;
+        }
         return static::getModel()::where('status', 'pending')->count() ?: null;
     }
 

@@ -46,26 +46,18 @@ const isSubmitting = ref(false);
 
 // Dropdown options
 const fundingTypes = [
+    { label: 'Personal', value: 'personal' },
     { label: 'Business', value: 'business' },
-    { label: 'Community Assistance', value: 'community_assistance' },
-    { label: 'Education', value: 'education' },
-    { label: 'Home Buyers', value: 'home_buyers' },
-    { label: 'Home Repairs', value: 'home_repairs' },
-    { label: 'Inventions', value: 'inventions' },
-    { label: 'Minorities / Demographic', value: 'minorities_demographic' },
-    { label: 'Misc', value: 'misc' },
-    { label: 'Non-Profit', value: 'non_profit' },
-    { label: 'Personal (Bills, Rent, Utilities, Etc.)', value: 'personal' },
-    { label: 'Real Estate', value: 'real_estate' },
+    { label: 'Community Service', value: 'community_service' },
 ];
 
 const fundingAmounts = [
-    { label: 'Less Than $5,000', value: 'less_than_5000' },
-    { label: '$5,000 - $10,000', value: '5000_10000' },
     { label: '$10,000 - $25,000', value: '10000_25000' },
     { label: '$25,000 - $50,000', value: '25000_50000' },
     { label: '$50,000 - $100,000', value: '50000_100000' },
-    { label: '$100,000 Or More', value: '100000_plus' },
+    { label: '$100,000 - $250,000', value: '100000_250000' },
+    { label: '$250,000 - $500,000', value: '250000_500000' },
+    { label: '$500,000 - $1,000,000', value: '500000_1000000' },
 ];
 
 const citizenshipStatuses = [
@@ -120,8 +112,8 @@ const employmentStatuses = [
 const validateForm = () => {
     const errors = [];
     
-    if (!form.funding_type) errors.push('Please select a funding type');
-    if (!form.funding_amount) errors.push('Please select how much funding you need');
+    if (!form.funding_type) errors.push('Please select an application type');
+    if (!form.funding_amount) errors.push('Please select an application amount');
     if (!form.citizenship_status) errors.push('Please select your citizenship status');
     if (!form.zip_code || form.zip_code.length < 5) errors.push('Please enter a valid ZIP code');
     if (!form.gender) errors.push('Please select your gender');
@@ -249,21 +241,21 @@ const passwordStrength = computed(() => {
                     <div class="border-b border-gray-200 dark:border-zinc-700 pb-6">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                             <i class="pi pi-dollar text-green-600"></i>
-                            Funding Information
+                            Select Your Application Category
                         </h3>
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Funding Type -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Type of Funding <span class="text-red-500">*</span>
+                                    Apply As <span class="text-red-500">*</span>
                                 </label>
                                 <Dropdown 
                                     v-model="form.funding_type"
                                     :options="fundingTypes"
                                     optionLabel="label"
                                     optionValue="value"
-                                    placeholder="Select funding type"
+                                    placeholder="Select application type"
                                     class="w-full"
                                     :class="{ 'p-invalid': form.errors.funding_type }"
                                 />
@@ -272,7 +264,7 @@ const passwordStrength = computed(() => {
                             <!-- Funding Amount -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    How Much Do You Need? <span class="text-red-500">*</span>
+                                    Application Amount <span class="text-red-500">*</span>
                                 </label>
                                 <Dropdown 
                                     v-model="form.funding_amount"
@@ -628,11 +620,11 @@ const passwordStrength = computed(() => {
                     <span class="font-medium text-gray-900 dark:text-white">{{ form.email }}</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-gray-500">Funding Type:</span>
+                    <span class="text-gray-500">Apply As:</span>
                     <span class="font-medium text-gray-900 dark:text-white">{{ fundingTypes.find(f => f.value === form.funding_type)?.label || '-' }}</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-gray-500">Amount Needed:</span>
+                    <span class="text-gray-500">Application Amount:</span>
                     <span class="font-medium text-gray-900 dark:text-white">{{ fundingAmounts.find(f => f.value === form.funding_amount)?.label || '-' }}</span>
                 </div>
             </div>

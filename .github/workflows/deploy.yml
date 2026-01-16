@@ -46,6 +46,9 @@ jobs:
       - name: Clear Composer cache for corrupted packages
         run: composer clear-cache
 
+      - name: Remove vendor directory before Composer install
+        run: rm -rf vendor
+
       - name: Install Composer dependencies
         run: composer install --no-dev --optimize-autoloader --no-interaction --no-progress
 

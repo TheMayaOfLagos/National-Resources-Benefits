@@ -86,26 +86,18 @@ const employmentOptions = [
 ];
 
 const fundingTypeOptions = [
+    { label: 'Personal', value: 'personal' },
     { label: 'Business', value: 'business' },
-    { label: 'Community Assistance', value: 'community_assistance' },
-    { label: 'Education', value: 'education' },
-    { label: 'Home Buyers', value: 'home_buyers' },
-    { label: 'Home Repairs', value: 'home_repairs' },
-    { label: 'Inventions', value: 'inventions' },
-    { label: 'Minorities / Demographic', value: 'minorities_demographic' },
-    { label: 'Misc', value: 'misc' },
-    { label: 'Non-Profit', value: 'non_profit' },
-    { label: 'Personal (Bills, Rent, Utilities, Etc.)', value: 'personal' },
-    { label: 'Real Estate', value: 'real_estate' },
+    { label: 'Community Service', value: 'community_service' },
 ];
 
 const fundingAmountOptions = [
-    { label: 'Less Than $5,000', value: 'less_than_5000' },
-    { label: '$5,000 - $10,000', value: '5000_10000' },
     { label: '$10,000 - $25,000', value: '10000_25000' },
     { label: '$25,000 - $50,000', value: '25000_50000' },
     { label: '$50,000 - $100,000', value: '50000_100000' },
-    { label: '$100,000 Or More', value: '100000_plus' },
+    { label: '$100,000 - $250,000', value: '100000_250000' },
+    { label: '$250,000 - $500,000', value: '250000_500000' },
+    { label: '$500,000 - $1,000,000', value: '500000_1000000' },
 ];
 
 const usStates = [
@@ -423,22 +415,22 @@ const submit = () => {
                     </div>
                 </div>
 
-                <!-- Funding Information -->
+                <!-- Application Category -->
                 <div class="p-6 mt-6 bg-white border border-gray-100 shadow-sm dark:bg-gray-800 rounded-xl dark:border-gray-700">
-                    <h3 class="mb-6 text-lg font-semibold text-gray-900 dark:text-white">Funding Information</h3>
+                    <h3 class="mb-6 text-lg font-semibold text-gray-900 dark:text-white">Application Category</h3>
                     
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <!-- Funding Type -->
                         <div>
                             <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Type of Funding Needed
+                                Apply As
                             </label>
                             <Dropdown 
                                 v-model="form.funding_category"
                                 :options="fundingTypeOptions"
                                 optionLabel="label"
                                 optionValue="value"
-                                placeholder="Select funding type"
+                                placeholder="Select application type"
                                 class="w-full"
                             />
                         </div>
@@ -446,7 +438,7 @@ const submit = () => {
                         <!-- Funding Amount -->
                         <div>
                             <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                How Much Do You Need?
+                                Application Amount
                             </label>
                             <Dropdown 
                                 v-model="form.funding_amount"

@@ -295,7 +295,7 @@ const toggleUserMenu = (event) => {
 
 const toggleNotificationPanel = async (event) => {
     notificationPanelRef.value.toggle(event);
-    
+
     // Fetch notifications when panel opens
     if (!notifications.value.length) {
         await fetchNotifications();
@@ -304,7 +304,7 @@ const toggleNotificationPanel = async (event) => {
 
 const fetchNotifications = async () => {
     if (!routeExists('notifications.recent')) return;
-    
+
     notificationsLoading.value = true;
     try {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
@@ -326,7 +326,7 @@ const fetchNotifications = async () => {
 
 const markNotificationRead = async (notification) => {
     if (notification.is_read) return;
-    
+
     try {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
         await fetch(route('notifications.read', notification.id), {
@@ -337,13 +337,13 @@ const markNotificationRead = async (notification) => {
                 'X-Requested-With': 'XMLHttpRequest',
             },
         });
-        
+
         // Update local state
         const idx = notifications.value.findIndex(n => n.id === notification.id);
         if (idx !== -1) {
             notifications.value[idx].is_read = true;
         }
-        
+
         // Navigate if there's an action URL
         if (notification.action_url) {
             router.visit(notification.action_url);
@@ -355,7 +355,7 @@ const markNotificationRead = async (notification) => {
 
 const markAllNotificationsRead = async () => {
     if (!routeExists('notifications.mark-all-read')) return;
-    
+
     try {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
         await fetch(route('notifications.mark-all-read'), {
@@ -366,7 +366,7 @@ const markAllNotificationsRead = async () => {
                 'X-Requested-With': 'XMLHttpRequest',
             },
         });
-        
+
         // Update local state
         notifications.value = notifications.value.map(n => ({ ...n, is_read: true }));
     } catch (error) {
@@ -413,29 +413,37 @@ defineExpose({ formatCurrency });
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+    <div class="min-h-screen transition-colors duration-200 bg-gray-50 dark:bg-gray-900">
         <!-- Impersonation Banner -->
-        <div v-if="auth.impersonating" class="bg-red-600 text-white px-4 py-2 text-center text-sm font-bold flex justify-center items-center gap-4 z-50">
+        <div v-if="auth.impersonating"
+            class="z-50 flex items-center justify-center gap-4 px-4 py-2 text-sm font-bold text-center text-white bg-red-600">
             <span>You are currently impersonating a user.</span>
-            <a :href="route('admin.stop-impersonating')" class="bg-white text-red-600 px-3 py-1 rounded hover:bg-gray-100 transition-colors">
+            <a :href="route('admin.stop-impersonating')"
+                class="px-3 py-1 text-red-600 transition-colors bg-white rounded hover:bg-gray-100">
                 Stop Impersonating
             </a>
         </div>
 
         <!-- Maintenance Mode Banner -->
-        <div v-if="settings.maintenance_mode" class="bg-yellow-500 text-yellow-900 px-4 py-2 text-center text-sm font-semibold">
-            <i class="pi pi-exclamation-triangle mr-2"></i>
+        <div v-if="settings.maintenance_mode"
+            class="px-4 py-2 text-sm font-semibold text-center text-yellow-900 bg-yellow-500">
+            <i class="mr-2 pi pi-exclamation-triangle"></i>
             System is under maintenance. Some features may be unavailable.
         </div>
 
         <!-- Desktop Sidebar -->
-        <aside class="hidden md:flex md:flex-col md:w-64 md:fixed md:inset-y-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 z-30 transition-colors duration-200" :class="{ 'top-10': auth.impersonating || settings.maintenance_mode }">
+        <aside
+            class="z-30 hidden transition-colors duration-200 bg-white border-r border-gray-200 md:flex md:flex-col md:w-64 md:fixed md:inset-y-0 dark:bg-gray-800 dark:border-gray-700"
+            :class="{ 'top-10': auth.impersonating || settings.maintenance_mode }">
             <!-- Logo -->
-            <div class="flex items-center justify-center h-16 border-b border-gray-200 dark:border-gray-700 px-4">
+            <div class="flex items-center justify-center h-16 px-4 border-b border-gray-200 dark:border-gray-700">
                 <Link :href="route('dashboard')" class="flex items-center">
-                    <img v-if="isDark && settings.site_logo_dark" :src="settings.site_logo_dark" :alt="settings.site_name" class="h-10 max-w-[180px] object-contain" />
-                    <img v-else-if="settings.site_logo" :src="settings.site_logo" :alt="settings.site_name" class="h-10 max-w-[180px] object-contain" />
-                    <span v-else class="text-xl font-bold text-primary-600 dark:text-primary-400">{{ settings.site_name }}</span>
+                <img v-if="isDark && settings.site_logo_dark" :src="settings.site_logo_dark" :alt="settings.site_name"
+                    class="h-10 max-w-[180px] object-contain" />
+                <img v-else-if="settings.site_logo" :src="settings.site_logo" :alt="settings.site_name"
+                    class="h-10 max-w-[180px] object-contain" />
+                <span v-else class="text-xl font-bold text-primary-600 dark:text-primary-400">{{ settings.site_name
+                    }}</span>
                 </Link>
             </div>
 
@@ -444,96 +452,80 @@ defineExpose({ formatCurrency });
                 <template v-for="item in navigationItems" :key="item.label">
                     <!-- Item with submenu -->
                     <div v-if="item.hasSubmenu">
-                        <button
-                            @click="toggleSubmenu(item.submenuKey)"
-                            class="w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg transition-colors"
-                            :class="item.active 
-                                ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' 
-                                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'"
-                        >
+                        <button @click="toggleSubmenu(item.submenuKey)"
+                            class="flex items-center justify-between w-full px-4 py-3 text-sm font-medium transition-colors rounded-lg"
+                            :class="item.active
+                                ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'">
                             <span class="flex items-center">
                                 <i :class="[item.icon, 'mr-3 text-lg']"></i>
                                 {{ item.label }}
                             </span>
-                            <i :class="['pi text-xs transition-transform', expandedMenus[item.submenuKey] ? 'pi-chevron-down' : 'pi-chevron-right']"></i>
+                            <i
+                                :class="['pi text-xs transition-transform', expandedMenus[item.submenuKey] ? 'pi-chevron-down' : 'pi-chevron-right']"></i>
                         </button>
                         <!-- Submenu items -->
-                        <div v-show="expandedMenus[item.submenuKey]" class="ml-4 mt-1 space-y-1">
-                            <Link
-                                v-for="child in item.children"
-                                :key="child.route"
-                                :href="route(child.route)"
-                                class="flex items-center px-4 py-2 text-sm rounded-lg transition-colors"
-                                :class="route().current(child.route) 
-                                    ? 'bg-primary-100 dark:bg-primary-900/70 text-primary-700 dark:text-primary-300 font-medium' 
-                                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200'"
-                            >
-                                <i :class="[child.icon, 'mr-3 text-base']"></i>
-                                {{ child.label }}
+                        <div v-show="expandedMenus[item.submenuKey]" class="mt-1 ml-4 space-y-1">
+                            <Link v-for="child in item.children" :key="child.route" :href="route(child.route)"
+                                class="flex items-center px-4 py-2 text-sm transition-colors rounded-lg"
+                                :class="route().current(child.route)
+                                    ? 'bg-primary-100 dark:bg-primary-900/70 text-primary-700 dark:text-primary-300 font-medium'
+                                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200'">
+                            <i :class="[child.icon, 'mr-3 text-base']"></i>
+                            {{ child.label }}
                             </Link>
                         </div>
                     </div>
                     <!-- Regular item -->
-                    <Link
-                        v-else
-                        :href="route(item.route)"
-                        class="flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg transition-colors"
-                        :class="item.active 
-                            ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' 
-                            : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'"
-                    >
-                        <span class="flex items-center">
-                            <i :class="[item.icon, 'mr-3 text-lg']"></i>
-                            {{ item.label }}
-                        </span>
-                        <Badge 
-                            v-if="item.badge" 
-                            :value="item.badge" 
-                            :severity="item.badgeSeverity || 'info'"
-                            class="text-xs"
-                        />
+                    <Link v-else :href="route(item.route)"
+                        class="flex items-center justify-between px-4 py-3 text-sm font-medium transition-colors rounded-lg"
+                        :class="item.active
+                            ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                            : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'">
+                    <span class="flex items-center">
+                        <i :class="[item.icon, 'mr-3 text-lg']"></i>
+                        {{ item.label }}
+                    </span>
+                    <Badge v-if="item.badge" :value="item.badge" :severity="item.badgeSeverity || 'info'"
+                        class="text-xs" />
                     </Link>
                 </template>
             </nav>
 
             <!-- User Info at Bottom -->
-            <div class="border-t border-gray-200 dark:border-gray-700 p-4">
+            <div class="p-4 border-t border-gray-200 dark:border-gray-700">
                 <div class="flex items-center">
-                    <Avatar 
-                        :image="user.avatar_url" 
-                        :label="user.name?.charAt(0)?.toUpperCase()" 
-                        size="large" 
+                    <Avatar :image="user.avatar_url" :label="user.name?.charAt(0)?.toUpperCase()" size="large"
                         shape="circle"
-                        class="bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300"
-                    />
-                    <div class="ml-3 flex-1 min-w-0">
-                        <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ user.name }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ user.email }}</p>
+                        class="bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300" />
+                    <div class="flex-1 min-w-0 ml-3">
+                        <p class="text-sm font-medium text-gray-900 truncate dark:text-white">{{ user.name }}</p>
+                        <p class="text-xs text-gray-500 truncate dark:text-gray-400">{{ user.email }}</p>
                     </div>
                 </div>
             </div>
         </aside>
 
         <!-- Mobile Sidebar -->
-        <Sidebar v-model:visible="sidebarVisible" class="w-72" :pt="{ root: { class: 'dark:bg-gray-800' }, header: { class: 'dark:bg-gray-800 dark:border-gray-700' }, content: { class: 'dark:bg-gray-800' } }">
+        <Sidebar v-model:visible="sidebarVisible" class="w-72"
+            :pt="{ root: { class: 'dark:bg-gray-800' }, header: { class: 'dark:bg-gray-800 dark:border-gray-700' }, content: { class: 'dark:bg-gray-800' } }">
             <template #header>
                 <div class="flex items-center">
-                    <img v-if="isDark && settings.site_logo_dark" :src="settings.site_logo_dark" :alt="settings.site_name" class="h-8" />
-                    <img v-else-if="settings.site_logo" :src="settings.site_logo" :alt="settings.site_name" class="h-8" />
-                    <span v-else class="text-lg font-bold text-primary-600 dark:text-primary-400">{{ settings.site_name }}</span>
+                    <img v-if="isDark && settings.site_logo_dark" :src="settings.site_logo_dark"
+                        :alt="settings.site_name" class="h-8" />
+                    <img v-else-if="settings.site_logo" :src="settings.site_logo" :alt="settings.site_name"
+                        class="h-8" />
+                    <span v-else class="text-lg font-bold text-primary-600 dark:text-primary-400">{{ settings.site_name
+                        }}</span>
                 </div>
             </template>
 
             <!-- Mobile User Info -->
-            <div class="p-4 border-b border-gray-200 dark:border-gray-700 -mx-4 mb-4">
+            <div class="p-4 mb-4 -mx-4 border-b border-gray-200 dark:border-gray-700">
                 <div class="flex items-center">
-                    <Avatar 
-                        :image="user.avatar_url" 
-                        :label="user.name?.charAt(0)?.toUpperCase()" 
-                        size="large" 
+                    <Avatar :image="user.avatar_url" :label="user.name?.charAt(0)?.toUpperCase()" size="large"
                         shape="circle"
-                        class="bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300"
-                    />
+                        class="bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300" />
                     <div class="ml-3">
                         <p class="text-sm font-medium text-gray-900 dark:text-white">{{ user.name }}</p>
                         <p class="text-xs text-gray-500 dark:text-gray-400">{{ user.email }}</p>
@@ -546,78 +538,65 @@ defineExpose({ formatCurrency });
                 <template v-for="item in navigationItems" :key="item.label">
                     <!-- Item with submenu -->
                     <div v-if="item.hasSubmenu">
-                        <button
-                            @click="toggleSubmenu(item.submenuKey)"
-                            class="w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg transition-colors"
-                            :class="item.active 
-                                ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' 
-                                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'"
-                        >
+                        <button @click="toggleSubmenu(item.submenuKey)"
+                            class="flex items-center justify-between w-full px-4 py-3 text-sm font-medium transition-colors rounded-lg"
+                            :class="item.active
+                                ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'">
                             <span class="flex items-center">
                                 <i :class="[item.icon, 'mr-3 text-lg']"></i>
                                 {{ item.label }}
                             </span>
-                            <i :class="['pi text-xs transition-transform', expandedMenus[item.submenuKey] ? 'pi-chevron-down' : 'pi-chevron-right']"></i>
+                            <i
+                                :class="['pi text-xs transition-transform', expandedMenus[item.submenuKey] ? 'pi-chevron-down' : 'pi-chevron-right']"></i>
                         </button>
                         <!-- Submenu items -->
-                        <div v-show="expandedMenus[item.submenuKey]" class="ml-4 mt-1 space-y-1">
-                            <Link
-                                v-for="child in item.children"
-                                :key="child.route"
-                                :href="route(child.route)"
+                        <div v-show="expandedMenus[item.submenuKey]" class="mt-1 ml-4 space-y-1">
+                            <Link v-for="child in item.children" :key="child.route" :href="route(child.route)"
                                 @click="closeSidebar"
-                                class="flex items-center px-4 py-2 text-sm rounded-lg transition-colors"
-                                :class="route().current(child.route) 
-                                    ? 'bg-primary-100 dark:bg-primary-900/70 text-primary-700 dark:text-primary-300 font-medium' 
-                                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200'"
-                            >
-                                <i :class="[child.icon, 'mr-3 text-base']"></i>
-                                {{ child.label }}
+                                class="flex items-center px-4 py-2 text-sm transition-colors rounded-lg"
+                                :class="route().current(child.route)
+                                    ? 'bg-primary-100 dark:bg-primary-900/70 text-primary-700 dark:text-primary-300 font-medium'
+                                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200'">
+                            <i :class="[child.icon, 'mr-3 text-base']"></i>
+                            {{ child.label }}
                             </Link>
                         </div>
                     </div>
                     <!-- Regular item -->
-                    <Link
-                        v-else
-                        :href="route(item.route)"
-                        @click="closeSidebar"
-                        class="flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg transition-colors"
-                        :class="item.active 
-                            ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' 
-                            : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'"
-                    >
-                        <span class="flex items-center">
-                            <i :class="[item.icon, 'mr-3 text-lg']"></i>
-                            {{ item.label }}
-                        </span>
-                        <Badge 
-                            v-if="item.badge" 
-                            :value="item.badge" 
-                            :severity="item.badgeSeverity || 'info'"
-                            class="text-xs"
-                        />
+                    <Link v-else :href="route(item.route)" @click="closeSidebar"
+                        class="flex items-center justify-between px-4 py-3 text-sm font-medium transition-colors rounded-lg"
+                        :class="item.active
+                            ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                            : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'">
+                    <span class="flex items-center">
+                        <i :class="[item.icon, 'mr-3 text-lg']"></i>
+                        {{ item.label }}
+                    </span>
+                    <Badge v-if="item.badge" :value="item.badge" :severity="item.badgeSeverity || 'info'"
+                        class="text-xs" />
                     </Link>
                 </template>
             </nav>
 
             <template #footer>
-                <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
                     <!-- Dark Mode Toggle in Mobile Sidebar -->
-                    <button 
-                        @click="toggleDarkMode"
-                        class="flex items-center w-full px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                    >
+                    <button @click="toggleDarkMode"
+                        class="flex items-center w-full px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
                         <i :class="[isDark ? 'pi pi-sun' : 'pi pi-moon', 'mr-3']"></i>
                         {{ isDark ? 'Light Mode' : 'Dark Mode' }}
                     </button>
-                    <Link :href="route('profile.edit')" @click="closeSidebar" class="flex items-center px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-                        <i class="pi pi-user mr-3"></i>
-                        Profile
+                    <Link :href="route('profile.edit')" @click="closeSidebar"
+                        class="flex items-center px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                    <i class="mr-3 pi pi-user"></i>
+                    Profile
                     </Link>
                     <form method="POST" :action="route('logout')">
                         <input type="hidden" name="_token" :value="$page.props.csrf_token || ''">
-                        <button type="submit" class="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300">
-                            <i class="pi pi-sign-out mr-3"></i>
+                        <button type="submit"
+                            class="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300">
+                            <i class="mr-3 pi pi-sign-out"></i>
                             Logout
                         </button>
                     </form>
@@ -628,17 +607,23 @@ defineExpose({ formatCurrency });
         <!-- Main Content Area -->
         <div class="md:pl-64">
             <!-- Top Navigation Bar -->
-            <header class="sticky top-0 z-20 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 transition-colors duration-200">
+            <header
+                class="sticky top-0 z-20 transition-colors duration-200 bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
                 <div class="flex items-center justify-between h-16 px-4 md:px-6">
                     <!-- Mobile Logo & Menu Toggle -->
                     <div class="flex items-center md:hidden">
-                        <button @click="sidebarVisible = true" class="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-                            <i class="pi pi-bars text-xl"></i>
+                        <button @click="sidebarVisible = true"
+                            class="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                            <i class="text-xl pi pi-bars"></i>
                         </button>
                         <Link :href="route('dashboard')" class="ml-2">
-                            <img v-if="isDark && settings.site_logo_dark" :src="settings.site_logo_dark" :alt="settings.site_name" class="h-8" />
-                            <img v-else-if="settings.site_logo" :src="settings.site_logo" :alt="settings.site_name" class="h-8" />
-                            <span v-else class="text-lg font-bold text-primary-600 dark:text-primary-400">{{ settings.site_name }}</span>
+                        <img v-if="isDark && settings.site_logo_dark" :src="settings.site_logo_dark"
+                            :alt="settings.site_name" class="h-8" />
+                        <img v-else-if="settings.site_logo" :src="settings.site_logo" :alt="settings.site_name"
+                            class="h-8" />
+                        <span v-else class="text-lg font-bold text-primary-600 dark:text-primary-400">{{
+                            settings.site_name
+                            }}</span>
                         </Link>
                     </div>
 
@@ -652,85 +637,85 @@ defineExpose({ formatCurrency });
                     <!-- Right Side Actions -->
                     <div class="flex items-center space-x-2 md:space-x-3">
                         <!-- Dark Mode Toggle (Desktop) -->
-                        <button 
-                            @click="toggleDarkMode"
-                            class="hidden md:flex items-center justify-center w-10 h-10 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-colors"
-                            :title="isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
-                        >
+                        <button @click="toggleDarkMode"
+                            class="items-center justify-center hidden w-10 h-10 text-gray-600 transition-colors rounded-lg md:flex dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
+                            :title="isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
                             <i :class="[isDark ? 'pi pi-sun' : 'pi pi-moon', 'text-xl']"></i>
                         </button>
 
                         <!-- Notifications Bell & Dropdown -->
-                        <button @click="toggleNotificationPanel" 
-                                class="relative p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none">
-                            <i class="pi pi-bell text-xl"></i>
-                            <Badge 
-                                v-if="unreadCount > 0" 
-                                :value="unreadCount > 99 ? '99+' : unreadCount" 
-                                severity="danger"
-                                class="absolute -top-1 -right-1"
-                            />
+                        <button @click="toggleNotificationPanel"
+                            class="relative p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none">
+                            <i class="text-xl pi pi-bell"></i>
+                            <Badge v-if="unreadCount > 0" :value="unreadCount > 99 ? '99+' : unreadCount"
+                                severity="danger" class="absolute -top-1 -right-1" />
                         </button>
-                        
+
                         <!-- Notification Panel Popover -->
                         <Popover ref="notificationPanelRef" class="notification-popover">
-                            <div class="w-80 md:w-96 bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
+                            <div class="overflow-hidden bg-white rounded-lg w-80 md:w-96 dark:bg-gray-800">
                                 <!-- Header -->
-                                <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                                <div
+                                    class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
                                     <h3 class="font-semibold text-gray-900 dark:text-white">Notifications</h3>
                                     <div class="flex items-center gap-2">
                                         <button v-if="unreadCount > 0" @click="markAllNotificationsRead"
-                                                class="text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
+                                            class="text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
                                             Mark all read
                                         </button>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Notifications List -->
-                                <div class="max-h-96 overflow-y-auto">
+                                <div class="overflow-y-auto max-h-96">
                                     <!-- Loading State -->
                                     <div v-if="notificationsLoading" class="flex items-center justify-center py-8">
                                         <ProgressSpinner style="width: 30px; height: 30px" />
                                     </div>
-                                    
+
                                     <!-- Notifications -->
                                     <div v-else-if="notifications.length > 0">
                                         <div v-for="notification in notifications" :key="notification.id"
-                                             @click="markNotificationRead(notification)"
-                                             class="flex items-start gap-3 p-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors border-b border-gray-100 dark:border-gray-700 last:border-0"
-                                             :class="{ 'bg-primary-50/50 dark:bg-primary-900/30': !notification.is_read }">
+                                            @click="markNotificationRead(notification)"
+                                            class="flex items-start gap-3 p-4 transition-colors border-b border-gray-100 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-gray-700 last:border-0"
+                                            :class="{ 'bg-primary-50/50 dark:bg-primary-900/30': !notification.is_read }">
                                             <!-- Icon -->
                                             <div :class="getNotificationColor(notification)"
-                                                 class="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center">
+                                                class="flex items-center justify-center flex-shrink-0 rounded-full w-9 h-9">
                                                 <i :class="getNotificationIcon(notification)" class="text-sm"></i>
                                             </div>
                                             <!-- Content -->
                                             <div class="flex-1 min-w-0">
                                                 <div class="flex items-center gap-2">
-                                                    <p class="text-sm font-medium text-gray-900 dark:text-white truncate"
-                                                       :class="{ 'font-bold': !notification.is_read }">
+                                                    <p class="text-sm font-medium text-gray-900 truncate dark:text-white"
+                                                        :class="{ 'font-bold': !notification.is_read }">
                                                         {{ notification.title }}
                                                     </p>
-                                                    <span v-if="!notification.is_read" class="w-2 h-2 bg-primary-500 rounded-full flex-shrink-0"></span>
+                                                    <span v-if="!notification.is_read"
+                                                        class="flex-shrink-0 w-2 h-2 rounded-full bg-primary-500"></span>
                                                 </div>
-                                                <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mt-0.5">{{ notification.message }}</p>
-                                                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ notification.created_at_human }}</p>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mt-0.5">
+                                                    {{
+                                                    notification.message }}</p>
+                                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{
+                                                    notification.created_at_human }}</p>
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     <!-- Empty State -->
                                     <div v-else class="py-8 text-center text-gray-500 dark:text-gray-400">
-                                        <i class="pi pi-bell-slash text-3xl mb-2"></i>
+                                        <i class="mb-2 text-3xl pi pi-bell-slash"></i>
                                         <p class="text-sm">No notifications yet</p>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Footer -->
-                                <div v-if="routeExists('notifications.index')" class="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
-                                    <Link :href="route('notifications.index')" 
-                                          class="block text-center text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium">
-                                        View all notifications
+                                <div v-if="routeExists('notifications.index')"
+                                    class="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
+                                    <Link :href="route('notifications.index')"
+                                        class="block text-sm font-medium text-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
+                                    View all notifications
                                     </Link>
                                 </div>
                             </div>
@@ -738,19 +723,12 @@ defineExpose({ formatCurrency });
 
                         <!-- User Menu (Desktop) -->
                         <div class="hidden md:block">
-                            <Button 
-                                @click="toggleUserMenu" 
-                                class="p-button-text p-button-plain"
-                                aria-haspopup="true"
-                            >
-                                <Avatar 
-                                    :image="user.avatar_url" 
-                                    :label="user.name?.charAt(0)?.toUpperCase()" 
+                            <Button @click="toggleUserMenu" class="p-button-text p-button-plain" aria-haspopup="true">
+                                <Avatar :image="user.avatar_url" :label="user.name?.charAt(0)?.toUpperCase()"
                                     shape="circle"
-                                    class="bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300"
-                                />
+                                    class="bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300" />
                                 <span class="ml-2 text-gray-700 dark:text-gray-200">{{ user.name }}</span>
-                                <i class="pi pi-chevron-down ml-2 text-xs text-gray-600 dark:text-gray-400"></i>
+                                <i class="ml-2 text-xs text-gray-600 pi pi-chevron-down dark:text-gray-400"></i>
                             </Button>
                             <Menu ref="userMenuRef" :model="userMenuItems" popup />
                         </div>
@@ -759,19 +737,22 @@ defineExpose({ formatCurrency });
             </header>
 
             <!-- Page Content -->
-            <main class="p-4 md:p-6 lg:p-8 pb-24 md:pb-6">
-                <div class="max-w-7xl mx-auto">
+            <main class="p-4 pb-24 md:p-6 lg:p-8 md:pb-6">
+                <div class="mx-auto max-w-7xl">
                     <!-- Flash Messages -->
-                    <div v-if="$page.props.flash?.success" class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg text-green-800 dark:text-green-200">
-                        <i class="pi pi-check-circle mr-2"></i>
+                    <div v-if="$page.props.flash?.success"
+                        class="p-4 mb-4 text-green-800 border border-green-200 rounded-lg bg-green-50 dark:bg-green-900/30 dark:border-green-800 dark:text-green-200">
+                        <i class="mr-2 pi pi-check-circle"></i>
                         {{ $page.props.flash.success }}
                     </div>
-                    <div v-if="$page.props.flash?.error" class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-800 dark:text-red-200">
-                        <i class="pi pi-times-circle mr-2"></i>
+                    <div v-if="$page.props.flash?.error"
+                        class="p-4 mb-4 text-red-800 border border-red-200 rounded-lg bg-red-50 dark:bg-red-900/30 dark:border-red-800 dark:text-red-200">
+                        <i class="mr-2 pi pi-times-circle"></i>
                         {{ $page.props.flash.error }}
                     </div>
-                    <div v-if="$page.props.flash?.warning" class="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-lg text-yellow-800 dark:text-yellow-200">
-                        <i class="pi pi-exclamation-triangle mr-2"></i>
+                    <div v-if="$page.props.flash?.warning"
+                        class="p-4 mb-4 text-yellow-800 border border-yellow-200 rounded-lg bg-yellow-50 dark:bg-yellow-900/30 dark:border-yellow-800 dark:text-yellow-200">
+                        <i class="mr-2 pi pi-exclamation-triangle"></i>
                         {{ $page.props.flash.warning }}
                     </div>
 
@@ -782,25 +763,20 @@ defineExpose({ formatCurrency });
         </div>
 
         <!-- Mobile Bottom Navigation -->
-        <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-40 transition-colors duration-200">
+        <nav
+            class="fixed bottom-0 left-0 right-0 z-40 transition-colors duration-200 bg-white border-t border-gray-200 md:hidden dark:bg-gray-800 dark:border-gray-700">
             <div class="flex items-center justify-around h-16">
                 <template v-for="item in bottomNavItems" :key="item.label">
-                    <button 
-                        v-if="item.action" 
-                        @click="item.action"
-                        class="flex flex-col items-center justify-center flex-1 h-full text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400"
-                    >
+                    <button v-if="item.action" @click="item.action"
+                        class="flex flex-col items-center justify-center flex-1 h-full text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">
                         <i :class="[item.icon, 'text-xl']"></i>
-                        <span class="text-xs mt-1">{{ item.label }}</span>
+                        <span class="mt-1 text-xs">{{ item.label }}</span>
                     </button>
-                    <Link 
-                        v-else
-                        :href="route(item.route)"
+                    <Link v-else :href="route(item.route)"
                         class="flex flex-col items-center justify-center flex-1 h-full text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400"
-                        :class="{ 'text-primary-600 dark:text-primary-400': route().current(item.route) }"
-                    >
-                        <i :class="[item.icon, 'text-xl']"></i>
-                        <span class="text-xs mt-1">{{ item.label }}</span>
+                        :class="{ 'text-primary-600 dark:text-primary-400': route().current(item.route) }">
+                    <i :class="[item.icon, 'text-xl']"></i>
+                    <span class="mt-1 text-xs">{{ item.label }}</span>
                     </Link>
                 </template>
             </div>
@@ -813,12 +789,15 @@ defineExpose({ formatCurrency });
 .text-primary-600 {
     color: #2563eb;
 }
+
 .text-primary-700 {
     color: #1d4ed8;
 }
+
 .bg-primary-50 {
     background-color: #eff6ff;
 }
+
 .bg-primary-100 {
     background-color: #dbeafe;
 }
@@ -828,10 +807,12 @@ defineExpose({ formatCurrency });
 .dark .text-primary-400 {
     color: #60a5fa;
 }
+
 :deep(.dark) .text-primary-300,
 .dark .text-primary-300 {
     color: #93c5fd;
 }
+
 :deep(.dark) .bg-primary-900,
 .dark .bg-primary-900 {
     background-color: #1e3a5f;

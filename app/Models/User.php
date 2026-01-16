@@ -77,7 +77,13 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
 
     public function getFilamentAvatarUrl(): ?string
     {
-        return $this->avatar_url ? \Illuminate\Support\Facades\Storage::url($this->avatar_url) : null;
+        // If user has uploaded a custom avatar, use it
+        if ($this->avatar_url) {
+            return \Illuminate\Support\Facades\Storage::url($this->avatar_url);
+        }
+
+        // Otherwise, use Gravatar with the user's email
+        return \App\Helpers\Avatar::gravatar($this->email, 200, 'mp');
     }
 
 

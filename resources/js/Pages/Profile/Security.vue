@@ -689,8 +689,8 @@ const getBrowserIcon = (browser) => {
                 </label>
                 <Password v-model="disableTwoFactorForm.password" class="w-full" :feedback="false" toggleMask
                     inputClass="w-full" placeholder="Enter your password" />
-                <small v-if="disableTwoFactorForm.errors.password" class="text-red-500">
-                    {{ disableTwoFactorForm.errors.password }}
+                <small v-if="disableTwoFactorForm.errors.password" class="text-red-500"> {{
+                    disableTwoFactorForm.errors.password }}
                 </small>
             </div>
 

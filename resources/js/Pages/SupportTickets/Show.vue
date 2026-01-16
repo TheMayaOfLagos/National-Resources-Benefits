@@ -75,7 +75,7 @@ const formatRelativeDate = (date) => {
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
-    
+
     if (diffMins < 1) return 'Just now';
     if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
     if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
@@ -122,19 +122,20 @@ const reopenTicket = () => {
 </script>
 
 <template>
+
     <Head :title="`Ticket ${ticket.ticket_id}`" />
-    
+
     <DashboardLayout>
         <template #header>
             <div class="flex items-center gap-2">
                 <Link :href="route('support-tickets.index')" class="text-gray-500 hover:text-gray-700">
-                    Support Tickets
+                Support Tickets
                 </Link>
                 <i class="pi pi-angle-right text-gray-400"></i>
                 <span>{{ ticket.ticket_id }}</span>
             </div>
         </template>
-        
+
         <div class="space-y-6">
             <!-- Ticket Header Card -->
             <Card class="shadow-sm">
@@ -145,20 +146,16 @@ const reopenTicket = () => {
                                 <span class="font-mono text-sm px-3 py-1 bg-primary-100 text-primary-700 rounded-full">
                                     {{ ticket.ticket_id }}
                                 </span>
-                                <Tag 
-                                    :value="ticket.priority?.charAt(0).toUpperCase() + ticket.priority?.slice(1)" 
-                                    :severity="getPrioritySeverity(ticket.priority)"
-                                />
-                                <Tag 
-                                    :value="formatStatus(ticket.status)" 
-                                    :severity="getStatusSeverity(ticket.status)"
-                                />
+                                <Tag :value="ticket.priority?.charAt(0).toUpperCase() + ticket.priority?.slice(1)"
+                                    :severity="getPrioritySeverity(ticket.priority)" />
+                                <Tag :value="formatStatus(ticket.status)"
+                                    :severity="getStatusSeverity(ticket.status)" />
                             </div>
-                            
+
                             <h1 class="text-xl font-semibold text-gray-900 mb-2">
                                 {{ ticket.subject }}
                             </h1>
-                            
+
                             <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500">
                                 <span class="flex items-center gap-1">
                                     <i class="pi pi-folder"></i>
@@ -174,37 +171,20 @@ const reopenTicket = () => {
                                 </span>
                             </div>
                         </div>
-                        
+
                         <div class="flex gap-2">
-                            <Button 
-                                v-if="ticket.status === 'closed'"
-                                label="Reopen Ticket" 
-                                icon="pi pi-refresh"
-                                severity="secondary"
-                                outlined
-                                @click="reopenTicket"
-                            />
-                            <Button 
-                                v-else
-                                label="Close Ticket" 
-                                icon="pi pi-times-circle"
-                                severity="danger"
-                                outlined
-                                @click="closeTicket"
-                            />
+                            <Button v-if="ticket.status === 'closed'" label="Reopen Ticket" icon="pi pi-refresh"
+                                severity="secondary" outlined @click="reopenTicket" />
+                            <Button v-else label="Close Ticket" icon="pi pi-times-circle" severity="danger" outlined
+                                @click="closeTicket" />
                             <Link :href="route('support-tickets.index')">
-                                <Button 
-                                    label="Back to Tickets" 
-                                    icon="pi pi-arrow-left"
-                                    severity="secondary"
-                                    text
-                                />
+                            <Button label="Back to Tickets" icon="pi pi-arrow-left" severity="secondary" text />
                             </Link>
                         </div>
                     </div>
                 </template>
             </Card>
-            
+
             <!-- Original Message -->
             <Card class="shadow-sm">
                 <template #title>
@@ -215,12 +195,8 @@ const reopenTicket = () => {
                 </template>
                 <template #content>
                     <div class="flex gap-4">
-                        <Avatar 
-                            :label="getInitials(ticket.user?.name || 'You')" 
-                            size="large"
-                            shape="circle"
-                            class="bg-primary-100 text-primary-700 flex-shrink-0"
-                        />
+                        <Avatar :image="ticket.user?.avatar" :label="getInitials(ticket.user?.name || 'You')"
+                            size="large" shape="circle" class="bg-primary-100 text-primary-700 flex-shrink-0" />
                         <div class="flex-1">
                             <div class="flex items-center gap-2 mb-2">
                                 <span class="font-medium text-gray-900">
@@ -237,7 +213,7 @@ const reopenTicket = () => {
                     </div>
                 </template>
             </Card>
-            
+
             <!-- Replies Section -->
             <Card v-if="replies && replies.length > 0" class="shadow-sm">
                 <template #title>
@@ -249,25 +225,18 @@ const reopenTicket = () => {
                 </template>
                 <template #content>
                     <div class="space-y-6">
-                        <div 
-                            v-for="(reply, index) in replies" 
-                            :key="reply.id"
-                            class="flex gap-4"
-                            :class="{ 'flex-row-reverse': reply.is_admin }"
-                        >
-                            <Avatar 
-                                :label="getInitials(reply.user?.name || (reply.is_admin ? 'Support' : 'You'))" 
-                                size="large"
-                                shape="circle"
+                        <div v-for="(reply, index) in replies" :key="reply.id" class="flex gap-4"
+                            :class="{ 'flex-row-reverse': reply.is_admin }">
+                            <Avatar :image="reply.user?.avatar"
+                                :label="getInitials(reply.user?.name || (reply.is_admin ? 'Support' : 'You'))"
+                                size="large" shape="circle"
                                 :class="reply.is_admin ? 'bg-green-100 text-green-700' : 'bg-primary-100 text-primary-700'"
-                                class="flex-shrink-0"
-                            />
-                            <div 
-                                class="flex-1 max-w-[80%] p-4 rounded-lg"
-                                :class="reply.is_admin ? 'bg-green-50 ml-auto' : 'bg-gray-50'"
-                            >
+                                class="flex-shrink-0" />
+                            <div class="flex-1 max-w-[80%] p-4 rounded-lg"
+                                :class="reply.is_admin ? 'bg-green-50 ml-auto' : 'bg-gray-50'">
                                 <div class="flex items-center gap-2 mb-2">
-                                    <span class="font-medium" :class="reply.is_admin ? 'text-green-800' : 'text-gray-900'">
+                                    <span class="font-medium"
+                                        :class="reply.is_admin ? 'text-green-800' : 'text-gray-900'">
                                         {{ reply.is_admin ? 'Support Team' : (reply.user?.name || 'You') }}
                                     </span>
                                     <Tag v-if="reply.is_admin" value="Staff" severity="success" class="text-xs" />
@@ -275,7 +244,8 @@ const reopenTicket = () => {
                                         {{ formatRelativeDate(reply.created_at) }}
                                     </span>
                                 </div>
-                                <div class="prose prose-sm max-w-none whitespace-pre-wrap" :class="reply.is_admin ? 'text-green-900' : 'text-gray-700'">
+                                <div class="prose prose-sm max-w-none whitespace-pre-wrap"
+                                    :class="reply.is_admin ? 'text-green-900' : 'text-gray-700'">
                                     {{ reply.message }}
                                 </div>
                             </div>
@@ -283,7 +253,7 @@ const reopenTicket = () => {
                     </div>
                 </template>
             </Card>
-            
+
             <!-- Reply Form -->
             <Card class="shadow-sm">
                 <template #title>
@@ -294,28 +264,18 @@ const reopenTicket = () => {
                 </template>
                 <template #content>
                     <div v-if="canReply">
-                        <Textarea 
-                            v-model="replyForm.message"
-                            rows="4"
-                            class="w-full"
-                            placeholder="Type your reply here..."
-                            :invalid="!!replyForm.errors.message"
-                        />
+                        <Textarea v-model="replyForm.message" rows="4" class="w-full"
+                            placeholder="Type your reply here..." :invalid="!!replyForm.errors.message" />
                         <small v-if="replyForm.errors.message" class="text-red-500">
                             {{ replyForm.errors.message }}
                         </small>
-                        
+
                         <div class="flex justify-end mt-4">
-                            <Button 
-                                label="Send Reply" 
-                                icon="pi pi-send"
-                                :loading="replyForm.processing"
-                                :disabled="!replyForm.message.trim()"
-                                @click="submitReply"
-                            />
+                            <Button label="Send Reply" icon="pi pi-send" :loading="replyForm.processing"
+                                :disabled="!replyForm.message.trim()" @click="submitReply" />
                         </div>
                     </div>
-                    
+
                     <Message v-else severity="warn" :closable="false">
                         <template #messageicon>
                             <i class="pi pi-lock"></i>
@@ -325,7 +285,7 @@ const reopenTicket = () => {
                 </template>
             </Card>
         </div>
-        
+
         <ConfirmDialog />
     </DashboardLayout>
 </template>

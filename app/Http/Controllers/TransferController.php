@@ -20,7 +20,7 @@ class TransferController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        
+
         // Get user's accounts with balances
         $accounts = $user->accounts()
             ->with('walletType')
@@ -32,10 +32,10 @@ class TransferController extends Controller
                 'balance_formatted' => number_format($account->balance, 2),
                 'currency' => $account->walletType?->currency ?? 'USD',
             ]);
-        
+
         // Check transfer permissions
         $canTransfer = $user->can_transfer ?? true;
-        
+
         // Get transfer settings
         $settings = [
             'transfer_internal_active' => Setting::get('transfer_internal_active', true),
@@ -47,7 +47,7 @@ class TransferController extends Controller
             'transfer_fee_percentage' => Setting::get('transfer_fee_percentage', 0),
             'currency_symbol' => Setting::get('currency_symbol', '$'),
         ];
-        
+
         return Inertia::render('Transfer/Index', [
             'accounts' => $accounts,
             'canTransfer' => $canTransfer,
@@ -55,14 +55,14 @@ class TransferController extends Controller
             'hasMultipleAccounts' => $accounts->count() > 1,
         ]);
     }
-    
+
     /**
      * Show internal (user-to-user) transfer form.
      */
     public function internal(Request $request)
     {
         $user = $request->user();
-        
+
         $accounts = $user->accounts()
             ->with('walletType')
             ->get()
@@ -73,7 +73,7 @@ class TransferController extends Controller
                 'balance_formatted' => number_format($account->balance, 2),
                 'currency' => $account->walletType?->currency ?? 'USD',
             ]);
-        
+
         $settings = [
             'transfer_min' => Setting::get('transfer_min', 1),
             'transfer_max' => Setting::get('transfer_max', 50000),
@@ -81,20 +81,20 @@ class TransferController extends Controller
             'transfer_fee_percentage' => Setting::get('transfer_fee_percentage', 0),
             'currency_symbol' => Setting::get('currency_symbol', '$'),
         ];
-        
+
         return Inertia::render('Transfer/Internal', [
             'accounts' => $accounts,
             'settings' => $settings,
         ]);
     }
-    
+
     /**
      * Show own accounts transfer form.
      */
     public function ownAccounts(Request $request)
     {
         $user = $request->user();
-        
+
         $accounts = $user->accounts()
             ->with('walletType')
             ->get()
@@ -105,16 +105,16 @@ class TransferController extends Controller
                 'balance_formatted' => number_format($account->balance, 2),
                 'currency' => $account->walletType?->currency ?? 'USD',
             ]);
-        
+
         if ($accounts->count() < 2) {
             return redirect()->route('transfer.index')
                 ->with('error', 'You need at least two accounts to transfer between your own accounts.');
         }
-        
+
         $settings = [
             'currency_symbol' => Setting::get('currency_symbol', '$'),
         ];
-        
+
         return Inertia::render('Transfer/OwnAccounts', [
             'accounts' => $accounts,
             'settings' => $settings,
@@ -127,7 +127,7 @@ class TransferController extends Controller
     public function domestic(Request $request)
     {
         $user = $request->user();
-        
+
         $accounts = $user->accounts()
             ->with('walletType')
             ->get()
@@ -138,7 +138,7 @@ class TransferController extends Controller
                 'balance_formatted' => number_format($account->balance, 2),
                 'currency' => $account->walletType?->currency ?? 'USD',
             ]);
-        
+
         $settings = [
             'transfer_domestic_active' => Setting::get('transfer_domestic_active', true),
             'domestic_transfer_min' => Setting::get('domestic_transfer_min', 10),
@@ -148,10 +148,10 @@ class TransferController extends Controller
             'domestic_processing_days' => Setting::get('domestic_processing_days', '1-3'),
             'currency_symbol' => Setting::get('currency_symbol', '$'),
         ];
-        
+
         // Get user's saved bank accounts (if any)
         $savedBanks = []; // Can be expanded to fetch from a user_bank_accounts table
-        
+
         return Inertia::render('Transfer/Domestic', [
             'accounts' => $accounts,
             'settings' => $settings,
@@ -165,7 +165,7 @@ class TransferController extends Controller
     public function wire(Request $request)
     {
         $user = $request->user();
-        
+
         $accounts = $user->accounts()
             ->with('walletType')
             ->get()
@@ -176,7 +176,7 @@ class TransferController extends Controller
                 'balance_formatted' => number_format($account->balance, 2),
                 'currency' => $account->walletType?->currency ?? 'USD',
             ]);
-        
+
         $settings = [
             'transfer_wire_active' => Setting::get('transfer_wire_active', true),
             'wire_transfer_min' => Setting::get('wire_transfer_min', 100),
@@ -186,7 +186,7 @@ class TransferController extends Controller
             'wire_processing_days' => Setting::get('wire_processing_days', '3-5'),
             'currency_symbol' => Setting::get('currency_symbol', '$'),
         ];
-        
+
         // Common countries for wire transfers
         $countries = [
             ['code' => 'US', 'name' => 'United States'],
@@ -205,14 +205,14 @@ class TransferController extends Controller
             ['code' => 'AE', 'name' => 'United Arab Emirates'],
             ['code' => 'SG', 'name' => 'Singapore'],
         ];
-        
+
         return Inertia::render('Transfer/Wire', [
             'accounts' => $accounts,
             'settings' => $settings,
             'countries' => $countries,
         ]);
     }
-    
+
     /**
      * Search for users by email or account number.
      */
@@ -221,10 +221,10 @@ class TransferController extends Controller
         $request->validate([
             'query' => 'required|string|min:3',
         ]);
-        
+
         $query = $request->input('query');
         $currentUserId = $request->user()->id;
-        
+
         // Search by email or name (not the current user)
         $users = User::where('id', '!=', $currentUserId)
             ->where('is_active', true)
@@ -238,12 +238,12 @@ class TransferController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $this->maskEmail($user->email),
-                'avatar' => $user->avatar,
+                'avatar' => $user->getFilamentAvatarUrl(),
             ]);
-        
+
         return response()->json($users);
     }
-    
+
     /**
      * Process internal transfer.
      */
@@ -255,53 +255,53 @@ class TransferController extends Controller
             'amount' => 'required|numeric|min:0.01',
             'description' => 'nullable|string|max:500',
         ]);
-        
+
         $user = $request->user();
         $fromAccount = Account::where('id', $request->from_account_id)
             ->where('user_id', $user->id)
             ->firstOrFail();
-        
+
         $recipient = User::findOrFail($request->recipient_id);
         $recipientAccount = $recipient->accounts()->first();
-        
+
         if (!$recipientAccount) {
             return back()->withErrors(['recipient_id' => 'Recipient does not have an account.']);
         }
-        
+
         // Get limits
         $minAmount = Setting::get('transfer_min', 1);
         $maxAmount = Setting::get('transfer_max', 50000);
         $feeFixed = Setting::get('transfer_fee_fixed', 0);
         $feePercentage = Setting::get('transfer_fee_percentage', 0);
-        
+
         $amount = $request->amount;
         $fee = $feeFixed + ($feePercentage / 100 * $amount);
         $totalDebit = $amount + $fee;
-        
+
         // Validations
         if ($amount < $minAmount) {
             return back()->withErrors(['amount' => "Minimum transfer amount is \${$minAmount}."]);
         }
-        
+
         if ($amount > $maxAmount) {
             return back()->withErrors(['amount' => "Maximum transfer amount is \${$maxAmount}."]);
         }
-        
+
         if ($fromAccount->balance < $totalDebit) {
             return back()->withErrors(['amount' => 'Insufficient balance.']);
         }
-        
+
         if ($recipient->id === $user->id) {
             return back()->withErrors(['recipient_id' => 'Cannot transfer to yourself.']);
         }
-        
+
         // Process transfer
         $transfer = DB::transaction(function () use ($fromAccount, $recipientAccount, $amount, $fee, $totalDebit, $request, $user, $recipient) {
             $baseReference = 'TRF-' . strtoupper(Str::random(12));
-            
+
             // Note: Balance updates are handled automatically by TransactionObserver
             // when completed transactions are created
-            
+
             // Create transfer record
             $transfer = Transfer::create([
                 'user_id' => $user->id,
@@ -311,7 +311,7 @@ class TransferController extends Controller
                 'status' => 'completed',
                 'created_by' => $user->id,
             ]);
-            
+
             // Sender transaction (transfer_out)
             Transaction::create([
                 'account_id' => $fromAccount->id,
@@ -330,7 +330,7 @@ class TransferController extends Controller
                 ],
                 'completed_at' => now(),
             ]);
-            
+
             // Recipient transaction (transfer_in)
             Transaction::create([
                 'account_id' => $recipientAccount->id,
@@ -348,10 +348,10 @@ class TransferController extends Controller
                 ],
                 'completed_at' => now(),
             ]);
-            
+
             return $transfer;
         });
-        
+
         // Notify sender and recipient (wrapped in try-catch to not break transfer flow)
         try {
             $user->notify(new \App\Notifications\TransferCompleted($transfer, $amount, $recipient->name, 'sent'));
@@ -359,11 +359,11 @@ class TransferController extends Controller
         } catch (\Exception $e) {
             \Log::error('Failed to send transfer notifications: ' . $e->getMessage());
         }
-        
+
         return redirect()->route('transfer.index')
             ->with('success', "Successfully transferred \${$amount} to {$recipient->name}.");
     }
-    
+
     /**
      * Process own accounts transfer.
      */
@@ -375,35 +375,35 @@ class TransferController extends Controller
             'amount' => 'required|numeric|min:0.01',
             'description' => 'nullable|string|max:500',
         ]);
-        
+
         $user = $request->user();
-        
+
         $fromAccount = Account::where('id', $request->from_account_id)
             ->where('user_id', $user->id)
             ->with('walletType')
             ->firstOrFail();
-            
+
         $toAccount = Account::where('id', $request->to_account_id)
             ->where('user_id', $user->id)
             ->with('walletType')
             ->firstOrFail();
-        
+
         $amount = $request->amount;
-        
+
         if ($fromAccount->balance < $amount) {
             return back()->withErrors(['amount' => 'Insufficient balance.']);
         }
-        
+
         // Process transfer (no fee for own account transfers)
         DB::transaction(function () use ($fromAccount, $toAccount, $amount, $request, $user) {
             $baseReference = 'OAT-' . strtoupper(Str::random(12));
-            
+
             // Note: Balance updates are handled automatically by TransactionObserver
             // when completed transactions are created
-            
+
             $fromName = $fromAccount->walletType?->name ?? 'Account';
             $toName = $toAccount->walletType?->name ?? 'Account';
-            
+
             // Source transaction
             Transaction::create([
                 'account_id' => $fromAccount->id,
@@ -420,7 +420,7 @@ class TransferController extends Controller
                 ],
                 'completed_at' => now(),
             ]);
-            
+
             // Destination transaction
             Transaction::create([
                 'account_id' => $toAccount->id,
@@ -438,7 +438,7 @@ class TransferController extends Controller
                 'completed_at' => now(),
             ]);
         });
-        
+
         return redirect()->route('transfer.index')
             ->with('success', "Successfully transferred \${$amount} between your accounts.");
     }
@@ -650,14 +650,14 @@ class TransferController extends Controller
         return redirect()->route('transfer.history')
             ->with('success', "Wire transfer of \${$amount} initiated successfully. Expected arrival: 3-5 business days.");
     }
-    
+
     /**
      * Show transfer history.
      */
     public function history(Request $request)
     {
         $user = $request->user();
-        
+
         $transfers = Transaction::whereHas('account', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             })
@@ -678,12 +678,12 @@ class TransferController extends Controller
                 'counterparty' => $this->getCounterparty($transaction),
                 'created_at' => $transaction->created_at->format('M d, Y H:i'),
             ]);
-        
+
         return Inertia::render('Transfer/History', [
             'transfers' => $transfers,
         ]);
     }
-    
+
     /**
      * Mask email for privacy.
      */
@@ -692,23 +692,23 @@ class TransferController extends Controller
         $parts = explode('@', $email);
         $name = $parts[0];
         $domain = $parts[1];
-        
+
         $maskedName = substr($name, 0, 2) . str_repeat('*', max(strlen($name) - 2, 3));
-        
+
         return $maskedName . '@' . $domain;
     }
-    
+
     /**
      * Get counterparty info from transaction metadata.
      */
     private function getCounterparty(Transaction $transaction): ?string
     {
         $metadata = $transaction->metadata ?? [];
-        
+
         if ($transaction->transaction_type === 'transfer_out') {
             return $metadata['recipient_name'] ?? $metadata['to_account_name'] ?? null;
         }
-        
+
         return $metadata['sender_name'] ?? $metadata['from_account_name'] ?? null;
     }
 }

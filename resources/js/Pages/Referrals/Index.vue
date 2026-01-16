@@ -69,9 +69,9 @@ const copyToClipboard = async (text, type = 'link') => {
 const shareVia = (platform) => {
     const text = `Join me on National Resource Benefits! Use my referral code: ${props.referralCode}`;
     const url = props.referralLink;
-    
+
     let shareUrl = '';
-    
+
     switch (platform) {
         case 'twitter':
             shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
@@ -89,7 +89,7 @@ const shareVia = (platform) => {
             shareUrl = `mailto:?subject=${encodeURIComponent('Join National Resource Benefits')}&body=${encodeURIComponent(text + '\n\n' + url)}`;
             break;
     }
-    
+
     if (shareUrl) {
         window.open(shareUrl, '_blank');
     }
@@ -107,21 +107,22 @@ const getStatusSeverity = (status) => {
 </script>
 
 <template>
+
     <Head title="Referrals" />
-    
+
     <DashboardLayout>
         <template #header>Referral Program</template>
-        
+
         <Toast />
-        
+
         <div class="space-y-6">
             <!-- Stats Cards -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
                 <Card class="shadow-sm">
                     <template #content>
                         <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                                <i class="pi pi-users text-xl text-blue-600"></i>
+                            <div class="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full">
+                                <i class="text-xl text-blue-600 pi pi-users"></i>
                             </div>
                             <div>
                                 <p class="text-2xl font-bold text-gray-900">{{ stats?.total_referrals || 0 }}</p>
@@ -130,12 +131,12 @@ const getStatusSeverity = (status) => {
                         </div>
                     </template>
                 </Card>
-                
+
                 <Card class="shadow-sm">
                     <template #content>
                         <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                                <i class="pi pi-check-circle text-xl text-green-600"></i>
+                            <div class="flex items-center justify-center w-12 h-12 bg-green-100 rounded-full">
+                                <i class="text-xl text-green-600 pi pi-check-circle"></i>
                             </div>
                             <div>
                                 <p class="text-2xl font-bold text-gray-900">{{ stats?.verified_referrals || 0 }}</p>
@@ -144,36 +145,38 @@ const getStatusSeverity = (status) => {
                         </div>
                     </template>
                 </Card>
-                
+
                 <Card class="shadow-sm">
                     <template #content>
                         <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
-                                <i class="pi pi-dollar text-xl text-purple-600"></i>
+                            <div class="flex items-center justify-center w-12 h-12 bg-purple-100 rounded-full">
+                                <i class="text-xl text-purple-600 pi pi-dollar"></i>
                             </div>
                             <div>
-                                <p class="text-2xl font-bold text-green-600">{{ formatCurrency(stats?.total_earnings || 0) }}</p>
+                                <p class="text-2xl font-bold text-green-600">{{ formatCurrency(stats?.total_earnings ||
+                                    0) }}</p>
                                 <p class="text-sm text-gray-500">Total Earned</p>
                             </div>
                         </div>
                     </template>
                 </Card>
-                
+
                 <Card class="shadow-sm">
                     <template #content>
                         <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center">
-                                <i class="pi pi-clock text-xl text-yellow-600"></i>
+                            <div class="flex items-center justify-center w-12 h-12 bg-yellow-100 rounded-full">
+                                <i class="text-xl text-yellow-600 pi pi-clock"></i>
                             </div>
                             <div>
-                                <p class="text-2xl font-bold text-yellow-600">{{ formatCurrency(stats?.pending_earnings || 0) }}</p>
+                                <p class="text-2xl font-bold text-yellow-600">{{ formatCurrency(stats?.pending_earnings
+                                    || 0) }}</p>
                                 <p class="text-sm text-gray-500">Pending</p>
                             </div>
                         </div>
                     </template>
                 </Card>
             </div>
-            
+
             <!-- Referral Link Card -->
             <Card class="shadow-sm bg-gradient-to-br from-primary-50 to-blue-50">
                 <template #title>
@@ -185,218 +188,141 @@ const getStatusSeverity = (status) => {
                 <template #content>
                     <div class="space-y-6">
                         <!-- Referral Code -->
-                        <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex flex-col gap-4 md:flex-row">
                             <div class="flex-1">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Referral Code</label>
+                                <label class="block mb-2 text-sm font-medium text-gray-700">Referral Code</label>
                                 <div class="flex gap-2">
-                                    <InputText 
-                                        :value="referralCode" 
-                                        readonly 
-                                        class="w-full font-mono text-lg font-bold tracking-wider"
-                                    />
-                                    <Button 
-                                        icon="pi pi-copy" 
-                                        severity="secondary"
-                                        @click="copyToClipboard(referralCode, 'code')"
-                                        v-tooltip.top="'Copy Code'"
-                                    />
+                                    <InputText :value="referralCode" readonly
+                                        class="w-full font-mono text-lg font-bold tracking-wider" />
+                                    <Button icon="pi pi-copy" severity="secondary"
+                                        @click="copyToClipboard(referralCode, 'code')" v-tooltip.top="'Copy Code'" />
                                 </div>
                             </div>
-                            
+
                             <div class="flex-[2]">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Referral Link</label>
+                                <label class="block mb-2 text-sm font-medium text-gray-700">Referral Link</label>
                                 <div class="flex gap-2">
-                                    <InputText 
-                                        :value="referralLink" 
-                                        readonly 
-                                        class="w-full text-sm"
-                                    />
-                                    <Button 
-                                        icon="pi pi-copy" 
-                                        severity="secondary"
-                                        @click="copyToClipboard(referralLink, 'link')"
-                                        v-tooltip.top="'Copy Link'"
-                                    />
+                                    <InputText :value="referralLink" readonly class="w-full text-sm" />
+                                    <Button icon="pi pi-copy" severity="secondary"
+                                        @click="copyToClipboard(referralLink, 'link')" v-tooltip.top="'Copy Link'" />
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Share Buttons -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Share via</label>
+                            <label class="block mb-2 text-sm font-medium text-gray-700">Share via</label>
                             <div class="flex flex-wrap gap-2">
-                                <Button 
-                                    icon="pi pi-twitter" 
-                                    label="Twitter"
-                                    severity="info"
-                                    outlined
-                                    size="small"
-                                    @click="shareVia('twitter')"
-                                />
-                                <Button 
-                                    icon="pi pi-facebook" 
-                                    label="Facebook"
-                                    severity="info"
-                                    outlined
-                                    size="small"
-                                    @click="shareVia('facebook')"
-                                />
-                                <Button 
-                                    icon="pi pi-whatsapp" 
-                                    label="WhatsApp"
-                                    severity="success"
-                                    outlined
-                                    size="small"
-                                    @click="shareVia('whatsapp')"
-                                />
-                                <Button 
-                                    icon="pi pi-telegram" 
-                                    label="Telegram"
-                                    severity="info"
-                                    outlined
-                                    size="small"
-                                    @click="shareVia('telegram')"
-                                />
-                                <Button 
-                                    icon="pi pi-envelope" 
-                                    label="Email"
-                                    severity="secondary"
-                                    outlined
-                                    size="small"
-                                    @click="shareVia('email')"
-                                />
+                                <Button icon="pi pi-twitter" label="Twitter" severity="info" outlined size="small"
+                                    @click="shareVia('twitter')" />
+                                <Button icon="pi pi-facebook" label="Facebook" severity="info" outlined size="small"
+                                    @click="shareVia('facebook')" />
+                                <Button icon="pi pi-whatsapp" label="WhatsApp" severity="success" outlined size="small"
+                                    @click="shareVia('whatsapp')" />
+                                <Button icon="pi pi-telegram" label="Telegram" severity="info" outlined size="small"
+                                    @click="shareVia('telegram')" />
+                                <Button icon="pi pi-envelope" label="Email" severity="secondary" outlined size="small"
+                                    @click="shareVia('email')" />
                             </div>
                         </div>
                     </div>
                 </template>
             </Card>
-            
+
             <!-- Deposit Commission Levels -->
             <Card v-if="settings?.deposit_enabled && settings?.deposit_levels?.length" class="shadow-sm">
                 <template #title>
                     <div class="flex items-center gap-2">
-                        <i class="pi pi-download text-green-600"></i>
+                        <i class="text-green-600 pi pi-download"></i>
                         <span>Deposit Commission Levels</span>
-                        <Badge :value="`${maxReferralLevel} of ${settings.deposit_levels.length} Unlocked`" severity="success" />
+                        <Badge :value="`${maxReferralLevel} of ${settings.deposit_levels.length} Unlocked`"
+                            severity="success" />
                     </div>
                 </template>
                 <template #subtitle>
                     <span class="text-sm text-gray-500">Earn commission when your referrals make deposits</span>
                 </template>
                 <template #content>
-                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                        <div 
-                            v-for="level in settings.deposit_levels" 
-                            :key="level.level"
-                            :class="[
-                                'text-center p-4 rounded-lg border transition-all',
-                                level.unlocked 
-                                    ? 'border-green-200 bg-green-50' 
-                                    : 'border-gray-200 bg-gray-50 opacity-60'
-                            ]"
-                        >
+                    <div class="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
+                        <div v-for="level in settings.deposit_levels" :key="level.level" :class="[
+                            'text-center p-4 rounded-lg border transition-all',
+                            level.unlocked
+                                ? 'border-green-200 bg-green-50'
+                                : 'border-gray-200 bg-gray-50 opacity-60'
+                        ]">
                             <div :class="[
                                 'w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2',
                                 level.unlocked ? 'bg-green-100' : 'bg-gray-200'
                             ]">
-                                <i v-if="!level.unlocked" class="pi pi-lock text-gray-400"></i>
+                                <i v-if="!level.unlocked" class="text-gray-400 pi pi-lock"></i>
                                 <span v-else class="font-bold text-green-600">{{ level.level }}</span>
                             </div>
                             <p :class="['text-2xl font-bold', level.unlocked ? 'text-gray-900' : 'text-gray-400']">
                                 {{ level.commission }}%
                             </p>
                             <p class="text-xs text-gray-500">Level {{ level.level }}</p>
-                            <Tag 
-                                v-if="level.unlocked" 
-                                value="Active" 
-                                severity="success" 
-                                class="mt-2"
-                                size="small"
-                            />
-                            <Tag 
-                                v-else 
-                                value="Locked" 
-                                severity="secondary" 
-                                class="mt-2"
-                                size="small"
-                            />
+                            <Tag v-if="level.unlocked" value="Active" severity="success" class="mt-2" size="small" />
+                            <Tag v-else value="Locked" severity="secondary" class="mt-2" size="small" />
                         </div>
                     </div>
                 </template>
             </Card>
-            
+
             <!-- Payment Commission Levels -->
             <Card v-if="settings?.payment_enabled && settings?.payment_levels?.length" class="shadow-sm">
                 <template #title>
                     <div class="flex items-center gap-2">
-                        <i class="pi pi-credit-card text-purple-600"></i>
+                        <i class="text-purple-600 pi pi-credit-card"></i>
                         <span>Payment Commission Levels</span>
-                        <Badge :value="`${maxReferralLevel} of ${settings.payment_levels.length} Unlocked`" severity="info" />
+                        <Badge :value="`${maxReferralLevel} of ${settings.payment_levels.length} Unlocked`"
+                            severity="info" />
                     </div>
                 </template>
                 <template #subtitle>
                     <span class="text-sm text-gray-500">Earn commission when your referrals make payments</span>
                 </template>
                 <template #content>
-                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                        <div 
-                            v-for="level in settings.payment_levels" 
-                            :key="level.level"
-                            :class="[
-                                'text-center p-4 rounded-lg border transition-all',
-                                level.unlocked 
-                                    ? 'border-purple-200 bg-purple-50' 
-                                    : 'border-gray-200 bg-gray-50 opacity-60'
-                            ]"
-                        >
+                    <div class="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
+                        <div v-for="level in settings.payment_levels" :key="level.level" :class="[
+                            'text-center p-4 rounded-lg border transition-all',
+                            level.unlocked
+                                ? 'border-purple-200 bg-purple-50'
+                                : 'border-gray-200 bg-gray-50 opacity-60'
+                        ]">
                             <div :class="[
                                 'w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2',
                                 level.unlocked ? 'bg-purple-100' : 'bg-gray-200'
                             ]">
-                                <i v-if="!level.unlocked" class="pi pi-lock text-gray-400"></i>
+                                <i v-if="!level.unlocked" class="text-gray-400 pi pi-lock"></i>
                                 <span v-else class="font-bold text-purple-600">{{ level.level }}</span>
                             </div>
                             <p :class="['text-2xl font-bold', level.unlocked ? 'text-gray-900' : 'text-gray-400']">
                                 {{ level.commission }}%
                             </p>
                             <p class="text-xs text-gray-500">Level {{ level.level }}</p>
-                            <Tag 
-                                v-if="level.unlocked" 
-                                value="Active" 
-                                severity="info" 
-                                class="mt-2"
-                                size="small"
-                            />
-                            <Tag 
-                                v-else 
-                                value="Locked" 
-                                severity="secondary" 
-                                class="mt-2"
-                                size="small"
-                            />
+                            <Tag v-if="level.unlocked" value="Active" severity="info" class="mt-2" size="small" />
+                            <Tag v-else value="Locked" severity="secondary" class="mt-2" size="small" />
                         </div>
                     </div>
                 </template>
             </Card>
-            
+
             <!-- Commission Info -->
             <Message v-if="settings?.deposit_enabled || settings?.payment_enabled" severity="info" :closable="false">
                 <template #messageicon>
                     <i class="pi pi-info-circle"></i>
                 </template>
-                Higher ranks unlock more referral levels! Level 1 earns from direct referrals, Level 2 from their referrals, and so on.
+                Higher ranks unlock more referral levels! Level 1 earns from direct referrals, Level 2 from their
+                referrals, and
+                so on.
             </Message>
-            
+
             <!-- Referred By -->
             <Card v-if="referrer" class="shadow-sm">
                 <template #content>
                     <div class="flex items-center gap-4">
-                        <Avatar 
-                            :label="referrer.name?.charAt(0).toUpperCase()" 
-                            size="large"
-                            shape="circle"
-                            class="bg-primary-100 text-primary-700"
-                        />
+                        <Avatar :image="referrer.avatar" :label="referrer.name?.charAt(0).toUpperCase()" size="large"
+                            shape="circle" class="bg-primary-100 text-primary-700" />
                         <div>
                             <p class="text-sm text-gray-500">You were referred by</p>
                             <p class="font-medium text-gray-900">{{ referrer.name }}</p>
@@ -404,7 +330,7 @@ const getStatusSeverity = (status) => {
                     </div>
                 </template>
             </Card>
-            
+
             <!-- My Referrals Table -->
             <Card class="shadow-sm">
                 <template #title>
@@ -415,31 +341,21 @@ const getStatusSeverity = (status) => {
                     </div>
                 </template>
                 <template #content>
-                    <DataTable 
-                        :value="referrals || []"
-                        :paginator="referrals?.length > 10"
-                        :rows="10"
-                        dataKey="id"
-                        stripedRows
-                        responsiveLayout="scroll"
-                        class="p-datatable-sm"
-                    >
+                    <DataTable :value="referrals || []" :paginator="referrals?.length > 10" :rows="10" dataKey="id"
+                        stripedRows responsiveLayout="scroll" class="p-datatable-sm">
                         <template #empty>
-                            <div class="text-center py-12">
-                                <i class="pi pi-users text-4xl text-gray-300 mb-4"></i>
-                                <p class="text-gray-500 mb-2">No referrals yet</p>
+                            <div class="py-12 text-center">
+                                <i class="mb-4 text-4xl text-gray-300 pi pi-users"></i>
+                                <p class="mb-2 text-gray-500">No referrals yet</p>
                                 <p class="text-sm text-gray-400">Share your referral link to start earning!</p>
                             </div>
                         </template>
-                        
+
                         <Column header="User" style="min-width: 200px">
                             <template #body="{ data }">
                                 <div class="flex items-center gap-3">
-                                    <Avatar 
-                                        :label="data.name?.charAt(0).toUpperCase()" 
-                                        shape="circle"
-                                        class="bg-gray-100 text-gray-600"
-                                    />
+                                    <Avatar :image="data.avatar" :label="data.name?.charAt(0).toUpperCase()"
+                                        shape="circle" class="text-gray-600 bg-gray-100" />
                                     <div>
                                         <p class="font-medium text-gray-900">{{ data.name }}</p>
                                         <p class="text-xs text-gray-500">{{ data.email }}</p>
@@ -447,16 +363,14 @@ const getStatusSeverity = (status) => {
                                 </div>
                             </template>
                         </Column>
-                        
+
                         <Column field="status" header="Status" style="min-width: 120px">
                             <template #body="{ data }">
-                                <Tag 
-                                    :value="data.status === 'verified' ? 'Verified' : 'Pending'" 
-                                    :severity="getStatusSeverity(data.status)"
-                                />
+                                <Tag :value="data.status === 'verified' ? 'Verified' : 'Pending'"
+                                    :severity="getStatusSeverity(data.status)" />
                             </template>
                         </Column>
-                        
+
                         <Column field="joined_at" header="Joined" style="min-width: 150px">
                             <template #body="{ data }">
                                 <span class="text-sm text-gray-600">{{ data.joined_at_human }}</span>
@@ -465,7 +379,7 @@ const getStatusSeverity = (status) => {
                     </DataTable>
                 </template>
             </Card>
-            
+
             <!-- Referral Rewards History -->
             <Card v-if="referralRecords && referralRecords.length > 0" class="shadow-sm">
                 <template #title>
@@ -475,39 +389,32 @@ const getStatusSeverity = (status) => {
                             <span>Reward History</span>
                         </div>
                         <Link v-if="route().has('referrals.earnings')" :href="route('referrals.earnings')">
-                            <Button label="View All" icon="pi pi-arrow-right" iconPos="right" text size="small" />
+                        <Button label="View All" icon="pi pi-arrow-right" iconPos="right" text size="small" />
                         </Link>
                     </div>
                 </template>
                 <template #content>
-                    <DataTable 
-                        :value="referralRecords.slice(0, 5)"
-                        dataKey="id"
-                        stripedRows
-                        responsiveLayout="scroll"
-                        class="p-datatable-sm"
-                    >
+                    <DataTable :value="referralRecords.slice(0, 5)" dataKey="id" stripedRows responsiveLayout="scroll"
+                        class="p-datatable-sm">
                         <Column header="Referee" style="min-width: 150px">
                             <template #body="{ data }">
                                 <span class="font-medium">{{ data.referee_name }}</span>
                             </template>
                         </Column>
-                        
+
                         <Column field="reward_amount" header="Reward" style="min-width: 120px">
                             <template #body="{ data }">
                                 <span class="font-medium text-green-600">{{ formatCurrency(data.reward_amount) }}</span>
                             </template>
                         </Column>
-                        
+
                         <Column field="status" header="Status" style="min-width: 100px">
                             <template #body="{ data }">
-                                <Tag 
-                                    :value="data.status?.charAt(0).toUpperCase() + data.status?.slice(1)" 
-                                    :severity="getStatusSeverity(data.status)"
-                                />
+                                <Tag :value="data.status?.charAt(0).toUpperCase() + data.status?.slice(1)"
+                                    :severity="getStatusSeverity(data.status)" />
                             </template>
                         </Column>
-                        
+
                         <Column field="completed_at" header="Date" style="min-width: 130px">
                             <template #body="{ data }">
                                 <span class="text-sm text-gray-600">
@@ -518,7 +425,7 @@ const getStatusSeverity = (status) => {
                     </DataTable>
                 </template>
             </Card>
-            
+
             <!-- How It Works -->
             <Card class="shadow-sm">
                 <template #title>
@@ -528,28 +435,32 @@ const getStatusSeverity = (status) => {
                     </div>
                 </template>
                 <template #content>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
                         <div class="text-center">
-                            <div class="w-14 h-14 rounded-full bg-primary-100 flex items-center justify-center mx-auto mb-3">
+                            <div
+                                class="flex items-center justify-center mx-auto mb-3 rounded-full w-14 h-14 bg-primary-100">
                                 <span class="text-2xl font-bold text-primary-600">1</span>
                             </div>
-                            <h4 class="font-semibold text-gray-900 mb-1">Share Your Link</h4>
+                            <h4 class="mb-1 font-semibold text-gray-900">Share Your Link</h4>
                             <p class="text-sm text-gray-500">Share your unique referral link with friends and family</p>
                         </div>
-                        
+
                         <div class="text-center">
-                            <div class="w-14 h-14 rounded-full bg-primary-100 flex items-center justify-center mx-auto mb-3">
+                            <div
+                                class="flex items-center justify-center mx-auto mb-3 rounded-full w-14 h-14 bg-primary-100">
                                 <span class="text-2xl font-bold text-primary-600">2</span>
                             </div>
-                            <h4 class="font-semibold text-gray-900 mb-1">They Sign Up</h4>
-                            <p class="text-sm text-gray-500">When they register using your link, they become your referral</p>
+                            <h4 class="mb-1 font-semibold text-gray-900">They Sign Up</h4>
+                            <p class="text-sm text-gray-500">When they register using your link, they become your
+                                referral</p>
                         </div>
-                        
+
                         <div class="text-center">
-                            <div class="w-14 h-14 rounded-full bg-primary-100 flex items-center justify-center mx-auto mb-3">
+                            <div
+                                class="flex items-center justify-center mx-auto mb-3 rounded-full w-14 h-14 bg-primary-100">
                                 <span class="text-2xl font-bold text-primary-600">3</span>
                             </div>
-                            <h4 class="font-semibold text-gray-900 mb-1">Earn Rewards</h4>
+                            <h4 class="mb-1 font-semibold text-gray-900">Earn Rewards</h4>
                             <p class="text-sm text-gray-500">Earn commission when your referrals make deposits</p>
                         </div>
                     </div>

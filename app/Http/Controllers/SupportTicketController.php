@@ -18,18 +18,18 @@ class SupportTicketController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        
+
         // Build query with filters
         $query = $user->supportTickets()->latest();
-        
+
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-        
+
         if ($request->filled('priority')) {
             $query->where('priority', $request->priority);
         }
-        
+
         $tickets = $query->paginate(15)->through(fn($ticket) => [
             'id' => $ticket->id,
             'ticket_id' => $ticket->ticket_id,
@@ -41,18 +41,18 @@ class SupportTicketController extends Controller
             'created_at' => $ticket->created_at->toIso8601String(),
             'updated_at' => $ticket->updated_at->toIso8601String(),
         ]);
-        
+
         // Get categories
         $categories = SupportCategory::where('is_active', true)
             ->orderBy('name')
             ->pluck('name')
             ->toArray();
-        
+
         // Default categories if none exist
         if (empty($categories)) {
             $categories = ['General', 'Technical', 'Billing', 'Account', 'Other'];
         }
-        
+
         // Calculate stats
         $stats = [
             'total' => $user->supportTickets()->count(),
@@ -60,11 +60,11 @@ class SupportTicketController extends Controller
             'in_progress' => $user->supportTickets()->where('status', 'in_progress')->count(),
             'resolved' => $user->supportTickets()->whereIn('status', ['resolved', 'closed'])->count(),
         ];
-        
+
         $settings = [
             'currency_symbol' => Setting::get('currency_symbol', '$'),
         ];
-        
+
         return Inertia::render('SupportTickets/Index', [
             'tickets' => $tickets,
             'categories' => $categories,
@@ -86,11 +86,11 @@ class SupportTicketController extends Controller
             ->orderBy('name')
             ->pluck('name')
             ->toArray();
-        
+
         if (empty($categories)) {
             $categories = ['General', 'Technical', 'Billing', 'Account', 'Other'];
         }
-        
+
         return Inertia::render('SupportTickets/Create', [
             'categories' => $categories,
         ]);
@@ -107,7 +107,7 @@ class SupportTicketController extends Controller
             'priority' => 'required|in:low,medium,high,urgent',
             'message' => 'required|string|max:10000',
         ]);
-        
+
         $ticket = $request->user()->supportTickets()->create([
             'subject' => $validated['subject'],
             'category' => $validated['category'],
@@ -115,14 +115,14 @@ class SupportTicketController extends Controller
             'message' => $validated['message'],
             'status' => 'open',
         ]);
-        
+
         // Notify admins
         $this->notifyAdmins(
             'New Support Ticket',
             "User {$request->user()->name} created ticket #{$ticket->ticket_id}: {$validated['subject']}",
             "/admin/support-tickets/{$ticket->id}"
         );
-        
+
         return redirect()->route('support-tickets.show', $ticket->id)
             ->with('success', 'Support ticket created successfully. Our team will respond shortly.');
     }
@@ -136,7 +136,7 @@ class SupportTicketController extends Controller
         if ($supportTicket->user_id !== $request->user()->id) {
             abort(403, 'Unauthorized access to this ticket.');
         }
-        
+
         $ticket = [
             'id' => $supportTicket->id,
             'ticket_id' => $supportTicket->ticket_id,
@@ -150,14 +150,15 @@ class SupportTicketController extends Controller
             'user' => [
                 'id' => $supportTicket->user->id,
                 'name' => $supportTicket->user->name,
+                'avatar' => $supportTicket->user->getFilamentAvatarUrl(),
             ],
         ];
-        
+
         // Get ticket replies if the relationship exists
         $replies = [];
         if (method_exists($supportTicket, 'replies')) {
             $replies = $supportTicket->replies()
-                ->with('user:id,name')
+                ->with('user:id,name,email,avatar_url')
                 ->orderBy('created_at', 'asc')
                 ->get()
                 ->map(fn($reply) => [
@@ -168,14 +169,15 @@ class SupportTicketController extends Controller
                     'user' => $reply->user ? [
                         'id' => $reply->user->id,
                         'name' => $reply->user->name,
+                        'avatar' => $reply->user->getFilamentAvatarUrl(),
                     ] : null,
                 ]);
         }
-        
+
         $settings = [
             'currency_symbol' => Setting::get('currency_symbol', '$'),
         ];
-        
+
         return Inertia::render('SupportTickets/Show', [
             'ticket' => $ticket,
             'replies' => $replies,
@@ -192,16 +194,16 @@ class SupportTicketController extends Controller
         if ($supportTicket->user_id !== $request->user()->id) {
             abort(403, 'Unauthorized access to this ticket.');
         }
-        
+
         // Ensure ticket is not closed
         if ($supportTicket->status === 'closed') {
             return back()->withErrors(['message' => 'Cannot reply to a closed ticket.']);
         }
-        
+
         $validated = $request->validate([
             'message' => 'required|string|max:10000',
         ]);
-        
+
         // Create reply if the relationship exists
         if (method_exists($supportTicket, 'replies')) {
             $supportTicket->replies()->create([
@@ -210,19 +212,19 @@ class SupportTicketController extends Controller
                 'is_admin' => false,
             ]);
         }
-        
+
         // Update ticket status to pending (waiting for support response)
         $supportTicket->update([
             'status' => 'pending',
         ]);
-        
+
         // Notify admins
         $this->notifyAdmins(
             'New Ticket Reply',
             "User {$request->user()->name} replied to ticket #{$supportTicket->ticket_id}",
             "/admin/support-tickets/{$supportTicket->id}"
         );
-        
+
         return back()->with('success', 'Reply sent successfully.');
     }
 
@@ -235,11 +237,11 @@ class SupportTicketController extends Controller
         if ($supportTicket->user_id !== $request->user()->id) {
             abort(403, 'Unauthorized access to this ticket.');
         }
-        
+
         $supportTicket->update([
             'status' => 'closed',
         ]);
-        
+
         return back()->with('success', 'Ticket closed successfully.');
     }
 
@@ -252,18 +254,18 @@ class SupportTicketController extends Controller
         if ($supportTicket->user_id !== $request->user()->id) {
             abort(403, 'Unauthorized access to this ticket.');
         }
-        
+
         $supportTicket->update([
             'status' => 'open',
         ]);
-        
+
         // Notify admins
         $this->notifyAdmins(
             'Ticket Reopened',
             "User {$request->user()->name} reopened ticket #{$supportTicket->ticket_id}",
             "/admin/support-tickets/{$supportTicket->id}"
         );
-        
+
         return back()->with('success', 'Ticket reopened successfully.');
     }
 
@@ -276,9 +278,9 @@ class SupportTicketController extends Controller
         if ($supportTicket->user_id !== $request->user()->id) {
             abort(403, 'Unauthorized access to this ticket.');
         }
-        
+
         $supportTicket->delete();
-        
+
         return redirect()->route('support-tickets.index')
             ->with('success', 'Ticket deleted successfully.');
     }
@@ -292,7 +294,7 @@ class SupportTicketController extends Controller
             $admins = User::whereHas('roles', function ($query) {
                 $query->whereIn('name', ['super_admin', 'admin']);
             })->get();
-            
+
             foreach ($admins as $admin) {
                 $admin->notify(new AdminAlert($title, $message, $url));
             }

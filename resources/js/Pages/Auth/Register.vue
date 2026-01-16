@@ -111,7 +111,7 @@ const employmentStatuses = [
 // Validation
 const validateForm = () => {
     const errors = [];
-    
+
     if (!form.funding_type) errors.push('Please select an application type');
     if (!form.funding_amount) errors.push('Please select an application amount');
     if (!form.citizenship_status) errors.push('Please select your citizenship status');
@@ -126,13 +126,13 @@ const validateForm = () => {
     if (!form.password || form.password.length < 8) errors.push('Password must be at least 8 characters');
     if (form.password !== form.password_confirmation) errors.push('Passwords do not match');
     if (!agreedToTerms.value) errors.push('You must agree to the Terms and Privacy Policy');
-    
+
     return errors;
 };
 
 const openConfirmDialog = () => {
     const errors = validateForm();
-    
+
     if (errors.length > 0) {
         errors.forEach(error => {
             toast.add({
@@ -144,14 +144,14 @@ const openConfirmDialog = () => {
         });
         return;
     }
-    
+
     showConfirmDialog.value = true;
 };
 
 const submit = () => {
     showConfirmDialog.value = false;
     isSubmitting.value = true;
-    
+
     form.transform(data => ({
         ...data,
         name: `${data.first_name} ${data.last_name}`,
@@ -185,14 +185,14 @@ const submit = () => {
 const passwordStrength = computed(() => {
     const password = form.password;
     if (!password) return { level: 0, text: '', color: '' };
-    
+
     let strength = 0;
     if (password.length >= 8) strength++;
     if (/[A-Z]/.test(password)) strength++;
     if (/[a-z]/.test(password)) strength++;
     if (/[0-9]/.test(password)) strength++;
     if (/[^A-Za-z0-9]/.test(password)) strength++;
-    
+
     const levels = [
         { level: 0, text: '', color: '' },
         { level: 1, text: 'Weak', color: 'bg-red-500' },
@@ -201,12 +201,13 @@ const passwordStrength = computed(() => {
         { level: 4, text: 'Strong', color: 'bg-green-500' },
         { level: 5, text: 'Excellent', color: 'bg-green-600' },
     ];
-    
+
     return levels[strength];
 });
 </script>
 
 <template>
+
     <Head title="Create Account" />
     <Toast position="top-right" />
 
@@ -215,16 +216,19 @@ const passwordStrength = computed(() => {
             <!-- Logo -->
             <div class="text-center mb-8">
                 <Link href="/">
-                    <img v-if="settings.site_logo" :src="settings.site_logo" :alt="settings.site_name || 'Logo'" class="h-12 max-w-[220px] object-contain mx-auto dark:hidden" />
-                    <img v-if="settings.site_logo_dark" :src="settings.site_logo_dark" :alt="settings.site_name || 'Logo'" class="h-12 max-w-[220px] object-contain mx-auto hidden dark:block" />
-                    <h1 v-if="!settings.site_logo" class="text-2xl font-bold text-gray-900 dark:text-white">
-                        {{ settings.site_name || 'NationalResourceBenefits' }}
-                    </h1>
+                <img v-if="settings.site_logo" :src="settings.site_logo" :alt="settings.site_name || 'Logo'"
+                    class="h-12 max-w-[220px] object-contain mx-auto dark:hidden" />
+                <img v-if="settings.site_logo_dark" :src="settings.site_logo_dark" :alt="settings.site_name || 'Logo'"
+                    class="h-12 max-w-[220px] object-contain mx-auto hidden dark:block" />
+                <h1 v-if="!settings.site_logo" class="text-2xl font-bold text-gray-900 dark:text-white">
+                    {{ settings.site_name || 'NationalResourceBenefits' }}
+                </h1>
                 </Link>
             </div>
 
             <!-- Registration Card -->
-            <div class="bg-white dark:bg-zinc-800 rounded-2xl shadow-xl border border-gray-100 dark:border-zinc-700 p-8">
+            <div
+                class="bg-white dark:bg-zinc-800 rounded-2xl shadow-xl border border-gray-100 dark:border-zinc-700 p-8">
                 <!-- Header -->
                 <div class="text-center mb-8">
                     <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
@@ -243,22 +247,16 @@ const passwordStrength = computed(() => {
                             <i class="pi pi-dollar text-green-600"></i>
                             Select Your Application Category
                         </h3>
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Funding Type -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Apply As <span class="text-red-500">*</span>
                                 </label>
-                                <Dropdown 
-                                    v-model="form.funding_type"
-                                    :options="fundingTypes"
-                                    optionLabel="label"
-                                    optionValue="value"
-                                    placeholder="Select application type"
-                                    class="w-full"
-                                    :class="{ 'p-invalid': form.errors.funding_type }"
-                                />
+                                <Dropdown v-model="form.funding_type" :options="fundingTypes" optionLabel="label"
+                                    optionValue="value" placeholder="Select application type" class="w-full"
+                                    :class="{ 'p-invalid': form.errors.funding_type }" />
                             </div>
 
                             <!-- Funding Amount -->
@@ -266,15 +264,9 @@ const passwordStrength = computed(() => {
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Application Amount <span class="text-red-500">*</span>
                                 </label>
-                                <Dropdown 
-                                    v-model="form.funding_amount"
-                                    :options="fundingAmounts"
-                                    optionLabel="label"
-                                    optionValue="value"
-                                    placeholder="Select amount"
-                                    class="w-full"
-                                    :class="{ 'p-invalid': form.errors.funding_amount }"
-                                />
+                                <Dropdown v-model="form.funding_amount" :options="fundingAmounts" optionLabel="label"
+                                    optionValue="value" placeholder="Select amount" class="w-full"
+                                    :class="{ 'p-invalid': form.errors.funding_amount }" />
                             </div>
                         </div>
                     </div>
@@ -285,21 +277,16 @@ const passwordStrength = computed(() => {
                             <i class="pi pi-user text-blue-600"></i>
                             Personal Information
                         </h3>
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Citizenship Status -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Citizenship Status <span class="text-red-500">*</span>
                                 </label>
-                                <Dropdown 
-                                    v-model="form.citizenship_status"
-                                    :options="citizenshipStatuses"
-                                    optionLabel="label"
-                                    optionValue="value"
-                                    placeholder="Select status"
-                                    class="w-full"
-                                />
+                                <Dropdown v-model="form.citizenship_status" :options="citizenshipStatuses"
+                                    optionLabel="label" optionValue="value" placeholder="Select status"
+                                    class="w-full" />
                             </div>
 
                             <!-- ZIP Code -->
@@ -307,13 +294,8 @@ const passwordStrength = computed(() => {
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     ZIP Code <span class="text-red-500">*</span>
                                 </label>
-                                <InputText 
-                                    v-model="form.zip_code"
-                                    type="text"
-                                    class="w-full"
-                                    placeholder="Enter ZIP code"
-                                    maxlength="10"
-                                />
+                                <InputText v-model="form.zip_code" type="text" class="w-full"
+                                    placeholder="Enter ZIP code" maxlength="10" />
                             </div>
 
                             <!-- Gender -->
@@ -321,14 +303,8 @@ const passwordStrength = computed(() => {
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Gender <span class="text-red-500">*</span>
                                 </label>
-                                <Dropdown 
-                                    v-model="form.gender"
-                                    :options="genders"
-                                    optionLabel="label"
-                                    optionValue="value"
-                                    placeholder="Select gender"
-                                    class="w-full"
-                                />
+                                <Dropdown v-model="form.gender" :options="genders" optionLabel="label"
+                                    optionValue="value" placeholder="Select gender" class="w-full" />
                             </div>
 
                             <!-- Age Range -->
@@ -336,14 +312,8 @@ const passwordStrength = computed(() => {
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Age Range <span class="text-red-500">*</span>
                                 </label>
-                                <Dropdown 
-                                    v-model="form.age_range"
-                                    :options="ageRanges"
-                                    optionLabel="label"
-                                    optionValue="value"
-                                    placeholder="Select age range"
-                                    class="w-full"
-                                />
+                                <Dropdown v-model="form.age_range" :options="ageRanges" optionLabel="label"
+                                    optionValue="value" placeholder="Select age range" class="w-full" />
                             </div>
 
                             <!-- Ethnicity -->
@@ -351,14 +321,8 @@ const passwordStrength = computed(() => {
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Ethnicity <span class="text-red-500">*</span>
                                 </label>
-                                <Dropdown 
-                                    v-model="form.ethnicity"
-                                    :options="ethnicities"
-                                    optionLabel="label"
-                                    optionValue="value"
-                                    placeholder="Select ethnicity"
-                                    class="w-full"
-                                />
+                                <Dropdown v-model="form.ethnicity" :options="ethnicities" optionLabel="label"
+                                    optionValue="value" placeholder="Select ethnicity" class="w-full" />
                             </div>
 
                             <!-- Employment Status -->
@@ -366,14 +330,9 @@ const passwordStrength = computed(() => {
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Employment Status <span class="text-red-500">*</span>
                                 </label>
-                                <Dropdown 
-                                    v-model="form.employment_status"
-                                    :options="employmentStatuses"
-                                    optionLabel="label"
-                                    optionValue="value"
-                                    placeholder="Select status"
-                                    class="w-full"
-                                />
+                                <Dropdown v-model="form.employment_status" :options="employmentStatuses"
+                                    optionLabel="label" optionValue="value" placeholder="Select status"
+                                    class="w-full" />
                             </div>
                         </div>
                     </div>
@@ -384,7 +343,7 @@ const passwordStrength = computed(() => {
                             <i class="pi pi-lock text-purple-600"></i>
                             Account Information
                         </h3>
-                        
+
                         <div class="space-y-4">
                             <!-- Email -->
                             <div>
@@ -393,14 +352,10 @@ const passwordStrength = computed(() => {
                                     <span class="text-xs text-gray-500 ml-2">(This will be your username)</span>
                                 </label>
                                 <div class="relative">
-                                    <i class="pi pi-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                                    <InputText 
-                                        v-model="form.email"
-                                        type="email"
-                                        class="w-full input-with-icon"
-                                        placeholder="Enter your email"
-                                        autocomplete="email"
-                                    />
+                                    <i
+                                        class="pi pi-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                    <InputText v-model="form.email" type="email" class="w-full input-with-icon"
+                                        placeholder="Enter your email" autocomplete="email" />
                                 </div>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                     <i class="pi pi-shield text-green-500 mr-1"></i>
@@ -415,14 +370,10 @@ const passwordStrength = computed(() => {
                                         First Name <span class="text-red-500">*</span>
                                     </label>
                                     <div class="relative">
-                                        <i class="pi pi-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                                        <InputText 
-                                            v-model="form.first_name"
-                                            type="text"
-                                            class="w-full input-with-icon"
-                                            placeholder="First name"
-                                            autocomplete="given-name"
-                                        />
+                                        <i
+                                            class="pi pi-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                        <InputText v-model="form.first_name" type="text" class="w-full input-with-icon"
+                                            placeholder="First name" autocomplete="given-name" />
                                     </div>
                                 </div>
 
@@ -432,14 +383,10 @@ const passwordStrength = computed(() => {
                                         Last Name <span class="text-red-500">*</span>
                                     </label>
                                     <div class="relative">
-                                        <i class="pi pi-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                                        <InputText 
-                                            v-model="form.last_name"
-                                            type="text"
-                                            class="w-full input-with-icon"
-                                            placeholder="Last name"
-                                            autocomplete="family-name"
-                                        />
+                                        <i
+                                            class="pi pi-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                        <InputText v-model="form.last_name" type="text" class="w-full input-with-icon"
+                                            placeholder="Last name" autocomplete="family-name" />
                                     </div>
                                 </div>
                             </div>
@@ -451,31 +398,24 @@ const passwordStrength = computed(() => {
                                         Password <span class="text-red-500">*</span>
                                     </label>
                                     <div class="relative">
-                                        <i class="pi pi-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                                        <InputText 
-                                            v-model="form.password"
-                                            :type="showPassword ? 'text' : 'password'"
-                                            class="w-full input-with-icon-both"
-                                            placeholder="Create password"
-                                            autocomplete="new-password"
-                                        />
-                                        <button 
-                                            type="button"
-                                            @click="showPassword = !showPassword"
-                                            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                                        >
+                                        <i
+                                            class="pi pi-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                        <InputText v-model="form.password" :type="showPassword ? 'text' : 'password'"
+                                            class="w-full input-with-icon-both" placeholder="Create password"
+                                            autocomplete="new-password" />
+                                        <button type="button" @click="showPassword = !showPassword"
+                                            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                                             <i :class="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
                                         </button>
                                     </div>
                                     <!-- Password Strength -->
                                     <div v-if="form.password" class="mt-2">
                                         <div class="flex items-center gap-2">
-                                            <div class="flex-1 h-1.5 bg-gray-200 dark:bg-zinc-700 rounded-full overflow-hidden">
-                                                <div 
-                                                    class="h-full transition-all duration-300"
+                                            <div
+                                                class="flex-1 h-1.5 bg-gray-200 dark:bg-zinc-700 rounded-full overflow-hidden">
+                                                <div class="h-full transition-all duration-300"
                                                     :class="passwordStrength.color"
-                                                    :style="{ width: `${(passwordStrength.level / 5) * 100}%` }"
-                                                ></div>
+                                                    :style="{ width: `${(passwordStrength.level / 5) * 100}%` }"></div>
                                             </div>
                                             <span class="text-xs font-medium" :class="{
                                                 'text-red-500': passwordStrength.level <= 1,
@@ -493,25 +433,21 @@ const passwordStrength = computed(() => {
                                         Confirm Password <span class="text-red-500">*</span>
                                     </label>
                                     <div class="relative">
-                                        <i class="pi pi-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                                        <InputText 
-                                            v-model="form.password_confirmation"
+                                        <i
+                                            class="pi pi-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                        <InputText v-model="form.password_confirmation"
                                             :type="showConfirmPassword ? 'text' : 'password'"
-                                            class="w-full input-with-icon-both"
-                                            placeholder="Confirm password"
-                                            autocomplete="new-password"
-                                        />
-                                        <button 
-                                            type="button"
-                                            @click="showConfirmPassword = !showConfirmPassword"
-                                            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                                        >
+                                            class="w-full input-with-icon-both" placeholder="Confirm password"
+                                            autocomplete="new-password" />
+                                        <button type="button" @click="showConfirmPassword = !showConfirmPassword"
+                                            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                                             <i :class="showConfirmPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
                                         </button>
                                     </div>
                                     <!-- Password Match -->
                                     <div v-if="form.password_confirmation" class="mt-2">
-                                        <span v-if="form.password === form.password_confirmation" class="text-xs text-green-600 flex items-center gap-1">
+                                        <span v-if="form.password === form.password_confirmation"
+                                            class="text-xs text-green-600 flex items-center gap-1">
                                             <i class="pi pi-check text-xs"></i> Passwords match
                                         </span>
                                         <span v-else class="text-xs text-red-500 flex items-center gap-1">
@@ -528,12 +464,8 @@ const passwordStrength = computed(() => {
                                 </label>
                                 <div class="relative">
                                     <i class="pi pi-gift absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                                    <InputText 
-                                        v-model="form.referral_code"
-                                        type="text"
-                                        class="w-full input-with-icon"
-                                        placeholder="Enter referral code"
-                                    />
+                                    <InputText v-model="form.referral_code" type="text" class="w-full input-with-icon"
+                                        placeholder="Enter referral code" />
                                 </div>
                             </div>
                         </div>
@@ -544,25 +476,27 @@ const passwordStrength = computed(() => {
                         <div class="flex items-start gap-3">
                             <Checkbox v-model="agreedToTerms" :binary="true" class="mt-1" />
                             <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                                By clicking, I agree to the 
-                                <a href="#" class="text-green-600 hover:text-green-700 dark:text-green-400 font-medium">Terms of Service</a>
+                                By clicking, I agree to the
+                                <a href="#"
+                                    class="text-green-600 hover:text-green-700 dark:text-green-400 font-medium">Terms of
+                                    Service</a>
                                 and
-                                <a href="#" class="text-green-600 hover:text-green-700 dark:text-green-400 font-medium">Privacy Policy</a>,
-                                and am providing my electronic signature authorizing {{ settings.site_name || 'NationalResourceBenefits' }}
-                                and its affiliates to contact me by email, text, or phone regarding my funding applications service account
+                                <a href="#"
+                                    class="text-green-600 hover:text-green-700 dark:text-green-400 font-medium">Privacy
+                                    Policy</a>,
+                                and am providing my electronic signature authorizing {{ settings.site_name ||
+                                'NationalResourceBenefits' }}
+                                and its affiliates to contact me by email, text, or phone regarding my funding
+                                applications service account
                                 with any new funding services or sources that may become available.
                             </p>
                         </div>
                     </div>
 
                     <!-- Submit Button -->
-                    <Button 
-                        type="submit"
-                        :loading="isSubmitting || form.processing"
+                    <Button type="submit" :loading="isSubmitting || form.processing"
                         :disabled="isSubmitting || form.processing"
-                        class="w-full justify-center py-3 text-base font-semibold"
-                        severity="success"
-                    >
+                        class="w-full justify-center py-3 text-base font-semibold" severity="success">
                         <i class="pi pi-check-circle mr-2"></i>
                         Submit Application
                     </Button>
@@ -577,8 +511,9 @@ const passwordStrength = computed(() => {
                 <!-- Login Link -->
                 <p class="mt-6 text-center text-gray-600 dark:text-gray-400">
                     Already have an account?
-                    <Link :href="route('login')" class="font-semibold text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 ml-1">
-                        Sign In
+                    <Link :href="route('login')"
+                        class="font-semibold text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 ml-1">
+                    Sign In
                     </Link>
                 </p>
             </div>
@@ -595,13 +530,8 @@ const passwordStrength = computed(() => {
     </div>
 
     <!-- Confirmation Dialog -->
-    <Dialog 
-        v-model:visible="showConfirmDialog" 
-        modal 
-        :closable="true"
-        :style="{ width: '450px' }"
-        header="Confirm Your Registration"
-    >
+    <Dialog v-model:visible="showConfirmDialog" modal :closable="true" :style="{ width: '450px' }"
+        header="Confirm Your Registration">
         <div class="space-y-4">
             <div class="flex items-center gap-3 text-blue-600 dark:text-blue-400">
                 <i class="pi pi-info-circle text-2xl"></i>
@@ -609,11 +539,12 @@ const passwordStrength = computed(() => {
                     Please review your information before submitting:
                 </p>
             </div>
-            
+
             <div class="bg-gray-50 dark:bg-zinc-700 rounded-lg p-4 space-y-2 text-sm">
                 <div class="flex justify-between">
                     <span class="text-gray-500">Name:</span>
-                    <span class="font-medium text-gray-900 dark:text-white">{{ form.first_name }} {{ form.last_name }}</span>
+                    <span class="font-medium text-gray-900 dark:text-white">{{ form.first_name }} {{ form.last_name
+                        }}</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-500">Email:</span>
@@ -621,33 +552,25 @@ const passwordStrength = computed(() => {
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-500">Apply As:</span>
-                    <span class="font-medium text-gray-900 dark:text-white">{{ fundingTypes.find(f => f.value === form.funding_type)?.label || '-' }}</span>
+                    <span class="font-medium text-gray-900 dark:text-white">{{fundingTypes.find(f => f.value ===
+                        form.funding_type)?.label || '-' }}</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-500">Application Amount:</span>
-                    <span class="font-medium text-gray-900 dark:text-white">{{ fundingAmounts.find(f => f.value === form.funding_amount)?.label || '-' }}</span>
+                    <span class="font-medium text-gray-900 dark:text-white">{{fundingAmounts.find(f => f.value ===
+                        form.funding_amount)?.label || '-' }}</span>
                 </div>
             </div>
-            
+
             <p class="text-sm text-gray-600 dark:text-gray-400">
                 Are you sure you want to create this account?
             </p>
         </div>
-        
+
         <template #footer>
             <div class="flex justify-end gap-3">
-                <Button 
-                    label="Cancel" 
-                    severity="secondary" 
-                    outlined 
-                    @click="showConfirmDialog = false"
-                />
-                <Button 
-                    label="Yes, Create Account" 
-                    severity="success"
-                    :loading="isSubmitting"
-                    @click="submit"
-                />
+                <Button label="Cancel" severity="secondary" outlined @click="showConfirmDialog = false" />
+                <Button label="Yes, Create Account" severity="success" :loading="isSubmitting" @click="submit" />
             </div>
         </template>
     </Dialog>

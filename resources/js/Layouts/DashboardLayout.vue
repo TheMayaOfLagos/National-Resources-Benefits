@@ -759,23 +759,25 @@ defineExpose({ formatCurrency });
             </header>
 
             <!-- Page Content -->
-            <main class="p-4 md:p-6 pb-24 md:pb-6">
-                <!-- Flash Messages -->
-                <div v-if="$page.props.flash?.success" class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg text-green-800 dark:text-green-200">
-                    <i class="pi pi-check-circle mr-2"></i>
-                    {{ $page.props.flash.success }}
-                </div>
-                <div v-if="$page.props.flash?.error" class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-800 dark:text-red-200">
-                    <i class="pi pi-times-circle mr-2"></i>
-                    {{ $page.props.flash.error }}
-                </div>
-                <div v-if="$page.props.flash?.warning" class="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-lg text-yellow-800 dark:text-yellow-200">
-                    <i class="pi pi-exclamation-triangle mr-2"></i>
-                    {{ $page.props.flash.warning }}
-                </div>
+            <main class="p-4 md:p-6 lg:p-8 pb-24 md:pb-6">
+                <div class="max-w-7xl mx-auto">
+                    <!-- Flash Messages -->
+                    <div v-if="$page.props.flash?.success" class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg text-green-800 dark:text-green-200">
+                        <i class="pi pi-check-circle mr-2"></i>
+                        {{ $page.props.flash.success }}
+                    </div>
+                    <div v-if="$page.props.flash?.error" class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-800 dark:text-red-200">
+                        <i class="pi pi-times-circle mr-2"></i>
+                        {{ $page.props.flash.error }}
+                    </div>
+                    <div v-if="$page.props.flash?.warning" class="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-lg text-yellow-800 dark:text-yellow-200">
+                        <i class="pi pi-exclamation-triangle mr-2"></i>
+                        {{ $page.props.flash.warning }}
+                    </div>
 
-                <!-- Main Slot -->
-                <slot />
+                    <!-- Main Slot -->
+                    <slot />
+                </div>
             </main>
         </div>
 

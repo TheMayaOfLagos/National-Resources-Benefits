@@ -4,6 +4,12 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
+use BaconQrCode\Renderer\Color\Rgb;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\Fill;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -19,6 +25,21 @@ class TwoFactorController extends Controller
     public function __construct()
     {
         $this->google2fa = new Google2FA();
+    }
+
+    /**
+     * Generate a QR code SVG from the given URL.
+     */
+    protected function generateQrCodeSvg(string $url): string
+    {
+        $renderer = new ImageRenderer(
+            new RendererStyle(200, 0, null, null, Fill::uniformColor(new Rgb(255, 255, 255), new Rgb(0, 0, 0))),
+            new SvgImageBackEnd()
+        );
+
+        $writer = new Writer($renderer);
+
+        return $writer->writeString($url);
     }
 
     /**
@@ -119,7 +140,7 @@ class TwoFactorController extends Controller
             $secret = decrypt($user->two_factor_secret);
         }
 
-        // Generate QR code URL
+        // Generate QR code URL (otpauth:// format)
         $siteName = Setting::get('site_name', 'NationalResourceBenefits');
         $qrCodeUrl = $this->google2fa->getQRCodeUrl(
             $siteName,
@@ -127,9 +148,12 @@ class TwoFactorController extends Controller
             $secret
         );
 
+        // Generate actual QR code SVG
+        $qrCodeSvg = $this->generateQrCodeSvg($qrCodeUrl);
+
         return back()->with([
             'secret' => $secret,
-            'qr_code_url' => $qrCodeUrl,
+            'qr_code_svg' => $qrCodeSvg,
         ]);
     }
 

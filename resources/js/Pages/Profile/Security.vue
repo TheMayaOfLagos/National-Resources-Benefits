@@ -75,7 +75,7 @@ const enableTwoFactor = () => {
     enableTwoFactorForm.post(route('auth.two-factor.enable'), {
         preserveScroll: true,
         onSuccess: (response) => {
-            twoFactorQrCode.value = response.props.flash?.qr_code_url;
+            twoFactorQrCode.value = response.props.flash?.qr_code_svg;
             twoFactorSecret.value = response.props.flash?.secret;
             showEnableTwoFactorDialog.value = false;
             showConfirmTwoFactorDialog.value = true;

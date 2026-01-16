@@ -80,12 +80,10 @@ class UserResource extends Resource
                                 Components\Actions::make([
                                     Components\Actions\Action::make('notify')
                                         ->icon('heroicon-o-bell')
-                                        ->iconButton()
+                                        ->button()
+                                        ->label('')
                                         ->color('warning')
                                         ->tooltip('Notify User')
-                                        ->extraAttributes([
-                                            'class' => 'bg-warning-500 hover:bg-warning-600 text-white rounded-full',
-                                        ])
                                         ->modalWidth('md')
                                         ->form([
                                             Forms\Components\Select::make('notify_type')
@@ -124,12 +122,10 @@ class UserResource extends Resource
 
                                     Components\Actions\Action::make('manage_funds')
                                         ->icon('heroicon-o-wallet')
-                                        ->iconButton()
+                                        ->button()
+                                        ->label('')
                                         ->color('success')
                                         ->tooltip('Manage Funds')
-                                        ->extraAttributes([
-                                            'class' => 'bg-success-500 hover:bg-success-600 text-white rounded-full',
-                                        ])
                                         ->modalWidth('md')
                                         ->form([
                                             Forms\Components\Select::make('account_id')
@@ -194,23 +190,19 @@ class UserResource extends Resource
 
                                     Components\Actions\Action::make('login_as')
                                         ->icon('heroicon-o-user')
-                                        ->iconButton()
+                                        ->button()
+                                        ->label('')
                                         ->color('gray')
                                         ->tooltip('Login as User')
-                                        ->extraAttributes([
-                                            'class' => 'bg-gray-500 hover:bg-gray-600 text-white rounded-full',
-                                        ])
                                         ->url(fn (User $record) => route('admin.impersonate', $record))
                                         ->openUrlInNewTab(),
 
                                     Components\Actions\Action::make('transfer_codes')
                                         ->icon('heroicon-o-key')
-                                        ->iconButton()
+                                        ->button()
+                                        ->label('')
                                         ->color('primary')
                                         ->tooltip('Manage Transfer Codes')
-                                        ->extraAttributes([
-                                            'class' => 'bg-primary-500 hover:bg-primary-600 text-white rounded-full',
-                                        ])
                                         ->modalWidth('md')
                                         ->fillForm(fn (User $record) => [
                                             'imf_code' => $record->imf_code,
@@ -232,12 +224,10 @@ class UserResource extends Resource
 
                                     Components\Actions\Action::make('withdrawal_control')
                                         ->icon('heroicon-o-no-symbol')
-                                        ->iconButton()
+                                        ->button()
+                                        ->label('')
                                         ->color('info')
                                         ->tooltip('Withdrawal Control')
-                                        ->extraAttributes([
-                                            'class' => 'bg-info-500 hover:bg-info-600 text-white rounded-full',
-                                        ])
                                         ->modalWidth('md')
                                         ->fillForm(fn (User $record) => [
                                             'withdrawal_status' => $record->withdrawal_status,

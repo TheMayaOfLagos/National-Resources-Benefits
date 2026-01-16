@@ -16,6 +16,7 @@ const props = defineProps({
 const toast = useToast();
 const page = usePage();
 const settings = computed(() => page.props.settings || {});
+const features = computed(() => page.props.features || {});
 
 // Form state
 const form = useForm({
@@ -457,8 +458,8 @@ const passwordStrength = computed(() => {
                                 </div>
                             </div>
 
-                            <!-- Referral Code (Optional) -->
-                            <div>
+                            <!-- Referral Code (Optional) - Only show if referrals feature is enabled -->
+                            <div v-if="features.referrals !== false">
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Referral Code <span class="text-gray-400 font-normal">(Optional)</span>
                                 </label>

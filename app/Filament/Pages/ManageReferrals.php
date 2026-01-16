@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Models\ReferralSetting;
+use App\Models\Setting;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
@@ -25,6 +26,11 @@ class ManageReferrals extends Page implements HasForms
     protected ?string $subheading = 'Easily manage and customize referral rewards, levels, and settings below.';
     protected static string $view = 'filament.pages.manage-referrals';
     protected static ?int $navigationSort = 4; // After the Resource
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return (bool) Setting::get('feature_referrals', true);
+    }
 
     public ?array $data = [];
 

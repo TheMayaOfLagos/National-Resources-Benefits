@@ -26,6 +26,7 @@ const props = defineProps({
 
 const page = usePage();
 const settings = computed(() => page.props.settings || {});
+const features = computed(() => page.props.features || {});
 const toast = useToast();
 const copied = ref(false);
 
@@ -123,7 +124,7 @@ const getRankClasses = computed(() => {
 
             <!-- Referral Card (if enabled) -->
             <div 
-                v-if="settings.referral_enabled && user?.referral_code" 
+                v-if="features.referrals !== false && user?.referral_code" 
                 class="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl p-6 text-white"
             >
                 <div class="flex items-start justify-between">

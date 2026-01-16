@@ -451,7 +451,7 @@ defineExpose({ formatCurrency });
                 <img v-else-if="settings.site_logo" :src="settings.site_logo" :alt="settings.site_name"
                     class="h-10 max-w-[180px] object-contain" />
                 <span v-else class="text-xl font-bold text-primary-600 dark:text-primary-400">{{ settings.site_name
-                    }}</span>
+                }}</span>
                 </Link>
             </div>
 
@@ -524,7 +524,7 @@ defineExpose({ formatCurrency });
                     <img v-else-if="settings.site_logo" :src="settings.site_logo" :alt="settings.site_name"
                         class="h-8" />
                     <span v-else class="text-lg font-bold text-primary-600 dark:text-primary-400">{{ settings.site_name
-                        }}</span>
+                    }}</span>
                 </div>
             </template>
 
@@ -631,7 +631,7 @@ defineExpose({ formatCurrency });
                             class="h-8" />
                         <span v-else class="text-lg font-bold text-primary-600 dark:text-primary-400">{{
                             settings.site_name
-                            }}</span>
+                        }}</span>
                         </Link>
                     </div>
 
@@ -704,7 +704,7 @@ defineExpose({ formatCurrency });
                                                 </div>
                                                 <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mt-0.5">
                                                     {{
-                                                    notification.message }}</p>
+                                                        notification.message }}</p>
                                                 <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{
                                                     notification.created_at_human }}</p>
                                             </div>

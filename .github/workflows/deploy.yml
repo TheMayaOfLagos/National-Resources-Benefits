@@ -9,29 +9,29 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
-      
+          node-version: "20"
+          cache: "npm"
+
       - name: Install NPM dependencies
         run: npm ci
-      
+
       - name: Build assets
         run: npm run build
-      
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: "8.4"
           extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql
-      
+
       - name: Get Composer Cache Directory
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
@@ -40,12 +40,15 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-      
+          key: ${{ runner.os }}-composer-v2-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-v2-
+
+      - name: Clear Composer cache for corrupted packages
+        run: composer clear-cache
+
       - name: Install Composer dependencies
         run: composer install --no-dev --optimize-autoloader --no-interaction --no-progress
-      
+
       - name: Check if FTP secrets are configured
         run: |
           if [ -z "${{ secrets.FTP_SERVER }}" ] || [ -z "${{ secrets.FTP_USERNAME }}" ] || [ -z "${{ secrets.FTP_PASSWORD }}" ]; then
@@ -61,7 +64,7 @@ jobs:
             exit 1
           fi
           echo "✅ FTP secrets are configured"
-      
+
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -87,4 +90,3 @@ jobs:
             **/phpstan.neon
             **/deploy.php
             **/admin-manager.php
-

@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Setting;
 
 class UserResource extends Resource
 {
@@ -66,7 +67,7 @@ class UserResource extends Resource
                                     ->hiddenLabel()
                                     ->alignCenter()
                                     ->color('gray'),
-                                
+
                                 Components\TextEntry::make('last_login_at')
                                     ->label('Last Login')
                                     ->alignCenter()
@@ -103,10 +104,10 @@ class UserResource extends Resource
                                                 'both' => ['mail', 'database'],
                                                 default => ['database'],
                                             };
-                                            
+
                                             $record->notify(new \App\Notifications\GeneralAnnouncement(
-                                                $data['title'], 
-                                                $data['message'], 
+                                                $data['title'],
+                                                $data['message'],
                                                 $channels
                                             ));
 
@@ -116,7 +117,7 @@ class UserResource extends Resource
                                                 ->success()
                                                 ->send();
                                         }),
-                                        
+
                                     Components\Actions\Action::make('manage_funds')
                                         ->icon('heroicon-o-wallet')
                                         ->color('success')
@@ -155,7 +156,7 @@ class UserResource extends Resource
                                                 } else {
                                                     $account->decrement('balance', $data['amount']);
                                                 }
-                                                
+
                                                 // Create Transaction
                                                 \App\Models\Transaction::create([
                                                     'account_id' => $account->id,
@@ -165,7 +166,7 @@ class UserResource extends Resource
                                                     'status' => 'completed',
                                                     'reference_number' => \Illuminate\Support\Str::uuid(),
                                                 ]);
-                                                
+
                                                 // Notify User (Push + Email)
                                                 $actionType = ucfirst($data['type']);
                                                 $record->notify(new \App\Notifications\GeneralAnnouncement(
@@ -184,7 +185,7 @@ class UserResource extends Resource
                                         }),
 
                                     Components\Actions\Action::make('login_as')
-                                        ->icon('heroicon-o-user') 
+                                        ->icon('heroicon-o-user')
                                         ->color('gray')
                                         ->tooltip('Login as User')
                                         ->url(fn (User $record) => route('admin.impersonate', $record))
@@ -267,8 +268,8 @@ class UserResource extends Resource
                                                 ->options($availableWalletTypes)
                                                 ->required()
                                                 ->searchable()
-                                                ->helperText($availableWalletTypes->isEmpty() 
-                                                    ? 'User already has all available wallet types.' 
+                                                ->helperText($availableWalletTypes->isEmpty()
+                                                    ? 'User already has all available wallet types.'
                                                     : 'Select a wallet type to assign to this user.'),
                                             Forms\Components\TextInput::make('initial_balance')
                                                 ->label('Initial Balance')
@@ -279,7 +280,7 @@ class UserResource extends Resource
                                     })
                                     ->action(function (array $data, User $record) {
                                         $walletType = \App\Models\WalletType::find($data['wallet_type_id']);
-                                        
+
                                         if (!$walletType) {
                                             \Filament\Notifications\Notification::make()
                                                 ->title('Invalid wallet type')
@@ -306,7 +307,7 @@ class UserResource extends Resource
                                             'status' => 'active',
                                             'account_type' => 'checking',
                                         ]);
-                                        
+
                                         \Filament\Notifications\Notification::make()
                                             ->title('Wallet assigned successfully')
                                             ->body("{$walletType->name} has been assigned to {$record->name}.")
@@ -336,7 +337,7 @@ class UserResource extends Resource
                                                 ->size('lg'),
                                         ]),
                                     ])
-                                    ->contained(false) 
+                                    ->contained(false)
                             ])->collapsible(),
 
                         // User Controls (Livewire)
@@ -362,7 +363,7 @@ class UserResource extends Resource
                                                 Components\Grid::make(3)->schema([
                                                     Components\TextEntry::make('stat_trx_total')
                                                         ->label('Total Transactions')
-                                                        ->state(fn (User $record) => $record->transactions()->count()) 
+                                                        ->state(fn (User $record) => $record->transactions()->count())
                                                         ->icon('heroicon-o-arrows-right-left')
                                                         ->color('primary'),
                                                     Components\TextEntry::make('stat_trx_completed')
@@ -392,7 +393,7 @@ class UserResource extends Resource
                                                         ->state(fn (User $record) => $record->transactions()->where('transactions.transaction_type', 'withdrawal')->where('transactions.status', 'completed')->sum('amount'))
                                                         ->icon('heroicon-o-arrow-up-tray')
                                                         ->color('warning'),
-                                                    
+
                                                     // Full width stats
                                                     Components\TextEntry::make('stat_total_balance')
                                                         ->label('Total Balance (All Wallets)')
@@ -405,16 +406,48 @@ class UserResource extends Resource
                                                 ]),
                                             ]),
 
-                                        // TAB 2: PROFILE INFO (Existing)
+                                        // TAB 2: PROFILE INFO (Enhanced with all registration fields)
                                         Components\Tabs\Tab::make('Profile Information')
                                             ->icon('heroicon-m-user')
                                             ->schema([
+                                                Components\Section::make('Account Information')
+                                                    ->schema([
+                                                        Components\Grid::make(3)->schema([
+                                                            Components\TextEntry::make('id')
+                                                                ->label('User ID')
+                                                                ->badge()
+                                                                ->color('gray'),
+                                                            Components\TextEntry::make('referral_code')
+                                                                ->label('Referral Code')
+                                                                ->copyable()
+                                                                ->icon('heroicon-o-share'),
+                                                            Components\TextEntry::make('referrer.name')
+                                                                ->label('Referred By')
+                                                                ->placeholder('Direct Sign-up')
+                                                                ->icon('heroicon-o-user-group'),
+                                                            Components\TextEntry::make('created_at')
+                                                                ->label('Joined')
+                                                                ->dateTime('M j, Y')
+                                                                ->icon('heroicon-o-calendar'),
+                                                            Components\TextEntry::make('last_login_at')
+                                                                ->label('Last Login')
+                                                                ->dateTime('M j, Y H:i')
+                                                                ->placeholder('Never')
+                                                                ->icon('heroicon-o-clock'),
+                                                            Components\TextEntry::make('rank.name')
+                                                                ->label('Current Rank')
+                                                                ->badge()
+                                                                ->color('primary')
+                                                                ->placeholder('Unranked'),
+                                                        ]),
+                                                    ]),
+
                                                 Components\Section::make('Personal Details')
                                                     ->headerActions([
                                                         Components\Actions\Action::make('edit_profile')
                                                             ->label('Edit Details')
                                                             ->icon('heroicon-m-pencil-square')
-                                                            ->modalWidth('lg')
+                                                            ->modalWidth('xl')
                                                             ->fillForm(fn (User $record) => [
                                                                 'name' => $record->name,
                                                                 'email' => $record->email,
@@ -505,30 +538,117 @@ class UserResource extends Resource
                                                             }),
                                                     ])
                                                     ->schema([
-                                                        Components\Grid::make(2)->schema([
-                                                            Components\TextEntry::make('name'),
+                                                        Components\Grid::make(3)->schema([
+                                                            Components\TextEntry::make('name')
+                                                                ->weight('bold'),
                                                             Components\TextEntry::make('email')
-                                                                ->icon('heroicon-m-envelope'),
+                                                                ->icon('heroicon-m-envelope')
+                                                                ->copyable(),
                                                             Components\TextEntry::make('phone')
-                                                                ->icon('heroicon-m-phone'),
+                                                                ->icon('heroicon-m-phone')
+                                                                ->placeholder('Not provided'),
                                                             Components\TextEntry::make('age_range')
-                                                                ->label('Age Range'),
-                                                            Components\TextEntry::make('gender'),
-                                                            Components\TextEntry::make('ethnicity'),
+                                                                ->label('Age Range')
+                                                                ->formatStateUsing(fn (?string $state): string => match ($state) {
+                                                                    '18_25' => '18-25',
+                                                                    '26_34' => '26-34',
+                                                                    '35_49' => '35-49',
+                                                                    '50_65' => '50-65',
+                                                                    '66_80' => '66-80',
+                                                                    '80_plus' => '80+',
+                                                                    default => $state ?? 'Not specified',
+                                                                })
+                                                                ->badge()
+                                                                ->color('gray'),
+                                                            Components\TextEntry::make('gender')
+                                                                ->formatStateUsing(fn (?string $state): string => ucfirst($state ?? 'Not specified'))
+                                                                ->badge()
+                                                                ->color(fn (?string $state): string => match ($state) {
+                                                                    'male' => 'info',
+                                                                    'female' => 'pink',
+                                                                    default => 'gray',
+                                                                }),
+                                                            Components\TextEntry::make('ethnicity')
+                                                                ->formatStateUsing(fn (?string $state): string => str($state ?? 'Not specified')->headline())
+                                                                ->badge()
+                                                                ->color('gray'),
+                                                        ]),
+                                                    ]),
+
+                                                Components\Section::make('Employment & Citizenship')
+                                                    ->schema([
+                                                        Components\Grid::make(2)->schema([
                                                             Components\TextEntry::make('employment_status')
                                                                 ->label('Employment Status')
+                                                                ->formatStateUsing(fn (?string $state): string => str($state ?? 'Not specified')->headline())
                                                                 ->badge()
-                                                                ->color('info'),
+                                                                ->color(fn (?string $state): string => match ($state) {
+                                                                    'employed_full_time', 'employed_part_time', 'self_employed' => 'success',
+                                                                    'retired' => 'info',
+                                                                    'student' => 'warning',
+                                                                    'unemployed' => 'danger',
+                                                                    default => 'gray',
+                                                                }),
                                                             Components\TextEntry::make('citizenship_status')
+                                                                ->label('Citizenship Status')
+                                                                ->formatStateUsing(fn (?string $state): string => str($state ?? 'Not specified')->headline())
                                                                 ->badge()
                                                                 ->color(fn (?string $state): string => match ($state) {
                                                                     'us_citizen' => 'success',
                                                                     'permanent_resident', 'green_card' => 'info',
+                                                                    'resident_alien' => 'warning',
                                                                     default => 'gray',
                                                                 }),
-                                                            Components\TextEntry::make('zip_code'),
-                                                            Components\TextEntry::make('city'),
-                                                            Components\TextEntry::make('state'),
+                                                        ]),
+                                                    ]),
+
+                                                Components\Section::make('Location')
+                                                    ->schema([
+                                                        Components\Grid::make(3)->schema([
+                                                            Components\TextEntry::make('city')
+                                                                ->placeholder('Not provided')
+                                                                ->icon('heroicon-o-building-office-2'),
+                                                            Components\TextEntry::make('state')
+                                                                ->placeholder('Not provided')
+                                                                ->icon('heroicon-o-map'),
+                                                            Components\TextEntry::make('zip_code')
+                                                                ->label('ZIP Code')
+                                                                ->placeholder('Not provided')
+                                                                ->icon('heroicon-o-map-pin'),
+                                                        ]),
+                                                    ]),
+
+                                                Components\Section::make('Verification Status')
+                                                    ->schema([
+                                                        Components\Grid::make(4)->schema([
+                                                            Components\IconEntry::make('email_verified_at')
+                                                                ->label('Email Verified')
+                                                                ->boolean()
+                                                                ->trueIcon('heroicon-o-check-badge')
+                                                                ->falseIcon('heroicon-o-x-circle')
+                                                                ->trueColor('success')
+                                                                ->falseColor('danger'),
+                                                            Components\IconEntry::make('kyc_verified_at')
+                                                                ->label('KYC Verified')
+                                                                ->boolean()
+                                                                ->trueIcon('heroicon-o-identification')
+                                                                ->falseIcon('heroicon-o-x-circle')
+                                                                ->trueColor('success')
+                                                                ->falseColor('danger'),
+                                                            Components\IconEntry::make('idme_verified_at')
+                                                                ->label('ID.me Verified')
+                                                                ->boolean()
+                                                                ->trueIcon('heroicon-o-shield-check')
+                                                                ->falseIcon('heroicon-o-x-circle')
+                                                                ->trueColor('success')
+                                                                ->falseColor('danger'),
+                                                            Components\IconEntry::make('two_factor_enabled')
+                                                                ->label('2FA Enabled')
+                                                                ->boolean()
+                                                                ->trueIcon('heroicon-o-lock-closed')
+                                                                ->falseIcon('heroicon-o-lock-open')
+                                                                ->trueColor('success')
+                                                                ->falseColor('gray'),
                                                         ]),
                                                     ]),
                                             ]),
@@ -674,7 +794,7 @@ class UserResource extends Resource
                                                                 ]),
                                                             ]),
                                                     ]),
-                                                    
+
                                                 Components\Section::make('Recent Notifications')
                                                     ->collapsed()
                                                     ->schema([
@@ -691,6 +811,172 @@ class UserResource extends Resource
                                                                     ->dateTime()
                                                                     ->alignRight(),
                                                             ]),
+                                                    ]),
+                                            ]),
+
+                                        // TAB 7: Security (Admin Password Management)
+                                        Components\Tabs\Tab::make('Security')
+                                            ->icon('heroicon-m-shield-check')
+                                            ->schema([
+                                                Components\Section::make('Password Management')
+                                                    ->description('Update the user\'s password. The user will need to use this new password on their next login.')
+                                                    ->headerActions([
+                                                        Components\Actions\Action::make('change_password')
+                                                            ->label('Change Password')
+                                                            ->icon('heroicon-m-key')
+                                                            ->color('danger')
+                                                            ->requiresConfirmation()
+                                                            ->modalHeading('Change User Password')
+                                                            ->modalDescription('Enter a new password for this user. They will need to use this password on their next login.')
+                                                            ->modalWidth('md')
+                                                            ->form([
+                                                                Forms\Components\TextInput::make('new_password')
+                                                                    ->label('New Password')
+                                                                    ->password()
+                                                                    ->required()
+                                                                    ->minLength(8)
+                                                                    ->revealable()
+                                                                    ->helperText('Minimum 8 characters'),
+                                                                Forms\Components\TextInput::make('new_password_confirmation')
+                                                                    ->label('Confirm Password')
+                                                                    ->password()
+                                                                    ->required()
+                                                                    ->same('new_password')
+                                                                    ->revealable(),
+                                                                Forms\Components\Checkbox::make('notify_user')
+                                                                    ->label('Notify user about password change')
+                                                                    ->default(true)
+                                                                    ->helperText('Send email notification to user about their password change'),
+                                                            ])
+                                                            ->action(function (User $record, array $data) {
+                                                                $record->update([
+                                                                    'password' => Hash::make($data['new_password']),
+                                                                ]);
+
+                                                                if ($data['notify_user'] ?? true) {
+                                                                    $record->notify(new \App\Notifications\GeneralAnnouncement(
+                                                                        'Password Changed',
+                                                                        'Your password has been changed by an administrator. If you did not request this change, please contact support immediately.',
+                                                                        ['mail', 'database']
+                                                                    ));
+                                                                }
+
+                                                                \Filament\Notifications\Notification::make()
+                                                                    ->title('Password Updated')
+                                                                    ->body('User password has been changed successfully.')
+                                                                    ->success()
+                                                                    ->send();
+                                                            }),
+                                                    ])
+                                                    ->schema([
+                                                        Components\TextEntry::make('password_info')
+                                                            ->label('')
+                                                            ->state('For security reasons, passwords are encrypted and cannot be viewed. Use the "Change Password" button to set a new password for this user.')
+                                                            ->icon('heroicon-o-information-circle')
+                                                            ->color('gray'),
+                                                    ]),
+
+                                                Components\Section::make('Two-Factor Authentication')
+                                                    ->description('Manage the user\'s two-factor authentication settings.')
+                                                    ->schema([
+                                                        Components\Grid::make(2)->schema([
+                                                            Components\IconEntry::make('two_factor_enabled')
+                                                                ->label('2FA Status')
+                                                                ->boolean()
+                                                                ->trueIcon('heroicon-o-shield-check')
+                                                                ->falseIcon('heroicon-o-shield-exclamation')
+                                                                ->trueColor('success')
+                                                                ->falseColor('gray'),
+                                                            Components\TextEntry::make('two_factor_confirmed_at')
+                                                                ->label('2FA Confirmed At')
+                                                                ->dateTime()
+                                                                ->placeholder('Not confirmed'),
+                                                        ]),
+                                                        Components\Actions::make([
+                                                            Components\Actions\Action::make('disable_2fa')
+                                                                ->label('Disable 2FA')
+                                                                ->icon('heroicon-o-shield-exclamation')
+                                                                ->color('danger')
+                                                                ->requiresConfirmation()
+                                                                ->modalHeading('Disable Two-Factor Authentication')
+                                                                ->modalDescription('This will disable 2FA for this user and clear all their recovery codes. They will need to set up 2FA again.')
+                                                                ->visible(fn (User $record) => $record->two_factor_enabled)
+                                                                ->action(function (User $record) {
+                                                                    $record->update([
+                                                                        'two_factor_enabled' => false,
+                                                                        'two_factor_secret' => null,
+                                                                        'two_factor_recovery_codes' => null,
+                                                                        'two_factor_confirmed_at' => null,
+                                                                    ]);
+
+                                                                    \Filament\Notifications\Notification::make()
+                                                                        ->title('2FA Disabled')
+                                                                        ->body('Two-factor authentication has been disabled for this user.')
+                                                                        ->success()
+                                                                        ->send();
+                                                                }),
+                                                        ]),
+                                                    ]),
+
+                                                Components\Section::make('Login Security')
+                                                    ->description('View and manage login-related security settings.')
+                                                    ->schema([
+                                                        Components\Grid::make(3)->schema([
+                                                            Components\IconEntry::make('login_otp_verified')
+                                                                ->label('Login OTP Verified')
+                                                                ->boolean()
+                                                                ->trueColor('success')
+                                                                ->falseColor('gray'),
+                                                            Components\TextEntry::make('login_otp_expires_at')
+                                                                ->label('OTP Expires At')
+                                                                ->dateTime()
+                                                                ->placeholder('No active OTP'),
+                                                            Components\TextEntry::make('last_login_at')
+                                                                ->label('Last Login')
+                                                                ->dateTime()
+                                                                ->placeholder('Never'),
+                                                        ]),
+                                                        Components\Actions::make([
+                                                            Components\Actions\Action::make('reset_otp')
+                                                                ->label('Reset Login OTP')
+                                                                ->icon('heroicon-o-arrow-path')
+                                                                ->color('warning')
+                                                                ->requiresConfirmation()
+                                                                ->modalDescription('This will clear any active OTP session, requiring the user to verify again on next login.')
+                                                                ->action(function (User $record) {
+                                                                    $record->update([
+                                                                        'login_otp' => null,
+                                                                        'login_otp_expires_at' => null,
+                                                                        'login_otp_verified' => false,
+                                                                    ]);
+
+                                                                    \Filament\Notifications\Notification::make()
+                                                                        ->title('OTP Reset')
+                                                                        ->body('Login OTP has been reset for this user.')
+                                                                        ->success()
+                                                                        ->send();
+                                                                }),
+                                                        ]),
+                                                    ]),
+
+                                                Components\Section::make('Transfer Security Codes')
+                                                    ->description('Manage the user\'s transfer verification codes.')
+                                                    ->collapsed()
+                                                    ->schema([
+                                                        Components\Grid::make(3)->schema([
+                                                            Components\TextEntry::make('imf_code')
+                                                                ->label('IMF Code')
+                                                                ->placeholder('Not set')
+                                                                ->copyable(),
+                                                            Components\TextEntry::make('tax_code')
+                                                                ->label('TAX Code')
+                                                                ->placeholder('Not set')
+                                                                ->copyable(),
+                                                            Components\TextEntry::make('cot_code')
+                                                                ->label('COT Code')
+                                                                ->placeholder('Not set')
+                                                                ->copyable(),
+                                                        ]),
                                                     ]),
                                             ]),
                                     ]),

@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\User;
 use App\Models\Account;
 use App\Models\Transaction;
+use App\Models\Setting;
 use Filament\Notifications\Notification;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -24,9 +25,24 @@ class UserControls extends Component implements HasForms, HasActions
     public User $record;
     public ?array $data = [];
 
+    // Feature flags from settings
+    public bool $featureDeposit = true;
+    public bool $featureTransfer = true;
+    public bool $featureWithdraw = true;
+    public bool $featureVoucher = true;
+    public bool $featureExchange = true;
+
     public function mount(User $record): void
     {
         $this->record = $record;
+
+        // Load feature settings from database
+        $this->featureDeposit = Setting::get('feature_deposit', true);
+        $this->featureTransfer = Setting::get('feature_transfer', true);
+        $this->featureWithdraw = Setting::get('feature_withdraw', true);
+        $this->featureVoucher = Setting::get('feature_voucher', true);
+        $this->featureExchange = Setting::get('feature_exchange', true);
+
         $this->form->fill([
             'is_active' => $record->is_active,
             'email_verified' => $record->email_verified_at !== null,
@@ -202,110 +218,147 @@ class UserControls extends Component implements HasForms, HasActions
             ->schema([
                 Forms\Components\Group::make()
                     ->schema([
-                        Forms\Components\Toggle::make('is_active')
-                            ->label('Account Status')
-                            ->helperText('Controls user login access.')
-                            ->onIcon('heroicon-m-check')
-                            ->offIcon('heroicon-m-x-mark')
-                            ->onColor('success')
-                            ->live()
-                            ->afterStateUpdated(function ($state) {
-                                $this->record->update(['is_active' => $state]);
-                                $this->notify('Account Status updated.');
-                            }),
+                        // Core Account Controls - Always visible
+                        Forms\Components\Section::make('Account Status')
+                            ->schema([
+                                Forms\Components\Toggle::make('is_active')
+                                    ->label('Account Status')
+                                    ->helperText('Controls user login access.')
+                                    ->onIcon('heroicon-m-check')
+                                    ->offIcon('heroicon-m-x-mark')
+                                    ->onColor('success')
+                                    ->live()
+                                    ->afterStateUpdated(function ($state) {
+                                        $this->record->update(['is_active' => $state]);
+                                        $this->notify('Account Status updated.');
+                                    }),
 
-                        Forms\Components\Toggle::make('email_verified')
-                            ->label('Email Verification')
-                            ->helperText('Requires email verification to activate.')
-                            ->onIcon('heroicon-m-check-badge')
-                            ->offIcon('heroicon-m-x-circle')
-                            ->onColor('success')
-                            ->live()
-                            ->afterStateUpdated(function ($state) {
-                                $this->record->update(['email_verified_at' => $state ? now() : null]);
-                                $this->notify('Email Verification updated.');
-                            }),
+                                Forms\Components\Toggle::make('email_verified')
+                                    ->label('Email Verification')
+                                    ->helperText('Requires email verification to activate.')
+                                    ->onIcon('heroicon-m-check-badge')
+                                    ->offIcon('heroicon-m-x-circle')
+                                    ->onColor('success')
+                                    ->live()
+                                    ->afterStateUpdated(function ($state) {
+                                        $this->record->update(['email_verified_at' => $state ? now() : null]);
+                                        $this->notify('Email Verification updated.');
+                                    }),
 
-                        Forms\Components\Toggle::make('kyc_verified')
-                            ->label('KYC Verification')
-                            ->helperText('Requires KYC verification before transactions.')
-                            ->onColor('success')
-                            ->live()
-                            ->afterStateUpdated(function ($state) {
-                                $this->record->update(['kyc_verified_at' => $state ? now() : null]);
-                                $this->notify('KYC Verification updated.');
-                            }),
+                                Forms\Components\Toggle::make('kyc_verified')
+                                    ->label('KYC Verification')
+                                    ->helperText('Requires KYC verification before transactions.')
+                                    ->onColor('success')
+                                    ->live()
+                                    ->afterStateUpdated(function ($state) {
+                                        $this->record->update(['kyc_verified_at' => $state ? now() : null]);
+                                        $this->notify('KYC Verification updated.');
+                                    }),
+                            ])
+                            ->compact()
+                            ->columns(1),
 
-                        Forms\Components\Toggle::make('can_deposit')
-                            ->label('Deposit')
-                            ->helperText('Allows users to add funds.')
-                            ->live()
-                            ->afterStateUpdated(fn ($state) => $this->updatePermission('can_deposit', $state)),
+                        // Feature Controls - Conditional based on platform settings
+                        Forms\Components\Section::make('Feature Permissions')
+                            ->description('Controls are only available for features enabled platform-wide in Settings > Features.')
+                            ->schema([
+                                Forms\Components\Toggle::make('can_deposit')
+                                    ->label('Deposit')
+                                    ->helperText($this->featureDeposit
+                                        ? 'Allows users to add funds.'
+                                        : 'Feature disabled platform-wide.')
+                                    ->disabled(!$this->featureDeposit)
+                                    ->live()
+                                    ->afterStateUpdated(fn ($state) => $this->updatePermission('can_deposit', $state)),
 
-                        Forms\Components\Toggle::make('can_exchange')
-                            ->label('Exchange Money')
-                            ->helperText('Allows currency conversion.')
-                            ->live()
-                            ->afterStateUpdated(fn ($state) => $this->updatePermission('can_exchange', $state)),
+                                Forms\Components\Toggle::make('can_exchange')
+                                    ->label('Exchange Money')
+                                    ->helperText($this->featureExchange
+                                        ? 'Allows currency conversion.'
+                                        : 'Feature disabled platform-wide.')
+                                    ->disabled(!$this->featureExchange)
+                                    ->live()
+                                    ->afterStateUpdated(fn ($state) => $this->updatePermission('can_exchange', $state)),
 
-                        Forms\Components\Toggle::make('can_transfer')
-                            ->label('Send Money')
-                            ->helperText('Allows sending money to others.')
-                            ->live()
-                            ->afterStateUpdated(fn ($state) => $this->updatePermission('can_transfer', $state)),
+                                Forms\Components\Toggle::make('can_transfer')
+                                    ->label('Send Money')
+                                    ->helperText($this->featureTransfer
+                                        ? 'Allows sending money to others.'
+                                        : 'Feature disabled platform-wide.')
+                                    ->disabled(!$this->featureTransfer)
+                                    ->live()
+                                    ->afterStateUpdated(fn ($state) => $this->updatePermission('can_transfer', $state)),
 
-                        Forms\Components\Toggle::make('can_request')
-                            ->label('Request Money')
-                            ->helperText('Allows requesting money.')
-                            ->live()
-                            ->afterStateUpdated(fn ($state) => $this->updatePermission('can_request', $state)),
+                                Forms\Components\Toggle::make('can_request')
+                                    ->label('Request Money')
+                                    ->helperText($this->featureTransfer
+                                        ? 'Allows requesting money.'
+                                        : 'Feature disabled platform-wide.')
+                                    ->disabled(!$this->featureTransfer)
+                                    ->live()
+                                    ->afterStateUpdated(fn ($state) => $this->updatePermission('can_request', $state)),
 
-                        Forms\Components\Toggle::make('can_withdraw')
-                            ->label('Withdraw')
-                            ->helperText('Allows withdrawal to bank.')
-                            ->live()
-                            ->afterStateUpdated(fn ($state) => $this->updatePermission('can_withdraw', $state)),
+                                Forms\Components\Toggle::make('can_withdraw')
+                                    ->label('Withdraw')
+                                    ->helperText($this->featureWithdraw
+                                        ? 'Allows withdrawal to bank.'
+                                        : 'Feature disabled platform-wide.')
+                                    ->disabled(!$this->featureWithdraw)
+                                    ->live()
+                                    ->afterStateUpdated(fn ($state) => $this->updatePermission('can_withdraw', $state)),
 
-                        Forms\Components\Toggle::make('can_use_voucher')
-                            ->label('Voucher')
-                            ->helperText('Allows voucher usage.')
-                            ->live()
-                            ->afterStateUpdated(fn ($state) => $this->updatePermission('can_use_voucher', $state)),
+                                Forms\Components\Toggle::make('can_use_voucher')
+                                    ->label('Voucher')
+                                    ->helperText($this->featureVoucher
+                                        ? 'Allows voucher usage.'
+                                        : 'Feature disabled platform-wide.')
+                                    ->disabled(!$this->featureVoucher)
+                                    ->live()
+                                    ->afterStateUpdated(fn ($state) => $this->updatePermission('can_use_voucher', $state)),
+                            ])
+                            ->compact()
+                            ->columns(1),
 
-                        Forms\Components\Toggle::make('two_factor_enabled')
-                            ->label('Two-Factor Auth')
-                            ->helperText('User\'s 2FA status. Disable to reset.')
-                            ->onIcon('heroicon-m-shield-check')
-                            ->offIcon('heroicon-m-shield-exclamation')
-                            ->onColor('success')
-                            ->live()
-                            ->afterStateUpdated(function ($state) {
-                                if (!$state) {
-                                    // Disable 2FA completely
-                                    $this->record->update([
-                                        'two_factor_enabled' => false,
-                                        'two_factor_secret' => null,
-                                        'two_factor_recovery_codes' => null,
-                                        'two_factor_confirmed_at' => null,
-                                    ]);
-                                    $this->notify('Two-Factor Authentication disabled and reset.');
-                                } else {
-                                    $this->record->update(['two_factor_enabled' => true]);
-                                    $this->notify('Two-Factor Authentication enabled.');
-                                }
-                            }),
+                        // Security Controls - Always visible
+                        Forms\Components\Section::make('Security Settings')
+                            ->schema([
+                                Forms\Components\Toggle::make('two_factor_enabled')
+                                    ->label('Two-Factor Auth')
+                                    ->helperText('User\'s 2FA status. Disable to reset.')
+                                    ->onIcon('heroicon-m-shield-check')
+                                    ->offIcon('heroicon-m-shield-exclamation')
+                                    ->onColor('success')
+                                    ->live()
+                                    ->afterStateUpdated(function ($state) {
+                                        if (!$state) {
+                                            // Disable 2FA completely
+                                            $this->record->update([
+                                                'two_factor_enabled' => false,
+                                                'two_factor_secret' => null,
+                                                'two_factor_recovery_codes' => null,
+                                                'two_factor_confirmed_at' => null,
+                                            ]);
+                                            $this->notify('Two-Factor Authentication disabled and reset.');
+                                        } else {
+                                            $this->record->update(['two_factor_enabled' => true]);
+                                            $this->notify('Two-Factor Authentication enabled.');
+                                        }
+                                    }),
 
-                        Forms\Components\Toggle::make('login_otp_verified')
-                            ->label('Login OTP Verified')
-                            ->helperText('Current session OTP status.')
-                            ->onIcon('heroicon-m-check-circle')
-                            ->offIcon('heroicon-m-x-circle')
-                            ->onColor('success')
-                            ->live()
-                            ->afterStateUpdated(function ($state) {
-                                $this->record->update(['login_otp_verified' => $state]);
-                                $this->notify('Login OTP status updated.');
-                            }),
+                                Forms\Components\Toggle::make('login_otp_verified')
+                                    ->label('Login OTP Verified')
+                                    ->helperText('Current session OTP status.')
+                                    ->onIcon('heroicon-m-check-circle')
+                                    ->offIcon('heroicon-m-x-circle')
+                                    ->onColor('success')
+                                    ->live()
+                                    ->afterStateUpdated(function ($state) {
+                                        $this->record->update(['login_otp_verified' => $state]);
+                                        $this->notify('Login OTP status updated.');
+                                    }),
+                            ])
+                            ->compact()
+                            ->columns(1),
                     ])
                     ->columns(1),
             ])

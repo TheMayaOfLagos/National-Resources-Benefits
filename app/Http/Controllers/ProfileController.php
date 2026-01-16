@@ -23,7 +23,7 @@ class ProfileController extends Controller
     public function edit(Request $request): Response
     {
         $user = $request->user();
-        
+
         return Inertia::render('Profile/Edit', [
             'mustVerifyEmail' => $user instanceof MustVerifyEmail,
             'status' => session('status'),
@@ -55,13 +55,14 @@ class ProfileController extends Controller
     public function security(Request $request): Response
     {
         $user = $request->user();
-        
+
         return Inertia::render('Profile/Security', [
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-                'two_factor_enabled' => (bool) ($user->two_factor_secret ?? false),
+                'two_factor_enabled' => (bool) $user->two_factor_enabled,
+                'two_factor_confirmed_at' => $user->two_factor_confirmed_at,
                 'email_verified_at' => $user->email_verified_at,
                 'created_at' => $user->created_at->format('M d, Y'),
                 'updated_at' => $user->updated_at->format('M d, Y'),
@@ -86,33 +87,33 @@ class ProfileController extends Controller
                 ->get()
                 ->map(function ($session) use ($request) {
                     $userAgent = $session->user_agent ?? '';
-                    
+
                     // Simple user agent parsing without external library
                     $browser = 'Unknown';
                     $platform = 'Unknown';
                     $device = 'Desktop';
-                    
+
                     // Detect browser
                     if (str_contains($userAgent, 'Firefox')) $browser = 'Firefox';
                     elseif (str_contains($userAgent, 'Edg')) $browser = 'Edge';
                     elseif (str_contains($userAgent, 'Chrome')) $browser = 'Chrome';
                     elseif (str_contains($userAgent, 'Safari')) $browser = 'Safari';
                     elseif (str_contains($userAgent, 'Opera')) $browser = 'Opera';
-                    
+
                     // Detect platform
                     if (str_contains($userAgent, 'Windows')) $platform = 'Windows';
                     elseif (str_contains($userAgent, 'Mac')) $platform = 'macOS';
                     elseif (str_contains($userAgent, 'Linux')) $platform = 'Linux';
                     elseif (str_contains($userAgent, 'Android')) $platform = 'Android';
                     elseif (str_contains($userAgent, 'iPhone') || str_contains($userAgent, 'iPad')) $platform = 'iOS';
-                    
+
                     // Detect device type
                     if (str_contains($userAgent, 'Mobile') || str_contains($userAgent, 'Android')) {
                         $device = 'Mobile';
                     } elseif (str_contains($userAgent, 'Tablet') || str_contains($userAgent, 'iPad')) {
                         $device = 'Tablet';
                     }
-                    
+
                     return [
                         'id' => $session->id,
                         'ip_address' => $session->ip_address,
@@ -137,20 +138,20 @@ class ProfileController extends Controller
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
         $user = $request->user();
-        
+
         $validated = $request->validated();
-        
+
         // Handle avatar upload
         if ($request->hasFile('avatar')) {
             // Delete old avatar
             if ($user->avatar_url) {
                 Storage::disk('public')->delete($user->avatar_url);
             }
-            
+
             $path = $request->file('avatar')->store('avatars', 'public');
             $validated['avatar_url'] = $path;
         }
-        
+
         $user->fill($validated);
 
         if ($user->isDirty('email')) {
@@ -185,7 +186,7 @@ class ProfileController extends Controller
     public function removeAvatar(Request $request): RedirectResponse
     {
         $user = $request->user();
-        
+
         if ($user->avatar_url) {
             Storage::disk('public')->delete($user->avatar_url);
             $user->avatar_url = null;

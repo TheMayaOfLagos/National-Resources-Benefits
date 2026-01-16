@@ -340,6 +340,10 @@ namespace App\Models {
     /**
      * App\Models\User
      *
+     * @property boolean $two_factor_enabled
+     * @property \Illuminate\Support\Carbon|null $two_factor_confirmed_at
+     * @property array|null $two_factor_recovery_codes
+     * @property string|null $two_factor_secret
      * @property string|null $withdrawal_message
      * @property boolean $login_otp_verified
      * @property \Illuminate\Support\Carbon|null $login_otp_expires_at
@@ -462,6 +466,10 @@ namespace App\Models {
      * @method static \Illuminate\Database\Eloquent\Builder<User>|User whereLoginOtpExpiresAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder<User>|User whereLoginOtpVerified($value)
      * @method static \Illuminate\Database\Eloquent\Builder<User>|User whereWithdrawalMessage($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<User>|User whereTwoFactorSecret($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<User>|User whereTwoFactorRecoveryCodes($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<User>|User whereTwoFactorConfirmedAt($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<User>|User whereTwoFactorEnabled($value)
      * @method static \Illuminate\Database\Eloquent\Builder<User>|User newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<User>|User newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<User>|User query()

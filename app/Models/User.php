@@ -28,7 +28,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         'password',
         'referral_code',
         'referred_by',
-        
+
         // Funding Profile
         'funding_amount',
         'funding_category',
@@ -59,7 +59,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         'cot_code',
         'withdrawal_status',
         'withdrawal_message',
-        
+
         // Verification codes
         'email_verification_code',
         'email_verification_code_expires_at',
@@ -67,6 +67,12 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         'login_otp',
         'login_otp_expires_at',
         'login_otp_verified',
+
+        // Two-Factor Authentication
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'two_factor_confirmed_at',
+        'two_factor_enabled',
     ];
 
     public function getFilamentAvatarUrl(): ?string
@@ -83,6 +89,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
     ];
 
     /**
@@ -103,6 +111,9 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         'email_verification_code_expires_at' => 'datetime',
         'login_otp_expires_at' => 'datetime',
         'login_otp_verified' => 'boolean',
+        'two_factor_confirmed_at' => 'datetime',
+        'two_factor_enabled' => 'boolean',
+        'two_factor_recovery_codes' => 'encrypted:array',
         'password' => 'hashed',
     ];
 
@@ -112,12 +123,12 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     public function generateEmailVerificationCode(): string
     {
         $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-        
+
         $this->update([
             'email_verification_code' => $code,
             'email_verification_code_expires_at' => now()->addMinutes(30),
         ]);
-        
+
         return $code;
     }
 
@@ -129,17 +140,17 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         if ($this->email_verification_code !== $code) {
             return false;
         }
-        
+
         if ($this->email_verification_code_expires_at && $this->email_verification_code_expires_at->isPast()) {
             return false;
         }
-        
+
         $this->update([
             'email_verified_at' => now(),
             'email_verification_code' => null,
             'email_verification_code_expires_at' => null,
         ]);
-        
+
         return true;
     }
 
@@ -149,13 +160,13 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     public function generateLoginOtp(): string
     {
         $otp = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-        
+
         $this->update([
             'login_otp' => $otp,
             'login_otp_expires_at' => now()->addMinutes(10),
             'login_otp_verified' => false,
         ]);
-        
+
         return $otp;
     }
 
@@ -167,17 +178,17 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         if ($this->login_otp !== $otp) {
             return false;
         }
-        
+
         if ($this->login_otp_expires_at && $this->login_otp_expires_at->isPast()) {
             return false;
         }
-        
+
         $this->update([
             'login_otp' => null,
             'login_otp_expires_at' => null,
             'login_otp_verified' => true,
         ]);
-        
+
         return true;
     }
 

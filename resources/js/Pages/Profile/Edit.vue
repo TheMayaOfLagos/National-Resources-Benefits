@@ -174,6 +174,7 @@ const submit = () => {
 </script>
 
 <template>
+
     <Head title="Profile Settings" />
 
     <DashboardLayout>
@@ -183,26 +184,20 @@ const submit = () => {
             <!-- Profile Navigation Tabs -->
             <div class="bg-white border border-gray-100 shadow-sm dark:bg-gray-800 rounded-xl dark:border-gray-700">
                 <div class="flex border-b border-gray-100 dark:border-gray-700">
-                    <Link 
-                        :href="route('profile.edit')"
-                        class="px-6 py-4 text-sm font-medium text-blue-600 border-b-2 border-blue-500 dark:text-blue-400"
-                    >
-                        <i class="mr-2 pi pi-user"></i>
-                        Profile
+                    <Link :href="route('profile.edit')"
+                        class="px-6 py-4 text-sm font-medium text-blue-600 border-b-2 border-blue-500 dark:text-blue-400">
+                    <i class="mr-2 pi pi-user"></i>
+                    Profile
                     </Link>
-                    <Link 
-                        :href="route('profile.security')"
-                        class="px-6 py-4 text-sm font-medium text-gray-500 border-b-2 border-transparent dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300"
-                    >
-                        <i class="mr-2 pi pi-shield"></i>
-                        Security
+                    <Link :href="route('profile.security')"
+                        class="px-6 py-4 text-sm font-medium text-gray-500 border-b-2 border-transparent dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300">
+                    <i class="mr-2 pi pi-shield"></i>
+                    Security
                     </Link>
-                    <Link 
-                        :href="route('linked-accounts.index')"
-                        class="px-6 py-4 text-sm font-medium text-gray-500 border-b-2 border-transparent dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300"
-                    >
-                        <i class="mr-2 pi pi-link"></i>
-                        Linked Accounts
+                    <Link :href="route('linked-accounts.index')"
+                        class="px-6 py-4 text-sm font-medium text-gray-500 border-b-2 border-transparent dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300">
+                    <i class="mr-2 pi pi-link"></i>
+                    Linked Accounts
                     </Link>
                 </div>
             </div>
@@ -215,57 +210,28 @@ const submit = () => {
             <!-- Avatar Section -->
             <div class="p-6 bg-white border border-gray-100 shadow-sm dark:bg-gray-800 rounded-xl dark:border-gray-700">
                 <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Profile Photo</h3>
-                
+
                 <div class="flex items-center gap-6 profile-avatar-section">
                     <div class="relative">
-                        <Avatar 
-                            v-if="displayAvatar"
-                            :image="displayAvatar"
-                            size="xlarge"
-                            shape="circle"
-                            class="w-24 h-24"
-                        />
-                        <Avatar 
-                            v-else
-                            :label="userInitials"
-                            size="xlarge"
-                            shape="circle"
-                            class="w-24 h-24 text-2xl text-white bg-blue-500"
-                        />
-                        
-                        <button 
-                            @click="triggerAvatarUpload"
-                            class="absolute bottom-0 right-0 flex items-center justify-center w-8 h-8 text-white transition-colors bg-blue-500 rounded-full shadow-lg hover:bg-blue-600"
-                        >
+                        <Avatar v-if="displayAvatar" :image="displayAvatar" size="xlarge" shape="circle"
+                            class="w-24 h-24" />
+                        <Avatar v-else :label="userInitials" size="xlarge" shape="circle"
+                            class="w-24 h-24 text-2xl text-white bg-blue-500" />
+
+                        <button @click="triggerAvatarUpload"
+                            class="absolute bottom-0 right-0 flex items-center justify-center w-8 h-8 text-white transition-colors bg-blue-500 rounded-full shadow-lg hover:bg-blue-600">
                             <i class="text-sm pi pi-camera"></i>
                         </button>
                     </div>
-                    
+
                     <div>
-                        <input 
-                            ref="avatarInput"
-                            type="file"
-                            accept="image/*"
-                            class="hidden"
-                            @change="handleAvatarSelect"
-                        />
+                        <input ref="avatarInput" type="file" accept="image/*" class="hidden"
+                            @change="handleAvatarSelect" />
                         <div class="flex gap-2">
-                            <Button 
-                                label="Upload Photo"
-                                icon="pi pi-upload"
-                                severity="secondary"
-                                size="small"
-                                @click="triggerAvatarUpload"
-                            />
-                            <Button 
-                                v-if="displayAvatar"
-                                label="Remove"
-                                icon="pi pi-trash"
-                                severity="danger"
-                                size="small"
-                                outlined
-                                @click="removeAvatar"
-                            />
+                            <Button label="Upload Photo" icon="pi pi-upload" severity="secondary" size="small"
+                                @click="triggerAvatarUpload" />
+                            <Button v-if="displayAvatar" label="Remove" icon="pi pi-trash" severity="danger"
+                                size="small" outlined @click="removeAvatar" />
                         </div>
                         <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
                             JPG, PNG or GIF. Max 2MB.
@@ -276,21 +242,18 @@ const submit = () => {
 
             <!-- Personal Information -->
             <form @submit.prevent="submit">
-                <div class="p-6 bg-white border border-gray-100 shadow-sm dark:bg-gray-800 rounded-xl dark:border-gray-700">
+                <div
+                    class="p-6 bg-white border border-gray-100 shadow-sm dark:bg-gray-800 rounded-xl dark:border-gray-700">
                     <h3 class="mb-6 text-lg font-semibold text-gray-900 dark:text-white">Personal Information</h3>
-                    
+
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <!-- Full Name -->
                         <div class="md:col-span-2">
                             <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Full Name *
                             </label>
-                            <InputText 
-                                v-model="form.name"
-                                class="w-full"
-                                :class="{ 'p-invalid': form.errors.name }"
-                                placeholder="Enter your full name"
-                            />
+                            <InputText v-model="form.name" class="w-full" :class="{ 'p-invalid': form.errors.name }"
+                                placeholder="Enter your full name" />
                             <small v-if="form.errors.name" class="text-red-500">{{ form.errors.name }}</small>
                         </div>
 
@@ -299,26 +262,17 @@ const submit = () => {
                             <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Email Address *
                             </label>
-                            <InputText 
-                                v-model="form.email"
-                                type="email"
-                                class="w-full"
-                                :class="{ 'p-invalid': form.errors.email }"
-                                placeholder="Enter your email"
-                            />
+                            <InputText v-model="form.email" type="email" class="w-full"
+                                :class="{ 'p-invalid': form.errors.email }" placeholder="Enter your email" />
                             <small v-if="form.errors.email" class="text-red-500">{{ form.errors.email }}</small>
-                            
+
                             <div v-if="mustVerifyEmail && !user.email_verified_at" class="mt-2">
                                 <p class="text-sm text-yellow-600 dark:text-yellow-400">
                                     <i class="mr-1 pi pi-exclamation-triangle"></i>
                                     Your email address is not verified.
-                                    <Link
-                                        :href="route('verification.send')"
-                                        method="post"
-                                        as="button"
-                                        class="ml-1 underline hover:text-yellow-700 dark:hover:text-yellow-300"
-                                    >
-                                        Resend verification email
+                                    <Link :href="route('verification.send')" method="post" as="button"
+                                        class="ml-1 underline hover:text-yellow-700 dark:hover:text-yellow-300">
+                                    Resend verification email
                                     </Link>
                                 </p>
                             </div>
@@ -329,12 +283,8 @@ const submit = () => {
                             <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Phone Number
                             </label>
-                            <InputText 
-                                v-model="form.phone"
-                                class="w-full"
-                                :class="{ 'p-invalid': form.errors.phone }"
-                                placeholder="(555) 123-4567"
-                            />
+                            <InputText v-model="form.phone" class="w-full" :class="{ 'p-invalid': form.errors.phone }"
+                                placeholder="(555) 123-4567" />
                             <small v-if="form.errors.phone" class="text-red-500">{{ form.errors.phone }}</small>
                         </div>
 
@@ -343,14 +293,8 @@ const submit = () => {
                             <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Gender
                             </label>
-                            <Dropdown 
-                                v-model="form.gender"
-                                :options="genderOptions"
-                                optionLabel="label"
-                                optionValue="value"
-                                placeholder="Select gender"
-                                class="w-full"
-                            />
+                            <Dropdown v-model="form.gender" :options="genderOptions" optionLabel="label"
+                                optionValue="value" placeholder="Select gender" class="w-full" />
                         </div>
 
                         <!-- Age Range -->
@@ -358,14 +302,8 @@ const submit = () => {
                             <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Age Range
                             </label>
-                            <Dropdown 
-                                v-model="form.age_range"
-                                :options="ageRangeOptions"
-                                optionLabel="label"
-                                optionValue="value"
-                                placeholder="Select age range"
-                                class="w-full"
-                            />
+                            <Dropdown v-model="form.age_range" :options="ageRangeOptions" optionLabel="label"
+                                optionValue="value" placeholder="Select age range" class="w-full" />
                         </div>
 
                         <!-- Citizenship Status -->
@@ -373,14 +311,9 @@ const submit = () => {
                             <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Citizenship Status
                             </label>
-                            <Dropdown 
-                                v-model="form.citizenship_status"
-                                :options="citizenshipOptions"
-                                optionLabel="label"
-                                optionValue="value"
-                                placeholder="Select citizenship status"
-                                class="w-full"
-                            />
+                            <Dropdown v-model="form.citizenship_status" :options="citizenshipOptions"
+                                optionLabel="label" optionValue="value" placeholder="Select citizenship status"
+                                class="w-full" />
                         </div>
 
                         <!-- Ethnicity -->
@@ -388,14 +321,8 @@ const submit = () => {
                             <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Ethnicity
                             </label>
-                            <Dropdown 
-                                v-model="form.ethnicity"
-                                :options="ethnicityOptions"
-                                optionLabel="label"
-                                optionValue="value"
-                                placeholder="Select ethnicity"
-                                class="w-full"
-                            />
+                            <Dropdown v-model="form.ethnicity" :options="ethnicityOptions" optionLabel="label"
+                                optionValue="value" placeholder="Select ethnicity" class="w-full" />
                         </div>
 
                         <!-- Employment Status -->
@@ -403,36 +330,25 @@ const submit = () => {
                             <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Employment Status
                             </label>
-                            <Dropdown 
-                                v-model="form.employment_status"
-                                :options="employmentOptions"
-                                optionLabel="label"
-                                optionValue="value"
-                                placeholder="Select employment status"
-                                class="w-full"
-                            />
+                            <Dropdown v-model="form.employment_status" :options="employmentOptions" optionLabel="label"
+                                optionValue="value" placeholder="Select employment status" class="w-full" />
                         </div>
                     </div>
                 </div>
 
                 <!-- Application Category -->
-                <div class="p-6 mt-6 bg-white border border-gray-100 shadow-sm dark:bg-gray-800 rounded-xl dark:border-gray-700">
+                <div
+                    class="p-6 mt-6 bg-white border border-gray-100 shadow-sm dark:bg-gray-800 rounded-xl dark:border-gray-700">
                     <h3 class="mb-6 text-lg font-semibold text-gray-900 dark:text-white">Application Category</h3>
-                    
+
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <!-- Funding Type -->
                         <div>
                             <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Apply As
                             </label>
-                            <Dropdown 
-                                v-model="form.funding_category"
-                                :options="fundingTypeOptions"
-                                optionLabel="label"
-                                optionValue="value"
-                                placeholder="Select application type"
-                                class="w-full"
-                            />
+                            <Dropdown v-model="form.funding_category" :options="fundingTypeOptions" optionLabel="label"
+                                optionValue="value" placeholder="Select application type" class="w-full" />
                         </div>
 
                         <!-- Funding Amount -->
@@ -440,33 +356,24 @@ const submit = () => {
                             <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Application Amount
                             </label>
-                            <Dropdown 
-                                v-model="form.funding_amount"
-                                :options="fundingAmountOptions"
-                                optionLabel="label"
-                                optionValue="value"
-                                placeholder="Select amount"
-                                class="w-full"
-                            />
+                            <Dropdown v-model="form.funding_amount" :options="fundingAmountOptions" optionLabel="label"
+                                optionValue="value" placeholder="Select amount" class="w-full" />
                         </div>
                     </div>
                 </div>
 
                 <!-- Address Information -->
-                <div class="p-6 mt-6 bg-white border border-gray-100 shadow-sm dark:bg-gray-800 rounded-xl dark:border-gray-700">
+                <div
+                    class="p-6 mt-6 bg-white border border-gray-100 shadow-sm dark:bg-gray-800 rounded-xl dark:border-gray-700">
                     <h3 class="mb-6 text-lg font-semibold text-gray-900 dark:text-white">Address Information</h3>
-                    
+
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
                         <!-- City -->
                         <div>
                             <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 City
                             </label>
-                            <InputText 
-                                v-model="form.city"
-                                class="w-full"
-                                placeholder="Enter city"
-                            />
+                            <InputText v-model="form.city" class="w-full" placeholder="Enter city" />
                         </div>
 
                         <!-- State -->
@@ -474,15 +381,8 @@ const submit = () => {
                             <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 State
                             </label>
-                            <Dropdown 
-                                v-model="form.state"
-                                :options="usStates"
-                                optionLabel="label"
-                                optionValue="value"
-                                placeholder="Select state"
-                                class="w-full"
-                                filter
-                            />
+                            <Dropdown v-model="form.state" :options="usStates" optionLabel="label" optionValue="value"
+                                placeholder="Select state" class="w-full" filter />
                         </div>
 
                         <!-- Zip Code -->
@@ -490,31 +390,22 @@ const submit = () => {
                             <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 ZIP Code
                             </label>
-                            <InputText 
-                                v-model="form.zip_code"
-                                class="w-full"
-                                placeholder="12345"
-                            />
+                            <InputText v-model="form.zip_code" class="w-full" placeholder="12345" />
                         </div>
                     </div>
                 </div>
 
                 <!-- Save Button -->
                 <div class="flex justify-end mt-6">
-                    <Button 
-                        type="submit"
-                        label="Save Changes"
-                        icon="pi pi-check"
-                        :loading="form.processing"
-                        :disabled="form.processing"
-                    />
+                    <Button type="submit" label="Save Changes" icon="pi pi-check" :loading="form.processing"
+                        :disabled="form.processing" />
                 </div>
             </form>
 
             <!-- Account Info -->
             <div class="p-6 bg-white border border-gray-100 shadow-sm dark:bg-gray-800 rounded-xl dark:border-gray-700">
                 <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Account Information</h3>
-                
+
                 <div class="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
                     <div>
                         <span class="text-gray-500 dark:text-gray-400">Account ID:</span>
@@ -526,12 +417,9 @@ const submit = () => {
                     </div>
                     <div>
                         <span class="text-gray-500 dark:text-gray-400">Email Verified:</span>
-                        <span 
-                            class="ml-2 px-2 py-0.5 text-xs rounded-full"
-                            :class="user.email_verified_at 
-                                ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400' 
-                                : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-400'"
-                        >
+                        <span class="ml-2 px-2 py-0.5 text-xs rounded-full" :class="user.email_verified_at
+                            ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400'
+                            : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-400'">
                             {{ user.email_verified_at ? 'Verified' : 'Pending' }}
                         </span>
                     </div>

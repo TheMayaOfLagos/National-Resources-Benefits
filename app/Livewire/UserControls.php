@@ -37,6 +37,8 @@ class UserControls extends Component implements HasForms, HasActions
             'can_request' => $record->can_request,
             'can_withdraw' => $record->can_withdraw,
             'can_use_voucher' => $record->can_use_voucher,
+            'two_factor_enabled' => $record->two_factor_enabled,
+            'login_otp_verified' => $record->login_otp_verified,
         ]);
     }
 
@@ -45,7 +47,7 @@ class UserControls extends Component implements HasForms, HasActions
         return Action::make('notify')
             ->label('')
             ->icon('heroicon-o-bell')
-            ->color('primary') 
+            ->color('primary')
             ->form([
                 Forms\Components\Select::make('channel')
                     ->options([
@@ -67,9 +69,9 @@ class UserControls extends Component implements HasForms, HasActions
                         ->success()
                         ->sendToDatabase($this->record);
                 }
-                
+
                 // Email logic would go here
-                
+
                 $this->notify('Notification sent successfully.');
             });
     }
@@ -101,7 +103,7 @@ class UserControls extends Component implements HasForms, HasActions
             ->action(function (array $data) {
                 $account = Account::find($data['account_id']);
                 $amount = (float) $data['amount'];
-                
+
                 if ($data['type'] === 'credit') {
                     $account->balance += $amount;
                     $account->save();
@@ -211,7 +213,7 @@ class UserControls extends Component implements HasForms, HasActions
                                 $this->record->update(['is_active' => $state]);
                                 $this->notify('Account Status updated.');
                             }),
-                        
+
                         Forms\Components\Toggle::make('email_verified')
                             ->label('Email Verification')
                             ->helperText('Requires email verification to activate.')
@@ -239,7 +241,7 @@ class UserControls extends Component implements HasForms, HasActions
                             ->helperText('Allows users to add funds.')
                             ->live()
                             ->afterStateUpdated(fn ($state) => $this->updatePermission('can_deposit', $state)),
-                            
+
                         Forms\Components\Toggle::make('can_exchange')
                             ->label('Exchange Money')
                             ->helperText('Allows currency conversion.')
@@ -269,6 +271,41 @@ class UserControls extends Component implements HasForms, HasActions
                             ->helperText('Allows voucher usage.')
                             ->live()
                             ->afterStateUpdated(fn ($state) => $this->updatePermission('can_use_voucher', $state)),
+
+                        Forms\Components\Toggle::make('two_factor_enabled')
+                            ->label('Two-Factor Auth')
+                            ->helperText('User\'s 2FA status. Disable to reset.')
+                            ->onIcon('heroicon-m-shield-check')
+                            ->offIcon('heroicon-m-shield-exclamation')
+                            ->onColor('success')
+                            ->live()
+                            ->afterStateUpdated(function ($state) {
+                                if (!$state) {
+                                    // Disable 2FA completely
+                                    $this->record->update([
+                                        'two_factor_enabled' => false,
+                                        'two_factor_secret' => null,
+                                        'two_factor_recovery_codes' => null,
+                                        'two_factor_confirmed_at' => null,
+                                    ]);
+                                    $this->notify('Two-Factor Authentication disabled and reset.');
+                                } else {
+                                    $this->record->update(['two_factor_enabled' => true]);
+                                    $this->notify('Two-Factor Authentication enabled.');
+                                }
+                            }),
+
+                        Forms\Components\Toggle::make('login_otp_verified')
+                            ->label('Login OTP Verified')
+                            ->helperText('Current session OTP status.')
+                            ->onIcon('heroicon-m-check-circle')
+                            ->offIcon('heroicon-m-x-circle')
+                            ->onColor('success')
+                            ->live()
+                            ->afterStateUpdated(function ($state) {
+                                $this->record->update(['login_otp_verified' => $state]);
+                                $this->notify('Login OTP status updated.');
+                            }),
                     ])
                     ->columns(1),
             ])
@@ -288,7 +325,7 @@ class UserControls extends Component implements HasForms, HasActions
             ->success()
             ->send();
     }
-    
+
     public function render()
     {
         return view('livewire.user-controls');

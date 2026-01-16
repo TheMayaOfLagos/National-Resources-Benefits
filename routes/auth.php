@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
@@ -75,7 +76,17 @@ Route::middleware('auth')->group(function () {
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
-    
+
+    // Two-Factor Authentication Routes
+    Route::prefix('two-factor')->name('auth.two-factor.')->group(function () {
+        Route::get('/challenge', [TwoFactorController::class, 'show'])->name('challenge');
+        Route::post('/verify', [TwoFactorController::class, 'verify'])->name('verify');
+        Route::post('/enable', [TwoFactorController::class, 'enable'])->name('enable');
+        Route::post('/confirm', [TwoFactorController::class, 'confirm'])->name('confirm');
+        Route::post('/disable', [TwoFactorController::class, 'disable'])->name('disable');
+        Route::post('/recovery-codes', [TwoFactorController::class, 'regenerateRecoveryCodes'])->name('recovery-codes');
+    });
+
     // ID.me Identity Verification Routes
     Route::prefix('idme')->name('auth.idme.')->group(function () {
         Route::get('/verify', [\App\Http\Controllers\Auth\IdMeVerificationController::class, 'show'])

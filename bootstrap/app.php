@@ -24,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'feature' => \App\Http\Middleware\CheckFeatureEnabled::class,
             'otp.verified' => \App\Http\Middleware\EnsureLoginOtpIsVerified::class,
             'maintenance' => \App\Http\Middleware\CheckMaintenanceMode::class,
+            '2fa.verified' => \App\Http\Middleware\EnsureTwoFactorVerified::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

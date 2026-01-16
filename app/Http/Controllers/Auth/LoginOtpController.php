@@ -50,6 +50,11 @@ class LoginOtpController extends Controller
             return Inertia::location(route('verification.notice'));
         }
 
+        // Check if 2FA is enabled and needs verification
+        if ($user->two_factor_enabled && $user->two_factor_secret) {
+            return Inertia::location(route('auth.two-factor.challenge'));
+        }
+
         // Check if ID.me verification is required
         if (config('services.idme.required', false) && !$user->idme_verified_at) {
             return Inertia::location(route('auth.idme.verify'));

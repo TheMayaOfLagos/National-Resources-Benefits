@@ -451,7 +451,7 @@ defineExpose({ formatCurrency });
                 <img v-else-if="settings.site_logo" :src="settings.site_logo" :alt="settings.site_name"
                     class="h-10 max-w-[180px] object-contain" />
                 <span v-else class="text-xl font-bold text-primary-600 dark:text-primary-400">{{ settings.site_name
-                }}</span>
+                    }}</span>
                 </Link>
             </div>
 
@@ -503,9 +503,9 @@ defineExpose({ formatCurrency });
             <!-- User Info at Bottom -->
             <div class="p-4 border-t border-gray-200 dark:border-gray-700">
                 <div class="flex items-center">
-                    <Avatar :image="user.avatar_url" :label="user.name?.charAt(0)?.toUpperCase()" size="large"
-                        shape="circle"
-                        class="bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300" />
+                    <img :src="user.avatar_url" :alt="user.name"
+                        class="w-10 h-10 rounded-full object-cover bg-primary-100 dark:bg-primary-900"
+                        @error="$event.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'U')}&background=random`" />
                     <div class="flex-1 min-w-0 ml-3">
                         <p class="text-sm font-medium text-gray-900 truncate dark:text-white">{{ user.name }}</p>
                         <p class="text-xs text-gray-500 truncate dark:text-gray-400">{{ user.email }}</p>
@@ -524,16 +524,16 @@ defineExpose({ formatCurrency });
                     <img v-else-if="settings.site_logo" :src="settings.site_logo" :alt="settings.site_name"
                         class="h-8" />
                     <span v-else class="text-lg font-bold text-primary-600 dark:text-primary-400">{{ settings.site_name
-                    }}</span>
+                        }}</span>
                 </div>
             </template>
 
             <!-- Mobile User Info -->
             <div class="p-4 mb-4 -mx-4 border-b border-gray-200 dark:border-gray-700">
                 <div class="flex items-center">
-                    <Avatar :image="user.avatar_url" :label="user.name?.charAt(0)?.toUpperCase()" size="large"
-                        shape="circle"
-                        class="bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300" />
+                    <img :src="user.avatar_url" :alt="user.name"
+                        class="w-10 h-10 rounded-full object-cover bg-primary-100 dark:bg-primary-900"
+                        @error="$event.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'U')}&background=random`" />
                     <div class="ml-3">
                         <p class="text-sm font-medium text-gray-900 dark:text-white">{{ user.name }}</p>
                         <p class="text-xs text-gray-500 dark:text-gray-400">{{ user.email }}</p>
@@ -631,7 +631,7 @@ defineExpose({ formatCurrency });
                             class="h-8" />
                         <span v-else class="text-lg font-bold text-primary-600 dark:text-primary-400">{{
                             settings.site_name
-                        }}</span>
+                            }}</span>
                         </Link>
                     </div>
 
@@ -732,9 +732,9 @@ defineExpose({ formatCurrency });
                         <!-- User Menu (Desktop) -->
                         <div class="hidden md:block">
                             <Button @click="toggleUserMenu" class="p-button-text p-button-plain" aria-haspopup="true">
-                                <Avatar :image="user.avatar_url" :label="user.name?.charAt(0)?.toUpperCase()"
-                                    shape="circle"
-                                    class="bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300" />
+                                <img :src="user.avatar_url" :alt="user.name"
+                                    class="w-8 h-8 rounded-full object-cover bg-primary-100 dark:bg-primary-900"
+                                    @error="$event.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'U')}&background=random`" />
                                 <span class="ml-2 text-gray-700 dark:text-gray-200">{{ user.name }}</span>
                                 <i class="ml-2 text-xs text-gray-600 pi pi-chevron-down dark:text-gray-400"></i>
                             </Button>

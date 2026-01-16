@@ -1,6 +1,6 @@
 <script setup>
 import { Head, Link, usePage } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 
 defineProps({
     title: {
@@ -26,6 +26,16 @@ const navItems = [
     { label: 'FAQ', href: '/faq' },
     { label: 'Contact', href: '/#contact' },
 ];
+
+// Load JivoChat widget
+onMounted(() => {
+    if (!document.querySelector('script[src*="jivosite.com"]')) {
+        const script = document.createElement('script');
+        script.src = '//code.jivosite.com/widget/0CS8wuJuUN';
+        script.async = true;
+        document.head.appendChild(script);
+    }
+});
 </script>
 
 <template>

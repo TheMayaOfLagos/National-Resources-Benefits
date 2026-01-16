@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use Filament\Widgets\ChartWidget;
+use Illuminate\Support\Facades\DB;
 
 class UserRegistrationsChart extends ChartWidget
 {
@@ -12,7 +13,17 @@ class UserRegistrationsChart extends ChartWidget
 
     protected function getData(): array
     {
-        $data = \App\Models\User::selectRaw('strftime("%Y-%m", created_at) as month, count(*) as count')
+        // Use database-agnostic date formatting
+        $driver = DB::getDriverName();
+
+        if ($driver === 'sqlite') {
+            $dateFormat = "strftime('%Y-%m', created_at)";
+        } else {
+            // MySQL, PostgreSQL, etc.
+            $dateFormat = "DATE_FORMAT(created_at, '%Y-%m')";
+        }
+
+        $data = \App\Models\User::selectRaw("{$dateFormat} as month, count(*) as count")
             ->groupBy('month')
             ->orderBy('month')
             ->pluck('count', 'month')
@@ -23,6 +34,9 @@ class UserRegistrationsChart extends ChartWidget
                 [
                     'label' => 'User Registrations',
                     'data' => array_values($data),
+                    'borderColor' => '#6366f1',
+                    'backgroundColor' => 'rgba(99, 102, 241, 0.1)',
+                    'fill' => true,
                 ],
             ],
             'labels' => array_keys($data),

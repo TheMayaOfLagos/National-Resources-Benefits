@@ -31,10 +31,10 @@ class FundingSourceResource extends Resource
                             ->required()
                             ->maxLength(255)
                             ->columnSpanFull(),
-                        
+
                         Forms\Components\RichEditor::make('description')
                             ->columnSpanFull(),
-                        
+
                         Forms\Components\Grid::make(2)->schema([
                             Forms\Components\TextInput::make('amount_min')
                                 ->label('Min Amount')
@@ -45,20 +45,20 @@ class FundingSourceResource extends Resource
                                 ->numeric()
                                 ->prefix('$'),
                         ]),
-                        
+
                         Forms\Components\Select::make('funding_category_id')
                             ->label('Category')
                             ->relationship('fundingCategory', 'name')
                             ->searchable()
                             ->required()
                             ->helperText('Manage categories from the table header.'),
-                            
+
                         Forms\Components\DatePicker::make('deadline'),
-                        
+
                         Forms\Components\Toggle::make('is_active')
                             ->default(true),
                     ]),
-                
+
                 Forms\Components\Section::make('Application Settings')
                     ->description('Configure how users can apply for this funding')
                     ->schema([
@@ -67,14 +67,14 @@ class FundingSourceResource extends Resource
                             ->helperText('Enable to allow users to apply directly from this platform')
                             ->default(true)
                             ->live(),
-                        
+
                         Forms\Components\TextInput::make('url')
                             ->label('External Application URL')
                             ->url()
                             ->suffixIcon('heroicon-m-globe-alt')
                             ->visible(fn ($get) => !$get('is_internal'))
                             ->helperText('Users will be redirected to this URL to apply'),
-                        
+
                         Forms\Components\Grid::make(2)
                             ->schema([
                                 Forms\Components\TextInput::make('total_slots')
@@ -82,7 +82,7 @@ class FundingSourceResource extends Resource
                                     ->numeric()
                                     ->helperText('Leave empty for unlimited')
                                     ->placeholder('Unlimited'),
-                                
+
                                 Forms\Components\TextInput::make('max_applications_per_user')
                                     ->label('Max Applications Per User')
                                     ->numeric()
@@ -90,15 +90,17 @@ class FundingSourceResource extends Resource
                                     ->helperText('How many times a user can apply'),
                             ])
                             ->visible(fn ($get) => $get('is_internal')),
-                        
+
                         Forms\Components\Textarea::make('requirements')
                             ->label('Eligibility Requirements')
                             ->rows(4)
                             ->helperText('One requirement per line. These will be shown to applicants.')
                             ->placeholder("Must be 18 years or older\nValid ID required\nMust be a resident")
                             ->visible(fn ($get) => $get('is_internal'))
-                            ->columnSpanFull(),
-                        
+                            ->columnSpanFull()
+                            ->formatStateUsing(fn ($record) => $record?->requirements_text ?? '')
+                            ->dehydrateStateUsing(fn ($state) => $state),
+
                         Forms\Components\Repeater::make('form_fields')
                             ->label('Custom Application Fields')
                             ->schema([
@@ -141,35 +143,35 @@ class FundingSourceResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
-                
+
                 Tables\Columns\TextColumn::make('fundingCategory.name')
                     ->label('Category')
                     ->badge()
                     ->color('primary'),
-                
+
                 Tables\Columns\TextColumn::make('amount_min')
                     ->money('USD')
                     ->label('Min Amount'),
-                    
+
                 Tables\Columns\TextColumn::make('amount_max')
                     ->money('USD')
                     ->label('Max Amount'),
-                
+
                 Tables\Columns\IconColumn::make('is_internal')
                     ->label('Internal')
                     ->boolean(),
-                
+
                 Tables\Columns\TextColumn::make('applications_count')
                     ->label('Applications')
                     ->counts('applications')
                     ->badge()
                     ->color('info'),
-                    
+
                 Tables\Columns\TextColumn::make('deadline')
                     ->date()
                     ->sortable()
                     ->color(fn ($record) => $record->deadline && $record->deadline < now() ? 'danger' : 'success'),
-                    
+
                 Tables\Columns\IconColumn::make('is_active')
                     ->boolean(),
             ])
@@ -188,7 +190,7 @@ class FundingSourceResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
-            
+
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),

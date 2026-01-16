@@ -357,8 +357,7 @@ const hasActiveFilters = computed(() => {
                         <i class="pi pi-inbox text-gray-400 text-5xl mb-4"></i>
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">No Transactions</h3>
                         <p class="text-gray-600 dark:text-gray-400">
-                            {{ hasActiveFilters ? 'No transactions match your filters.' : 'This account has no
-                            transactions yet.' }}
+                            {{ hasActiveFilters ? 'No transactions match your filters.' : 'This account has no transactions yet.' }}
                         </p>
                         <Button v-if="hasActiveFilters" label="Clear Filters" icon="pi pi-times" severity="secondary"
                             @click="clearFilters" class="mt-4" />

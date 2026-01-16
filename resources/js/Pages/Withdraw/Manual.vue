@@ -582,12 +582,12 @@ const submitWithdrawal = () => {
                         <div class="flex justify-between mb-2 text-sm">
                             <span class="text-gray-500">Minimum Withdrawal:</span>
                             <span class="font-medium">{{ settings.currency_symbol }}{{ minLimit.toLocaleString()
-                            }}</span>
+                                }}</span>
                         </div>
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-500">Maximum Withdrawal:</span>
                             <span class="font-medium">{{ settings.currency_symbol }}{{ maxLimit.toLocaleString()
-                            }}</span>
+                                }}</span>
                         </div>
                     </div>
 
@@ -818,24 +818,18 @@ const submitWithdrawal = () => {
                         <div class="p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
                             <h4 class="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">Bank Details</h4>
                             <div v-if="useLinkedAccount && selectedLinkedAccount" class="space-y-1 text-sm">
-                                <p class="font-medium text-gray-900 dark:text-white">{{
-                                    selectedLinkedAccount.account_name }}</p>
+                                <p class="font-medium text-gray-900 dark:text-white">{{ selectedLinkedAccount.account_name }}</p>
                                 <p class="text-gray-500">{{ selectedLinkedAccount.display_name }}</p>
                             </div>
                             <div v-else class="grid grid-cols-2 gap-2 text-sm">
                                 <p class="text-gray-500">Bank:</p>
-                                <p class="font-medium text-gray-900 dark:text-white">{{ form.bank_details.bank_name }}
-                                </p>
+                                <p class="font-medium text-gray-900 dark:text-white">{{ form.bank_details.bank_name }}</p>
                                 <p class="text-gray-500">Account Name:</p>
-                                <p class="font-medium text-gray-900 dark:text-white">{{ form.bank_details.account_name
-                                }}</p>
+                                <p class="font-medium text-gray-900 dark:text-white">{{ form.bank_details.account_name }}</p>
                                 <p class="text-gray-500">Account Number:</p>
-                                <p class="font-medium text-gray-900 dark:text-white">****{{
-                                    form.bank_details.account_number?.slice(-4) }}</p>
+                                <p class="font-medium text-gray-900 dark:text-white">****{{ form.bank_details.account_number?.slice(-4) }}</p>
                                 <p v-if="form.bank_details.routing_number" class="text-gray-500">Routing:</p>
-                                <p v-if="form.bank_details.routing_number"
-                                    class="font-medium text-gray-900 dark:text-white">{{
-                                        form.bank_details.routing_number }}</p>
+                                <p v-if="form.bank_details.routing_number" class="font-medium text-gray-900 dark:text-white">{{ form.bank_details.routing_number }}</p>
                             </div>
                         </div>
 

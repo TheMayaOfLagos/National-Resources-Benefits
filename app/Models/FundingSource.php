@@ -33,24 +33,44 @@ class FundingSource extends Model
         'is_active' => 'boolean',
         'is_internal' => 'boolean',
         'form_fields' => 'array',
+        'requirements' => 'array',
     ];
+
+    /**
+     * Set requirements - handles both string (textarea newlines) and array input
+     */
+    public function setRequirementsAttribute($value): void
+    {
+        if (is_string($value) && !empty($value)) {
+            // Convert newline-separated string to array
+            $this->attributes['requirements'] = json_encode(
+                array_values(array_filter(array_map('trim', explode("\n", $value))))
+            );
+        } elseif (is_array($value)) {
+            $this->attributes['requirements'] = json_encode(array_values(array_filter($value)));
+        } else {
+            $this->attributes['requirements'] = null;
+        }
+    }
+
+    /**
+     * Get requirements as newline-separated string for textarea display
+     */
+    public function getRequirementsTextAttribute(): string
+    {
+        $requirements = $this->requirements;
+        if (empty($requirements)) {
+            return '';
+        }
+        return implode("\n", $requirements);
+    }
 
     /**
      * Get requirements as an array (one per line)
      */
     public function getRequirementsListAttribute(): array
     {
-        if (empty($this->requirements)) {
-            return [];
-        }
-        
-        // If stored as string, split by newlines
-        if (is_string($this->requirements)) {
-            return array_filter(array_map('trim', explode("\n", $this->requirements)));
-        }
-        
-        // If already an array
-        return $this->requirements;
+        return $this->requirements ?? [];
     }
 
     public function fundingCategory()
@@ -110,7 +130,7 @@ class FundingSource extends Model
                 ->where('user_id', $user->id)
                 ->whereNotIn('status', ['cancelled', 'rejected'])
                 ->count();
-            
+
             if ($userApplications >= $this->max_applications_per_user) {
                 return ['can_apply' => false, 'reason' => 'You have reached the maximum number of applications for this funding source.'];
             }
@@ -121,7 +141,7 @@ class FundingSource extends Model
             ->where('user_id', $user->id)
             ->whereIn('status', ['pending', 'under_review'])
             ->exists();
-        
+
         if ($existingActive) {
             return ['can_apply' => false, 'reason' => 'You already have an active application for this funding source.'];
         }

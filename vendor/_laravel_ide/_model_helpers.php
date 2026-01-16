@@ -2095,7 +2095,6 @@ namespace App\Models {
      * @property int|null $total_slots
      * @property int|null $max_applications_per_user
      * @property array|null $form_fields
-     * @property string|null $requirements
      * @property boolean $is_internal
      * @property int|null $funding_category_id
      * @property \Illuminate\Support\Carbon|null $updated_at
@@ -2109,6 +2108,8 @@ namespace App\Models {
      * @property string|null $description
      * @property string $title
      * @property int $id
+     * @property-read mixed $requirements
+     * @property-read mixed $requirements_text
      * @property-read mixed $requirements_list
      * @property-read mixed $slots_used
      * @property-read mixed $slots_remaining
@@ -2128,7 +2129,6 @@ namespace App\Models {
      * @method static \Illuminate\Database\Eloquent\Builder<FundingSource>|FundingSource whereUpdatedAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder<FundingSource>|FundingSource whereFundingCategoryId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<FundingSource>|FundingSource whereIsInternal($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<FundingSource>|FundingSource whereRequirements($value)
      * @method static \Illuminate\Database\Eloquent\Builder<FundingSource>|FundingSource whereFormFields($value)
      * @method static \Illuminate\Database\Eloquent\Builder<FundingSource>|FundingSource whereMaxApplicationsPerUser($value)
      * @method static \Illuminate\Database\Eloquent\Builder<FundingSource>|FundingSource whereTotalSlots($value)

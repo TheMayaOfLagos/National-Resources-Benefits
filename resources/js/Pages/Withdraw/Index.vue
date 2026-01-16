@@ -80,7 +80,7 @@ const totalBalance = () => {
         <!-- Page Header -->
         <div class="mb-6">
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Withdraw Funds</h1>
-            <p class="text-gray-500 dark:text-gray-400 mt-1">Request a withdrawal from your account</p>
+            <p class="mt-1 text-gray-500 dark:text-gray-400">Request a withdrawal from your account</p>
         </div>
 
         <!-- Verification Required Warning -->
@@ -102,19 +102,15 @@ const totalBalance = () => {
                 <template #content>
                     <div class="flex items-start gap-4">
                         <div
-                            class="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center flex-shrink-0">
-                            <i class="pi pi-ban text-2xl text-red-600 dark:text-red-400"></i>
+                            class="flex items-center justify-center flex-shrink-0 w-12 h-12 bg-red-100 rounded-full dark:bg-red-900/30">
+                            <i class="text-2xl text-red-600 pi pi-ban dark:text-red-400"></i>
                         </div>
                         <div class="flex-grow">
-                            <h3 class="text-lg font-semibold text-red-700 dark:text-red-400 mb-2">Withdrawal Disabled
-                            </h3>
-                            <p class="text-gray-600 dark:text-gray-400 mb-4">
-                                {{ withdrawalMessage || 'Your withdrawal capability has been disabled. This restriction
-                                has been placed on your account by an administrator.' }}
-                            </p>
-                            <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
-                                <h4 class="font-medium text-red-800 dark:text-red-300 mb-2">What you can do:</h4>
-                                <ul class="text-sm text-red-700 dark:text-red-400 space-y-1">
+                            <h3 class="mb-2 text-lg font-semibold text-red-700 dark:text-red-400">Withdrawal Disabled</h3>
+                            <p class="mb-4 text-gray-600 dark:text-gray-400">{{ withdrawalMessage || 'Your withdrawal capability has been disabled. This restriction has been placed on your account by an administrator.' }}</p>
+                            <div class="p-4 rounded-lg bg-red-50 dark:bg-red-900/20">
+                                <h4 class="mb-2 font-medium text-red-800 dark:text-red-300">What you can do:</h4>
+                                <ul class="space-y-1 text-sm text-red-700 dark:text-red-400">
                                     <li class="flex items-center gap-2">
                                         <i class="pi pi-envelope"></i>
                                         Contact our support team for clarification
@@ -147,26 +143,26 @@ const totalBalance = () => {
                 <template #content>
                     <div class="flex items-start gap-4">
                         <div
-                            class="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center flex-shrink-0">
-                            <i class="pi pi-ban text-2xl text-red-600 dark:text-red-400"></i>
+                            class="flex items-center justify-center flex-shrink-0 w-12 h-12 bg-red-100 rounded-full dark:bg-red-900/30">
+                            <i class="text-2xl text-red-600 pi pi-ban dark:text-red-400"></i>
                         </div>
                         <div class="flex-grow">
                             <div class="flex items-center gap-3 mb-2">
                                 <h3 class="text-lg font-semibold text-red-700 dark:text-red-400">Account Suspended</h3>
                                 <Tag value="Suspended" severity="danger" />
                             </div>
-                            <p class="text-gray-600 dark:text-gray-400 mb-4">
+                            <p class="mb-4 text-gray-600 dark:text-gray-400">
                                 {{ withdrawalMessage || getDefaultStatusMessage('suspended') }}
                             </p>
-                            <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
-                                <h4 class="font-medium text-red-800 dark:text-red-300 mb-2">Why was my account
+                            <div class="p-4 rounded-lg bg-red-50 dark:bg-red-900/20">
+                                <h4 class="mb-2 font-medium text-red-800 dark:text-red-300">Why was my account
                                     suspended?</h4>
-                                <p class="text-sm text-red-700 dark:text-red-400 mb-3">
+                                <p class="mb-3 text-sm text-red-700 dark:text-red-400">
                                     Common reasons include: unusual activity patterns, policy violations,
                                     unverified identity documents, or pending security reviews.
                                 </p>
-                                <h4 class="font-medium text-red-800 dark:text-red-300 mb-2">Next Steps:</h4>
-                                <ul class="text-sm text-red-700 dark:text-red-400 space-y-1">
+                                <h4 class="mb-2 font-medium text-red-800 dark:text-red-300">Next Steps:</h4>
+                                <ul class="space-y-1 text-sm text-red-700 dark:text-red-400">
                                     <li class="flex items-center gap-2">
                                         <i class="pi pi-check"></i>
                                         Contact support to understand the reason
@@ -181,7 +177,7 @@ const totalBalance = () => {
                                     </li>
                                 </ul>
                             </div>
-                            <div class="mt-4 flex gap-3">
+                            <div class="flex gap-3 mt-4">
                                 <Link :href="route('support.index')">
                                 <Button label="Contact Support" icon="pi pi-envelope" severity="danger" />
                                 </Link>
@@ -201,8 +197,8 @@ const totalBalance = () => {
                 <template #content>
                     <div class="flex items-start gap-4">
                         <div
-                            class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center flex-shrink-0">
-                            <i class="pi pi-clock text-2xl text-yellow-600 dark:text-yellow-400"></i>
+                            class="flex items-center justify-center flex-shrink-0 w-12 h-12 bg-yellow-100 rounded-full dark:bg-yellow-900/30">
+                            <i class="text-2xl text-yellow-600 pi pi-clock dark:text-yellow-400"></i>
                         </div>
                         <div class="flex-grow">
                             <div class="flex items-center gap-3 mb-2">
@@ -210,13 +206,13 @@ const totalBalance = () => {
                                     Hold</h3>
                                 <Tag value="On Hold" severity="warn" />
                             </div>
-                            <p class="text-gray-600 dark:text-gray-400 mb-4">
+                            <p class="mb-4 text-gray-600 dark:text-gray-400">
                                 {{ withdrawalMessage || getDefaultStatusMessage('hold') }}
                             </p>
-                            <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4">
-                                <h4 class="font-medium text-yellow-800 dark:text-yellow-300 mb-2">What does this mean?
+                            <div class="p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20">
+                                <h4 class="mb-2 font-medium text-yellow-800 dark:text-yellow-300">What does this mean?
                                 </h4>
-                                <p class="text-sm text-yellow-700 dark:text-yellow-400 mb-3">
+                                <p class="mb-3 text-sm text-yellow-700 dark:text-yellow-400">
                                     Your withdrawal capability has been temporarily placed on hold. This is often
                                     a precautionary measure and typically resolves within 24-72 hours.
                                 </p>
@@ -225,7 +221,7 @@ const totalBalance = () => {
                                     <span>Your funds are safe and secure in your account.</span>
                                 </div>
                             </div>
-                            <div class="mt-4 flex gap-3">
+                            <div class="flex gap-3 mt-4">
                                 <Link :href="route('support.index')">
                                 <Button label="Contact Support" icon="pi pi-envelope" severity="warn" outlined />
                                 </Link>
@@ -242,8 +238,8 @@ const totalBalance = () => {
                 <template #content>
                     <div class="flex items-start gap-4">
                         <div
-                            class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0">
-                            <i class="pi pi-search text-2xl text-blue-600 dark:text-blue-400"></i>
+                            class="flex items-center justify-center flex-shrink-0 w-12 h-12 bg-blue-100 rounded-full dark:bg-blue-900/30">
+                            <i class="text-2xl text-blue-600 pi pi-search dark:text-blue-400"></i>
                         </div>
                         <div class="flex-grow">
                             <div class="flex items-center gap-3 mb-2">
@@ -251,39 +247,39 @@ const totalBalance = () => {
                                 </h3>
                                 <Tag value="Under Review" severity="info" />
                             </div>
-                            <p class="text-gray-600 dark:text-gray-400 mb-4">
+                            <p class="mb-4 text-gray-600 dark:text-gray-400">
                                 {{ withdrawalMessage || getDefaultStatusMessage('under_review') }}
                             </p>
-                            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-                                <h4 class="font-medium text-blue-800 dark:text-blue-300 mb-2">Review Process</h4>
+                            <div class="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                                <h4 class="mb-2 font-medium text-blue-800 dark:text-blue-300">Review Process</h4>
                                 <div class="space-y-3">
                                     <div class="flex items-center gap-3">
                                         <div
-                                            class="w-8 h-8 bg-blue-200 dark:bg-blue-800 rounded-full flex items-center justify-center text-sm font-bold text-blue-700 dark:text-blue-300">
+                                            class="flex items-center justify-center w-8 h-8 text-sm font-bold text-blue-700 bg-blue-200 rounded-full dark:bg-blue-800 dark:text-blue-300">
                                             1</div>
                                         <span class="text-sm text-blue-700 dark:text-blue-400">Account flagged for
                                             routine review</span>
                                     </div>
                                     <div class="flex items-center gap-3">
                                         <div
-                                            class="w-8 h-8 bg-blue-200 dark:bg-blue-800 rounded-full flex items-center justify-center text-sm font-bold text-blue-700 dark:text-blue-300">
+                                            class="flex items-center justify-center w-8 h-8 text-sm font-bold text-blue-700 bg-blue-200 rounded-full dark:bg-blue-800 dark:text-blue-300">
                                             2</div>
                                         <span class="text-sm text-blue-700 dark:text-blue-400">Compliance team reviewing
                                             documentation</span>
                                     </div>
                                     <div class="flex items-center gap-3">
                                         <div
-                                            class="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center text-sm font-bold text-gray-500">
+                                            class="flex items-center justify-center w-8 h-8 text-sm font-bold text-gray-500 bg-gray-200 rounded-full dark:bg-gray-700">
                                             3</div>
                                         <span class="text-sm text-gray-500">Review completion and status update</span>
                                     </div>
                                 </div>
-                                <p class="text-sm text-blue-700 dark:text-blue-400 mt-3">
-                                    <i class="pi pi-clock mr-1"></i>
+                                <p class="mt-3 text-sm text-blue-700 dark:text-blue-400">
+                                    <i class="mr-1 pi pi-clock"></i>
                                     Estimated completion: 1-3 business days
                                 </p>
                             </div>
-                            <div class="mt-4 flex gap-3">
+                            <div class="flex gap-3 mt-4">
                                 <Link :href="route('support.index')">
                                 <Button label="Contact Support" icon="pi pi-envelope" severity="info" outlined />
                                 </Link>
@@ -300,23 +296,23 @@ const totalBalance = () => {
         <!-- Balance & Limits Info (show only when withdrawals are possible) -->
         <Card v-if="!isWithdrawalBlocked" class="mb-6">
             <template #content>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <div class="grid grid-cols-2 gap-4 text-center md:grid-cols-4">
                     <div>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Total Balance</p>
                         <p class="text-xl font-bold text-green-600">{{ settings.currency_symbol }}{{
                             totalBalance().toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</p>
                     </div>
-                    <div class="border-l border-gray-200 dark:border-gray-700 pl-4">
+                    <div class="pl-4 border-l border-gray-200 dark:border-gray-700">
                         <p class="text-sm text-gray-500 dark:text-gray-400">Min Withdrawal</p>
                         <p class="text-xl font-bold text-primary-600">{{ settings.currency_symbol }}{{
                             settings.withdrawal_min }}</p>
                     </div>
-                    <div class="border-l border-gray-200 dark:border-gray-700 pl-4">
+                    <div class="pl-4 border-l border-gray-200 dark:border-gray-700">
                         <p class="text-sm text-gray-500 dark:text-gray-400">Max Withdrawal</p>
                         <p class="text-xl font-bold text-primary-600">{{ settings.currency_symbol }}{{
                             settings.withdrawal_max }}</p>
                     </div>
-                    <div class="border-l border-gray-200 dark:border-gray-700 pl-4">
+                    <div class="pl-4 border-l border-gray-200 dark:border-gray-700">
                         <p class="text-sm text-gray-500 dark:text-gray-400">Daily Remaining</p>
                         <p class="text-xl font-bold text-orange-600">{{ settings.currency_symbol }}{{
                             remainingDailyLimit }}</p>
@@ -334,16 +330,16 @@ const totalBalance = () => {
                 </div>
             </template>
             <template #content>
-                <div v-if="accounts.length === 0" class="text-center py-4 text-gray-500">
-                    <i class="pi pi-inbox text-3xl mb-2"></i>
+                <div v-if="accounts.length === 0" class="py-4 text-center text-gray-500">
+                    <i class="mb-2 text-3xl pi pi-inbox"></i>
                     <p>No accounts found. Please contact support.</p>
                 </div>
                 <div v-else class="space-y-3">
                     <div v-for="account in accounts" :key="account.id"
-                        class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        class="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
                         <div class="flex items-center gap-3">
                             <div
-                                class="w-10 h-10 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center">
+                                class="flex items-center justify-center w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900">
                                 <i class="pi pi-wallet text-primary-600"></i>
                             </div>
                             <div>
@@ -360,43 +356,43 @@ const totalBalance = () => {
         </Card>
 
         <!-- Withdrawal Method Selection -->
-        <div class="grid md:grid-cols-2 gap-6"
+        <div class="grid gap-6 md:grid-cols-2"
             :class="{ 'opacity-50 pointer-events-none': !canWithdraw || withdrawalStatus !== 'approved' || requiresVerification }">
             <!-- Manual Withdrawal Card -->
-            <Card class="hover:shadow-lg transition-shadow">
+            <Card class="transition-shadow hover:shadow-lg">
                 <template #header>
-                    <div class="bg-gradient-to-r from-purple-500 to-purple-600 p-6 text-white text-center rounded-t-lg">
-                        <i class="pi pi-building text-4xl mb-3"></i>
+                    <div class="p-6 text-center text-white rounded-t-lg bg-gradient-to-r from-purple-500 to-purple-600">
+                        <i class="mb-3 text-4xl pi pi-building"></i>
                         <h3 class="text-xl font-bold">Bank Withdrawal</h3>
                     </div>
                 </template>
                 <template #content>
                     <div class="text-center">
-                        <p class="text-gray-600 dark:text-gray-400 mb-4">
+                        <p class="mb-4 text-gray-600 dark:text-gray-400">
                             Withdraw funds directly to your bank account via wire transfer or ACH.
                         </p>
-                        <ul class="text-sm text-left text-gray-500 dark:text-gray-400 mb-4 space-y-2">
+                        <ul class="mb-4 space-y-2 text-sm text-left text-gray-500 dark:text-gray-400">
                             <li class="flex items-center gap-2">
-                                <i class="pi pi-check text-green-500"></i>
+                                <i class="text-green-500 pi pi-check"></i>
                                 Bank Wire Transfer
                             </li>
                             <li class="flex items-center gap-2">
-                                <i class="pi pi-check text-green-500"></i>
+                                <i class="text-green-500 pi pi-check"></i>
                                 ACH Direct Deposit
                             </li>
                             <li class="flex items-center gap-2">
-                                <i class="pi pi-check text-green-500"></i>
+                                <i class="text-green-500 pi pi-check"></i>
                                 International Wire
                             </li>
                         </ul>
-                        <p class="text-xs text-gray-400 mb-4">
+                        <p class="mb-4 text-xs text-gray-400">
                             Processing time: 1-5 business days
                         </p>
                         <Link :href="route('withdraw.manual')">
                         <Button label="Request Bank Withdrawal" icon="pi pi-arrow-right" iconPos="right" class="w-full"
                             :disabled="manualMethodsCount === 0" />
                         </Link>
-                        <p v-if="manualMethodsCount === 0" class="text-xs text-orange-500 mt-2">
+                        <p v-if="manualMethodsCount === 0" class="mt-2 text-xs text-orange-500">
                             No bank withdrawal methods available
                         </p>
                     </div>
@@ -404,40 +400,40 @@ const totalBalance = () => {
             </Card>
 
             <!-- Automatic Withdrawal Card -->
-            <Card class="hover:shadow-lg transition-shadow">
+            <Card class="transition-shadow hover:shadow-lg">
                 <template #header>
-                    <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 p-6 text-white text-center rounded-t-lg">
-                        <i class="pi pi-bolt text-4xl mb-3"></i>
+                    <div class="p-6 text-center text-white rounded-t-lg bg-gradient-to-r from-indigo-500 to-indigo-600">
+                        <i class="mb-3 text-4xl pi pi-bolt"></i>
                         <h3 class="text-xl font-bold">Express Withdrawal</h3>
                     </div>
                 </template>
                 <template #content>
                     <div class="text-center">
-                        <p class="text-gray-600 dark:text-gray-400 mb-4">
+                        <p class="mb-4 text-gray-600 dark:text-gray-400">
                             Fast withdrawals via supported payment processors and digital wallets.
                         </p>
-                        <ul class="text-sm text-left text-gray-500 dark:text-gray-400 mb-4 space-y-2">
+                        <ul class="mb-4 space-y-2 text-sm text-left text-gray-500 dark:text-gray-400">
                             <li class="flex items-center gap-2">
-                                <i class="pi pi-check text-green-500"></i>
+                                <i class="text-green-500 pi pi-check"></i>
                                 PayPal Withdrawal
                             </li>
                             <li class="flex items-center gap-2">
-                                <i class="pi pi-check text-green-500"></i>
+                                <i class="text-green-500 pi pi-check"></i>
                                 Crypto Wallet
                             </li>
                             <li class="flex items-center gap-2">
-                                <i class="pi pi-check text-green-500"></i>
+                                <i class="text-green-500 pi pi-check"></i>
                                 E-Wallet Transfer
                             </li>
                         </ul>
-                        <p class="text-xs text-gray-400 mb-4">
+                        <p class="mb-4 text-xs text-gray-400">
                             Processing time: 1-24 hours
                         </p>
                         <Link :href="route('withdraw.automatic')">
                         <Button label="Request Express Withdrawal" icon="pi pi-arrow-right" iconPos="right"
                             severity="help" class="w-full" :disabled="automaticMethodsCount === 0" />
                         </Link>
-                        <p v-if="automaticMethodsCount === 0" class="text-xs text-orange-500 mt-2">
+                        <p v-if="automaticMethodsCount === 0" class="mt-2 text-xs text-orange-500">
                             No express methods available
                         </p>
                     </div>
@@ -466,8 +462,8 @@ const totalBalance = () => {
                             settings.withdrawal_limit_daily.toLocaleString() }}</p>
                     </div>
                 </div>
-                <div class="mt-4 bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
-                    <div class="bg-primary-600 h-full transition-all duration-300"
+                <div class="h-3 mt-4 overflow-hidden bg-gray-200 rounded-full dark:bg-gray-700">
+                    <div class="h-full transition-all duration-300 bg-primary-600"
                         :style="{ width: `${Math.min((parseFloat(todayWithdrawals.replace(/,/g, '')) / settings.withdrawal_limit_daily) * 100, 100)}%` }">
                     </div>
                 </div>
@@ -476,8 +472,8 @@ const totalBalance = () => {
 
         <!-- Withdrawal History Link -->
         <div class="mt-8 text-center">
-            <Link :href="route('withdraw.history')" class="text-primary-600 hover:text-primary-700 font-medium">
-            <i class="pi pi-history mr-2"></i>
+            <Link :href="route('withdraw.history')" class="font-medium text-primary-600 hover:text-primary-700">
+            <i class="mr-2 pi pi-history"></i>
             View Withdrawal History
             </Link>
         </div>
@@ -491,16 +487,16 @@ const totalBalance = () => {
                 </div>
             </template>
             <template #content>
-                <div class="grid md:grid-cols-2 gap-4 text-sm">
+                <div class="grid gap-4 text-sm md:grid-cols-2">
                     <div>
-                        <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Processing Times</h4>
+                        <h4 class="mb-2 font-semibold text-gray-900 dark:text-white">Processing Times</h4>
                         <p class="text-gray-600 dark:text-gray-400">
                             Bank withdrawals typically take 1-5 business days. Express withdrawals are processed within
                             24 hours.
                         </p>
                     </div>
                     <div>
-                        <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Verification Codes</h4>
+                        <h4 class="mb-2 font-semibold text-gray-900 dark:text-white">Verification Codes</h4>
                         <p class="text-gray-600 dark:text-gray-400">
                             You may need to enter verification codes (IMF, Tax, COT) before withdrawing.
                             <Link :href="route('withdraw.verify')" class="text-primary-600 hover:underline">Verify now

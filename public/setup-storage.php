@@ -3,8 +3,9 @@
  * Post-Deployment Setup Script
  * 
  * Run this script once after deploying to cPanel to:
- * 1. Migrate files from storage to uploads directory
- * 2. Fix permissions
+ * 1. Create uploads directory structure
+ * 2. Migrate files from storage to uploads directory
+ * 3. Fix permissions
  * 
  * Access via: https://yourdomain.com/setup-storage.php?token=YOUR_TOKEN
  * DELETE THIS FILE AFTER RUNNING!
@@ -29,17 +30,38 @@ $newUploadsPath = $publicPath . '/uploads';
 echo "Old storage path: $oldStoragePath\n";
 echo "New uploads path: $newUploadsPath\n\n";
 
-// Create uploads directory if it doesn't exist
-if (!is_dir($newUploadsPath)) {
-    echo "Creating uploads directory...\n";
-    if (mkdir($newUploadsPath, 0755, true)) {
-        echo "✅ Created uploads directory\n";
+// Required subdirectories for Filament uploads
+$requiredDirs = [
+    'settings',
+    'avatars', 
+    'ranks',
+    'gateways',
+    'gateway-qr',
+    'payment-methods',
+    'kyc-documents',
+    'funding-applications',
+];
+
+// Create uploads directory and all subdirectories
+echo "Creating uploads directory structure...\n";
+foreach ($requiredDirs as $dir) {
+    $fullPath = $newUploadsPath . '/' . $dir;
+    if (!is_dir($fullPath)) {
+        if (mkdir($fullPath, 0755, true)) {
+            echo "  ✅ Created: uploads/$dir/\n";
+        } else {
+            echo "  ❌ Failed to create: uploads/$dir/\n";
+        }
     } else {
-        echo "❌ Failed to create uploads directory\n";
+        echo "  ✓ Exists: uploads/$dir/\n";
     }
-} else {
-    echo "✅ Uploads directory exists\n";
 }
+
+// Also ensure base uploads directory exists
+if (!is_dir($newUploadsPath)) {
+    mkdir($newUploadsPath, 0755, true);
+}
+echo "✅ Directory structure ready\n";
 
 // Function to recursively copy directory
 function recurseCopy($src, $dst) {

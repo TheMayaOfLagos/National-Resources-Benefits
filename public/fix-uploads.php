@@ -141,6 +141,9 @@ echo "  - file_exists(): " . (file_exists($storageDir) ? 'true' : 'false') . "\n
 echo "  - is_link(): " . (is_link($storageDir) ? 'true' : 'false') . "\n";
 echo "  - is_dir(): " . (is_dir($storageDir) ? 'true' : 'false') . "\n";
 
+// Check if symlink function is available
+echo "  - symlink() available: " . (function_exists('symlink') ? 'yes' : 'NO') . "\n";
+
 if (is_link($storageDir)) {
     $target = @readlink($storageDir);
     echo "  - current target: $target\n";
@@ -148,35 +151,75 @@ if (is_link($storageDir)) {
         echo "✓ Symlink already correct: /storage -> uploads\n";
     } else {
         echo "⚠️ Symlink points to wrong target, fixing...\n";
-        @unlink($storageDir);
-        if (@symlink('uploads', $storageDir)) {
-            echo "✅ Fixed symlink: /storage -> uploads\n";
+        if (@unlink($storageDir)) {
+            echo "  ✅ Removed old symlink\n";
         } else {
-            echo "❌ Failed to create symlink\n";
+            echo "  ❌ Failed to remove old symlink\n";
         }
     }
 } elseif (is_dir($storageDir) && !is_link($storageDir)) {
-    echo "⚠️ Real directory exists at /storage - need manual cleanup\n";
-    echo "Run in cPanel Terminal:\n";
-    echo "  rm -rf " . $storageDir . "\n";
-    echo "  ln -s uploads " . $storageDir . "\n";
-} else {
-    // Create symlink
-    if (@symlink('uploads', $storageDir)) {
-        echo "✅ Created symlink: /storage -> uploads\n";
+    echo "⚠️ Real directory exists at /storage\n";
+    
+    // Check if directory is empty
+    $files = @scandir($storageDir);
+    $isEmpty = ($files && count($files) <= 2); // Only . and ..
+    
+    if ($isEmpty) {
+        echo "  Directory is empty, removing...\n";
+        if (@rmdir($storageDir)) {
+            echo "  ✅ Removed empty directory\n";
+        } else {
+            echo "  ❌ Failed to remove directory\n";
+        }
     } else {
-        echo "❌ Failed to create symlink\n";
-        echo "Run in cPanel Terminal:\n";
-        echo "  ln -s uploads " . $storageDir . "\n";
+        echo "  Directory has files, need manual cleanup\n";
+        echo "  Run in cPanel Terminal:\n";
+        echo "    rm -rf " . $storageDir . "\n";
     }
 }
 
-// Verify symlink works
+// Try to create symlink if storage path doesn't exist now
+if (!file_exists($storageDir) && !is_link($storageDir)) {
+    echo "\nAttempting to create symlink...\n";
+    
+    // Clear any errors
+    error_clear_last();
+    
+    // Try symlink with error suppression off to see the actual error
+    $result = @symlink('uploads', $storageDir);
+    $error = error_get_last();
+    
+    if ($result) {
+        echo "✅ Created symlink: /storage -> uploads\n";
+    } else {
+        echo "❌ Failed to create symlink via PHP\n";
+        if ($error) {
+            echo "  Error: " . $error['message'] . "\n";
+        }
+        echo "\n⚠️ PHP symlink() may be disabled on this server.\n";
+        echo "Run these commands in cPanel Terminal:\n";
+        echo "  cd /home/zpprnrpp/public_html/public\n";
+        echo "  ln -s uploads storage\n";
+    }
+}
+
+// Final verification
+echo "\n=== Final Verification ===\n";
+echo "Storage path: $storageDir\n";
+echo "  - exists: " . (file_exists($storageDir) ? 'yes' : 'no') . "\n";
+echo "  - is_link: " . (is_link($storageDir) ? 'yes' : 'no') . "\n";
+echo "  - is_dir: " . (is_dir($storageDir) ? 'yes' : 'no') . "\n";
+
 if (is_link($storageDir) && is_dir($storageDir)) {
     echo "✅ Verified: /storage symlink works!\n";
     echo "\nNow these URLs are equivalent:\n";
     echo "  /uploads/avatars/file.jpg\n";
     echo "  /storage/avatars/file.jpg\n";
+} else {
+    echo "\n❌ Symlink NOT working yet.\n";
+    echo "You MUST run this in cPanel Terminal:\n";
+    echo "  cd /home/zpprnrpp/public_html/public\n";
+    echo "  ln -s uploads storage\n";
 }
 
 echo "\n✅ Done! Now test uploading an image.\n";

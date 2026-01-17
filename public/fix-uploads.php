@@ -1,7 +1,7 @@
 <?php
 /**
  * Quick Fix Script - Creates uploads directory
- * 
+ *
  * This script REMOVES any symlink and creates a REAL directory.
  *
  * Access: https://yourdomain.com/fix-uploads.php?token=NRB-SETUP-2024
@@ -130,6 +130,53 @@ if (is_dir($uploadsDir)) {
         if ($item === '.' || $item === '..') continue;
         echo (is_dir($uploadsDir . '/' . $item) ? '[DIR] ' : '[FILE] ') . "$item\n";
     }
+}
+
+// Create /storage -> /uploads symlink for backward compatibility
+echo "\n=== Creating /storage compatibility symlink ===\n";
+$storageDir = __DIR__ . '/storage';
+
+echo "Checking: $storageDir\n";
+echo "  - file_exists(): " . (file_exists($storageDir) ? 'true' : 'false') . "\n";
+echo "  - is_link(): " . (is_link($storageDir) ? 'true' : 'false') . "\n";
+echo "  - is_dir(): " . (is_dir($storageDir) ? 'true' : 'false') . "\n";
+
+if (is_link($storageDir)) {
+    $target = @readlink($storageDir);
+    echo "  - current target: $target\n";
+    if ($target === 'uploads' || $target === './uploads') {
+        echo "✓ Symlink already correct: /storage -> uploads\n";
+    } else {
+        echo "⚠️ Symlink points to wrong target, fixing...\n";
+        @unlink($storageDir);
+        if (@symlink('uploads', $storageDir)) {
+            echo "✅ Fixed symlink: /storage -> uploads\n";
+        } else {
+            echo "❌ Failed to create symlink\n";
+        }
+    }
+} elseif (is_dir($storageDir) && !is_link($storageDir)) {
+    echo "⚠️ Real directory exists at /storage - need manual cleanup\n";
+    echo "Run in cPanel Terminal:\n";
+    echo "  rm -rf " . $storageDir . "\n";
+    echo "  ln -s uploads " . $storageDir . "\n";
+} else {
+    // Create symlink
+    if (@symlink('uploads', $storageDir)) {
+        echo "✅ Created symlink: /storage -> uploads\n";
+    } else {
+        echo "❌ Failed to create symlink\n";
+        echo "Run in cPanel Terminal:\n";
+        echo "  ln -s uploads " . $storageDir . "\n";
+    }
+}
+
+// Verify symlink works
+if (is_link($storageDir) && is_dir($storageDir)) {
+    echo "✅ Verified: /storage symlink works!\n";
+    echo "\nNow these URLs are equivalent:\n";
+    echo "  /uploads/avatars/file.jpg\n";
+    echo "  /storage/avatars/file.jpg\n";
 }
 
 echo "\n✅ Done! Now test uploading an image.\n";

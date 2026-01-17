@@ -1,6 +1,8 @@
 <?php
 /**
  * Quick Fix Script - Creates uploads directory
+ * 
+ * This script REMOVES any symlink and creates a REAL directory.
  *
  * Access: https://yourdomain.com/fix-uploads.php?token=NRB-SETUP-2024
  * DELETE AFTER USE!
@@ -12,35 +14,44 @@ if ($token !== 'NRB-SETUP-2024') {
 }
 
 echo "<pre>";
-echo "=== Quick Fix: Creating uploads directory ===\n\n";
+echo "=== Quick Fix: Creating REAL uploads directory ===\n\n";
 
 $uploadsDir = __DIR__ . '/uploads';
 
 // Check what exists at this path
 echo "Checking: $uploadsDir\n";
-if (file_exists($uploadsDir)) {
-    echo "  - file_exists: true\n";
-} else {
-    echo "  - file_exists: false\n";
-}
+echo "  - file_exists(): " . (file_exists($uploadsDir) ? 'true' : 'false') . "\n";
+echo "  - is_link(): " . (is_link($uploadsDir) ? 'true' : 'false') . "\n";
+echo "  - is_dir(): " . (is_dir($uploadsDir) ? 'true' : 'false') . "\n";
+echo "  - is_file(): " . (is_file($uploadsDir) ? 'true' : 'false') . "\n";
+
 if (is_link($uploadsDir)) {
-    echo "  - is_link: true (target: " . readlink($uploadsDir) . ")\n";
-} else {
-    echo "  - is_link: false\n";
-}
-if (is_dir($uploadsDir)) {
-    echo "  - is_dir: true\n";
-} else {
-    echo "  - is_dir: false\n";
+    $target = @readlink($uploadsDir);
+    echo "  - symlink target: " . ($target ?: 'unreadable') . "\n";
 }
 
-// Remove broken symlink or file if it exists but isn't a valid directory
-if ((is_link($uploadsDir) || file_exists($uploadsDir)) && !is_dir($uploadsDir)) {
-    echo "\n⚠️ Found broken symlink or file, removing...\n";
-    if (is_link($uploadsDir)) {
-        unlink($uploadsDir);
-        echo "✅ Removed broken symlink\n";
+// FORCE REMOVE if it's a symlink (regardless of whether it works)
+if (is_link($uploadsDir)) {
+    echo "\n⚠️ Found SYMLINK at uploads path - REMOVING IT...\n";
+    if (@unlink($uploadsDir)) {
+        echo "✅ Removed symlink successfully\n";
+    } else {
+        echo "❌ Failed to remove symlink via PHP\n";
+        echo "\nRun this in cPanel Terminal:\n";
+        echo "  rm -f " . $uploadsDir . "\n";
+        echo "  mkdir -p " . $uploadsDir . "\n";
+        echo "</pre>";
+        exit;
     }
+}
+
+// Also check parent directory for symlink (public_html/uploads)
+$parentUploads = dirname(__DIR__) . '/uploads';
+echo "\nChecking parent: $parentUploads\n";
+echo "  - is_link(): " . (is_link($parentUploads) ? 'true' : 'false') . "\n";
+if (is_link($parentUploads)) {
+    echo "  - symlink target: " . @readlink($parentUploads) . "\n";
+    echo "  ⚠️ This symlink in public_html may be fine (for web access)\n";
 }
 
 // Create main directory
@@ -51,7 +62,7 @@ if (!is_dir($uploadsDir)) {
         $error = error_get_last();
         echo "❌ Failed to create: $uploadsDir\n";
         echo "   Error: " . ($error['message'] ?? 'Unknown') . "\n";
-        
+
         // Try to see what's blocking
         if (is_link($uploadsDir)) {
             echo "   Reason: Symlink exists at path\n";

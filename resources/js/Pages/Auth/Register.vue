@@ -212,10 +212,10 @@ const passwordStrength = computed(() => {
     <Head title="Create Account" />
     <Toast position="top-right" />
 
-    <div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-zinc-900 py-12 px-4 sm:px-6">
+    <div class="flex items-center justify-center min-h-screen px-4 py-12 bg-gray-50 dark:bg-zinc-900 sm:px-6">
         <div class="w-full max-w-2xl">
             <!-- Logo -->
-            <div class="text-center mb-8">
+            <div class="mb-8 text-center">
                 <Link href="/">
                 <img v-if="settings.site_logo" :src="settings.site_logo" :alt="settings.site_name || 'Logo'"
                     class="h-12 max-w-[220px] object-contain mx-auto dark:hidden" />
@@ -229,10 +229,10 @@ const passwordStrength = computed(() => {
 
             <!-- Registration Card -->
             <div
-                class="bg-white dark:bg-zinc-800 rounded-2xl shadow-xl border border-gray-100 dark:border-zinc-700 p-8">
+                class="p-8 bg-white border border-gray-100 shadow-xl dark:bg-zinc-800 rounded-2xl dark:border-zinc-700">
                 <!-- Header -->
-                <div class="text-center mb-8">
-                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                <div class="mb-8 text-center">
+                    <h2 class="mb-2 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
                         Registration Form
                     </h2>
                     <p class="text-gray-600 dark:text-gray-400">
@@ -243,16 +243,16 @@ const passwordStrength = computed(() => {
                 <!-- Registration Form -->
                 <form @submit.prevent="openConfirmDialog" class="space-y-6">
                     <!-- Section: Funding Needs -->
-                    <div class="border-b border-gray-200 dark:border-zinc-700 pb-6">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                            <i class="pi pi-dollar text-green-600"></i>
+                    <div class="pb-6 border-b border-gray-200 dark:border-zinc-700">
+                        <h3 class="flex items-center gap-2 mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+                            <i class="text-green-600 pi pi-dollar"></i>
                             Select Your Application Category
                         </h3>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <!-- Funding Type -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Apply As <span class="text-red-500">*</span>
                                 </label>
                                 <Dropdown v-model="form.funding_type" :options="fundingTypes" optionLabel="label"
@@ -262,7 +262,7 @@ const passwordStrength = computed(() => {
 
                             <!-- Funding Amount -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Application Amount <span class="text-red-500">*</span>
                                 </label>
                                 <Dropdown v-model="form.funding_amount" :options="fundingAmounts" optionLabel="label"
@@ -273,16 +273,16 @@ const passwordStrength = computed(() => {
                     </div>
 
                     <!-- Section: Personal Information -->
-                    <div class="border-b border-gray-200 dark:border-zinc-700 pb-6">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                            <i class="pi pi-user text-blue-600"></i>
+                    <div class="pb-6 border-b border-gray-200 dark:border-zinc-700">
+                        <h3 class="flex items-center gap-2 mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+                            <i class="text-blue-600 pi pi-user"></i>
                             Personal Information
                         </h3>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <!-- Citizenship Status -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Citizenship Status <span class="text-red-500">*</span>
                                 </label>
                                 <Dropdown v-model="form.citizenship_status" :options="citizenshipStatuses"
@@ -292,7 +292,7 @@ const passwordStrength = computed(() => {
 
                             <!-- ZIP Code -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                     ZIP Code <span class="text-red-500">*</span>
                                 </label>
                                 <InputText v-model="form.zip_code" type="text" class="w-full"
@@ -301,7 +301,7 @@ const passwordStrength = computed(() => {
 
                             <!-- Gender -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Gender <span class="text-red-500">*</span>
                                 </label>
                                 <Dropdown v-model="form.gender" :options="genders" optionLabel="label"
@@ -310,7 +310,7 @@ const passwordStrength = computed(() => {
 
                             <!-- Age Range -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Age Range <span class="text-red-500">*</span>
                                 </label>
                                 <Dropdown v-model="form.age_range" :options="ageRanges" optionLabel="label"
@@ -319,7 +319,7 @@ const passwordStrength = computed(() => {
 
                             <!-- Ethnicity -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Ethnicity <span class="text-red-500">*</span>
                                 </label>
                                 <Dropdown v-model="form.ethnicity" :options="ethnicities" optionLabel="label"
@@ -328,7 +328,7 @@ const passwordStrength = computed(() => {
 
                             <!-- Employment Status -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Employment Status <span class="text-red-500">*</span>
                                 </label>
                                 <Dropdown v-model="form.employment_status" :options="employmentStatuses"
@@ -340,39 +340,39 @@ const passwordStrength = computed(() => {
 
                     <!-- Section: Account Information -->
                     <div>
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                            <i class="pi pi-lock text-purple-600"></i>
+                        <h3 class="flex items-center gap-2 mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+                            <i class="text-purple-600 pi pi-lock"></i>
                             Account Information
                         </h3>
 
                         <div class="space-y-4">
                             <!-- Email -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Email Address <span class="text-red-500">*</span>
-                                    <span class="text-xs text-gray-500 ml-2">(This will be your username)</span>
+                                    <span class="ml-2 text-xs text-gray-500">(This will be your username)</span>
                                 </label>
                                 <div class="relative">
                                     <i
-                                        class="pi pi-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                        class="absolute text-gray-400 -translate-y-1/2 pi pi-envelope left-4 top-1/2"></i>
                                     <InputText v-model="form.email" type="email" class="w-full input-with-icon"
                                         placeholder="Enter your email" autocomplete="email" />
                                 </div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                    <i class="pi pi-shield text-green-500 mr-1"></i>
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                    <i class="mr-1 text-green-500 pi pi-shield"></i>
                                     Your email is safe. We hate spam as much as you do!
                                 </p>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <!-- First Name -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                         First Name <span class="text-red-500">*</span>
                                     </label>
                                     <div class="relative">
                                         <i
-                                            class="pi pi-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                            class="absolute text-gray-400 -translate-y-1/2 pi pi-user left-4 top-1/2"></i>
                                         <InputText v-model="form.first_name" type="text" class="w-full input-with-icon"
                                             placeholder="First name" autocomplete="given-name" />
                                     </div>
@@ -380,32 +380,32 @@ const passwordStrength = computed(() => {
 
                                 <!-- Last Name -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                         Last Name <span class="text-red-500">*</span>
                                     </label>
                                     <div class="relative">
                                         <i
-                                            class="pi pi-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                            class="absolute text-gray-400 -translate-y-1/2 pi pi-user left-4 top-1/2"></i>
                                         <InputText v-model="form.last_name" type="text" class="w-full input-with-icon"
                                             placeholder="Last name" autocomplete="family-name" />
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <!-- Password -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                         Password <span class="text-red-500">*</span>
                                     </label>
                                     <div class="relative">
                                         <i
-                                            class="pi pi-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                            class="absolute text-gray-400 -translate-y-1/2 pi pi-lock left-4 top-1/2"></i>
                                         <InputText v-model="form.password" :type="showPassword ? 'text' : 'password'"
                                             class="w-full input-with-icon-both" placeholder="Create password"
                                             autocomplete="new-password" />
                                         <button type="button" @click="showPassword = !showPassword"
-                                            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                            class="absolute text-gray-400 -translate-y-1/2 right-4 top-1/2 hover:text-gray-600 dark:hover:text-gray-300">
                                             <i :class="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
                                         </button>
                                     </div>
@@ -430,29 +430,29 @@ const passwordStrength = computed(() => {
 
                                 <!-- Confirm Password -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                         Confirm Password <span class="text-red-500">*</span>
                                     </label>
                                     <div class="relative">
                                         <i
-                                            class="pi pi-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                            class="absolute text-gray-400 -translate-y-1/2 pi pi-lock left-4 top-1/2"></i>
                                         <InputText v-model="form.password_confirmation"
                                             :type="showConfirmPassword ? 'text' : 'password'"
                                             class="w-full input-with-icon-both" placeholder="Confirm password"
                                             autocomplete="new-password" />
                                         <button type="button" @click="showConfirmPassword = !showConfirmPassword"
-                                            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                            class="absolute text-gray-400 -translate-y-1/2 right-4 top-1/2 hover:text-gray-600 dark:hover:text-gray-300">
                                             <i :class="showConfirmPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
                                         </button>
                                     </div>
                                     <!-- Password Match -->
                                     <div v-if="form.password_confirmation" class="mt-2">
                                         <span v-if="form.password === form.password_confirmation"
-                                            class="text-xs text-green-600 flex items-center gap-1">
-                                            <i class="pi pi-check text-xs"></i> Passwords match
+                                            class="flex items-center gap-1 text-xs text-green-600">
+                                            <i class="text-xs pi pi-check"></i> Passwords match
                                         </span>
-                                        <span v-else class="text-xs text-red-500 flex items-center gap-1">
-                                            <i class="pi pi-times text-xs"></i> Passwords don't match
+                                        <span v-else class="flex items-center gap-1 text-xs text-red-500">
+                                            <i class="text-xs pi pi-times"></i> Passwords don't match
                                         </span>
                                     </div>
                                 </div>
@@ -460,11 +460,11 @@ const passwordStrength = computed(() => {
 
                             <!-- Referral Code (Optional) - Only show if referrals feature is enabled -->
                             <div v-if="features.referrals !== false">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Referral Code <span class="text-gray-400 font-normal">(Optional)</span>
+                                <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Referral Code <span class="font-normal text-gray-400">(Optional)</span>
                                 </label>
                                 <div class="relative">
-                                    <i class="pi pi-gift absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                    <i class="absolute text-gray-400 -translate-y-1/2 pi pi-gift left-4 top-1/2"></i>
                                     <InputText v-model="form.referral_code" type="text" class="w-full input-with-icon"
                                         placeholder="Enter referral code" />
                                 </div>
@@ -473,20 +473,20 @@ const passwordStrength = computed(() => {
                     </div>
 
                     <!-- Terms Agreement -->
-                    <div class="bg-gray-50 dark:bg-zinc-700/50 rounded-xl p-4">
+                    <div class="p-4 bg-gray-50 dark:bg-zinc-700/50 rounded-xl">
                         <div class="flex items-start gap-3">
                             <Checkbox v-model="agreedToTerms" :binary="true" class="mt-1" />
-                            <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                            <p class="text-sm leading-relaxed text-gray-600 dark:text-gray-400">
                                 By clicking, I agree to the
                                 <a href="#"
-                                    class="text-green-600 hover:text-green-700 dark:text-green-400 font-medium">Terms of
+                                    class="font-medium text-green-600 hover:text-green-700 dark:text-green-400">Terms of
                                     Service</a>
                                 and
                                 <a href="#"
-                                    class="text-green-600 hover:text-green-700 dark:text-green-400 font-medium">Privacy
+                                    class="font-medium text-green-600 hover:text-green-700 dark:text-green-400">Privacy
                                     Policy</a>,
                                 and am providing my electronic signature authorizing {{ settings.site_name ||
-                                'NationalResourceBenefits' }}
+                                    'NationalResourceBenefits' }}
                                 and its affiliates to contact me by email, text, or phone regarding my funding
                                 applications service account
                                 with any new funding services or sources that may become available.
@@ -497,14 +497,14 @@ const passwordStrength = computed(() => {
                     <!-- Submit Button -->
                     <Button type="submit" :loading="isSubmitting || form.processing"
                         :disabled="isSubmitting || form.processing"
-                        class="w-full justify-center py-3 text-base font-semibold" severity="success">
-                        <i class="pi pi-check-circle mr-2"></i>
+                        class="justify-center w-full py-3 text-base font-semibold" severity="success">
+                        <i class="mr-2 pi pi-check-circle"></i>
                         Submit Application
                     </Button>
 
                     <!-- Security Badge -->
                     <div class="flex items-center justify-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                        <i class="pi pi-shield text-green-500"></i>
+                        <i class="text-green-500 pi pi-shield"></i>
                         <span>256-bit SSL Encrypted • Your information is secure</span>
                     </div>
                 </form>
@@ -513,14 +513,14 @@ const passwordStrength = computed(() => {
                 <p class="mt-6 text-center text-gray-600 dark:text-gray-400">
                     Already have an account?
                     <Link :href="route('login')"
-                        class="font-semibold text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 ml-1">
+                        class="ml-1 font-semibold text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300">
                     Sign In
                     </Link>
                 </p>
             </div>
 
             <!-- Footer Links -->
-            <div class="mt-6 flex items-center justify-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+            <div class="flex items-center justify-center gap-4 mt-6 text-xs text-gray-500 dark:text-gray-400">
                 <a href="#" class="hover:text-gray-700 dark:hover:text-gray-300">Privacy Policy</a>
                 <span>•</span>
                 <a href="#" class="hover:text-gray-700 dark:hover:text-gray-300">Terms of Service</a>
@@ -535,17 +535,17 @@ const passwordStrength = computed(() => {
         header="Confirm Your Registration">
         <div class="space-y-4">
             <div class="flex items-center gap-3 text-blue-600 dark:text-blue-400">
-                <i class="pi pi-info-circle text-2xl"></i>
+                <i class="text-2xl pi pi-info-circle"></i>
                 <p class="text-gray-700 dark:text-gray-300">
                     Please review your information before submitting:
                 </p>
             </div>
 
-            <div class="bg-gray-50 dark:bg-zinc-700 rounded-lg p-4 space-y-2 text-sm">
+            <div class="p-4 space-y-2 text-sm rounded-lg bg-gray-50 dark:bg-zinc-700">
                 <div class="flex justify-between">
                     <span class="text-gray-500">Name:</span>
                     <span class="font-medium text-gray-900 dark:text-white">{{ form.first_name }} {{ form.last_name
-                        }}</span>
+                    }}</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-500">Email:</span>
@@ -554,12 +554,12 @@ const passwordStrength = computed(() => {
                 <div class="flex justify-between">
                     <span class="text-gray-500">Apply As:</span>
                     <span class="font-medium text-gray-900 dark:text-white">{{fundingTypes.find(f => f.value ===
-                        form.funding_type)?.label || '-' }}</span>
+                        form.funding_type)?.label || '-'}}</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-500">Application Amount:</span>
                     <span class="font-medium text-gray-900 dark:text-white">{{fundingAmounts.find(f => f.value ===
-                        form.funding_amount)?.label || '-' }}</span>
+                        form.funding_amount)?.label || '-'}}</span>
                 </div>
             </div>
 

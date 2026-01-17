@@ -159,11 +159,11 @@ if (is_link($storageDir)) {
     }
 } elseif (is_dir($storageDir) && !is_link($storageDir)) {
     echo "⚠️ Real directory exists at /storage\n";
-    
+
     // Check if directory is empty
     $files = @scandir($storageDir);
     $isEmpty = ($files && count($files) <= 2); // Only . and ..
-    
+
     if ($isEmpty) {
         echo "  Directory is empty, removing...\n";
         if (@rmdir($storageDir)) {
@@ -181,14 +181,14 @@ if (is_link($storageDir)) {
 // Try to create symlink if storage path doesn't exist now
 if (!file_exists($storageDir) && !is_link($storageDir)) {
     echo "\nAttempting to create symlink...\n";
-    
+
     // Clear any errors
     error_clear_last();
-    
+
     // Try symlink with error suppression off to see the actual error
     $result = @symlink('uploads', $storageDir);
     $error = error_get_last();
-    
+
     if ($result) {
         echo "✅ Created symlink: /storage -> uploads\n";
     } else {

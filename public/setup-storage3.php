@@ -1,13 +1,13 @@
 <?php
 /**
  * Storage Setup Script v3
- * 
+ *
  * Strategy:
  * - Laravel writes to: public_path('uploads') = /public_html/public/uploads (REAL directory)
  * - Web accessible at: /public_html/uploads (SYMLINK pointing to public/uploads)
- * 
+ *
  * This creates: public_html/uploads -> public/uploads
- * 
+ *
  * Access via: https://yourdomain.com/setup-storage3.php?token=NRB-SETUP-2024
  * DELETE THIS FILE AFTER RUNNING!
  */
@@ -83,7 +83,7 @@ echo "Goal: $webSymlinkPath -> public/uploads\n";
 if (is_link($webSymlinkPath)) {
     $target = readlink($webSymlinkPath);
     echo "✓ Symlink already exists: $webSymlinkPath -> $target\n";
-    
+
     // Check if it points to correct location
     if ($target !== 'public/uploads' && $target !== './public/uploads') {
         echo "⚠️ Symlink points to wrong target, recreating...\n";
@@ -95,17 +95,17 @@ if (is_link($webSymlinkPath)) {
 } elseif (is_dir($webSymlinkPath) && !is_link($webSymlinkPath)) {
     // Real directory exists at symlink location - migrate files
     echo "⚠️ Found real directory at symlink location, migrating...\n";
-    
+
     $movedCount = 0;
     $iterator = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator($webSymlinkPath, RecursiveDirectoryIterator::SKIP_DOTS),
         RecursiveIteratorIterator::SELF_FIRST
     );
-    
+
     foreach ($iterator as $item) {
         $relativePath = substr($item->getPathname(), strlen($webSymlinkPath) + 1);
         $destPath = $laravelUploadsPath . '/' . $relativePath;
-        
+
         if ($item->isDir()) {
             if (!is_dir($destPath)) {
                 mkdir($destPath, 0755, true);
@@ -126,7 +126,7 @@ if (is_link($webSymlinkPath)) {
         }
     }
     echo "  Moved $movedCount files to Laravel uploads\n";
-    
+
     // Remove empty directories
     $dirs = [];
     $iter = new RecursiveIteratorIterator(
@@ -139,7 +139,7 @@ if (is_link($webSymlinkPath)) {
         }
     }
     @rmdir($webSymlinkPath);
-    
+
     // Create symlink
     if (!file_exists($webSymlinkPath)) {
         if (@symlink('public/uploads', $webSymlinkPath)) {
@@ -170,11 +170,11 @@ if (is_dir($oldStoragePath)) {
         new RecursiveDirectoryIterator($oldStoragePath, RecursiveDirectoryIterator::SKIP_DOTS),
         RecursiveIteratorIterator::SELF_FIRST
     );
-    
+
     foreach ($iterator as $item) {
         $relativePath = substr($item->getPathname(), strlen($oldStoragePath) + 1);
         $destPath = $laravelUploadsPath . '/' . $relativePath;
-        
+
         if ($item->isDir()) {
             if (!is_dir($destPath)) {
                 mkdir($destPath, 0755, true);
@@ -201,12 +201,12 @@ if (is_dir($oldStoragePath)) {
 echo "\n=== Step 4: Fixing permissions ===\n";
 if (is_dir($laravelUploadsPath)) {
     chmod($laravelUploadsPath, 0755);
-    
+
     $iterator = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator($laravelUploadsPath, RecursiveDirectoryIterator::SKIP_DOTS),
         RecursiveIteratorIterator::SELF_FIRST
     );
-    
+
     foreach ($iterator as $item) {
         if ($item->isDir()) {
             chmod($item->getPathname(), 0755);

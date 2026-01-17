@@ -504,7 +504,7 @@ defineExpose({ formatCurrency });
             <div class="p-4 border-t border-gray-200 dark:border-gray-700">
                 <div class="flex items-center">
                     <img :src="user.avatar_url" :alt="user.name"
-                        class="w-10 h-10 rounded-full object-cover bg-primary-100 dark:bg-primary-900"
+                        class="object-cover w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900"
                         @error="$event.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'U')}&background=random`" />
                     <div class="flex-1 min-w-0 ml-3">
                         <p class="text-sm font-medium text-gray-900 truncate dark:text-white">{{ user.name }}</p>
@@ -532,7 +532,7 @@ defineExpose({ formatCurrency });
             <div class="p-4 mb-4 -mx-4 border-b border-gray-200 dark:border-gray-700">
                 <div class="flex items-center">
                     <img :src="user.avatar_url" :alt="user.name"
-                        class="w-10 h-10 rounded-full object-cover bg-primary-100 dark:bg-primary-900"
+                        class="object-cover w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900"
                         @error="$event.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'U')}&background=random`" />
                     <div class="ml-3">
                         <p class="text-sm font-medium text-gray-900 dark:text-white">{{ user.name }}</p>
@@ -733,7 +733,7 @@ defineExpose({ formatCurrency });
                         <div class="hidden md:block">
                             <Button @click="toggleUserMenu" class="p-button-text p-button-plain" aria-haspopup="true">
                                 <img :src="user.avatar_url" :alt="user.name"
-                                    class="w-8 h-8 rounded-full object-cover bg-primary-100 dark:bg-primary-900"
+                                    class="object-cover w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900"
                                     @error="$event.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'U')}&background=random`" />
                                 <span class="ml-2 text-gray-700 dark:text-gray-200">{{ user.name }}</span>
                                 <i class="ml-2 text-xs text-gray-600 pi pi-chevron-down dark:text-gray-400"></i>
@@ -839,5 +839,9 @@ defineExpose({ formatCurrency });
     transition-property: color, background-color, border-color;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 150ms;
+}
+
+._orientationRight__Vw1iA.wrap__KOFv0 {
+    bottom: 50px !important;
 }
 </style>

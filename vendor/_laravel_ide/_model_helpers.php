@@ -473,10 +473,10 @@ namespace App\Models {
      * @method static \Illuminate\Database\Eloquent\Builder<User>|User newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<User>|User newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<User>|User query()
-     * @method static \Illuminate\Database\Eloquent\Builder<User>|User role(mixed $roles, mixed $guard = null, mixed $without = false)
-     * @method static \Illuminate\Database\Eloquent\Builder<User>|User withoutRole(mixed $roles, mixed $guard = null)
-     * @method static \Illuminate\Database\Eloquent\Builder<User>|User permission(mixed $permissions, mixed $without = false)
-     * @method static \Illuminate\Database\Eloquent\Builder<User>|User withoutPermission(mixed $permissions)
+     * @method static \Illuminate\Database\Eloquent\Builder<User>|User role(mixed $roles, mixed $guard = null, mixed $without = false) {@see App\Models\User::scopeRole()}
+     * @method static \Illuminate\Database\Eloquent\Builder<User>|User withoutRole(mixed $roles, mixed $guard = null) {@see App\Models\User::scopeWithoutRole()}
+     * @method static \Illuminate\Database\Eloquent\Builder<User>|User permission(mixed $permissions, mixed $without = false) {@see App\Models\User::scopePermission()}
+     * @method static \Illuminate\Database\Eloquent\Builder<User>|User withoutPermission(mixed $permissions) {@see App\Models\User::scopeWithoutPermission()}
      * @method static mixed select($columns)
      * @method static mixed selectSub($query, $as)
      * @method static mixed selectRaw($expression, array $bindings)
@@ -1471,10 +1471,10 @@ namespace App\Models {
      * @method static \Illuminate\Database\Eloquent\Builder<FundingApplication>|FundingApplication newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<FundingApplication>|FundingApplication newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<FundingApplication>|FundingApplication query()
-     * @method static \Illuminate\Database\Eloquent\Builder<FundingApplication>|FundingApplication pending()
-     * @method static \Illuminate\Database\Eloquent\Builder<FundingApplication>|FundingApplication underReview()
-     * @method static \Illuminate\Database\Eloquent\Builder<FundingApplication>|FundingApplication approved()
-     * @method static \Illuminate\Database\Eloquent\Builder<FundingApplication>|FundingApplication active()
+     * @method static \Illuminate\Database\Eloquent\Builder<FundingApplication>|FundingApplication pending() {@see App\Models\FundingApplication::scopePending()}
+     * @method static \Illuminate\Database\Eloquent\Builder<FundingApplication>|FundingApplication underReview() {@see App\Models\FundingApplication::scopeUnderReview()}
+     * @method static \Illuminate\Database\Eloquent\Builder<FundingApplication>|FundingApplication approved() {@see App\Models\FundingApplication::scopeApproved()}
+     * @method static \Illuminate\Database\Eloquent\Builder<FundingApplication>|FundingApplication active() {@see App\Models\FundingApplication::scopeActive()}
      * @method static mixed select($columns)
      * @method static mixed selectSub($query, $as)
      * @method static mixed selectRaw($expression, array $bindings)
@@ -3784,8 +3784,8 @@ namespace App\Models {
      * @method static \Illuminate\Database\Eloquent\Builder<LinkedWithdrawalAccount>|LinkedWithdrawalAccount newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<LinkedWithdrawalAccount>|LinkedWithdrawalAccount newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<LinkedWithdrawalAccount>|LinkedWithdrawalAccount query()
-     * @method static \Illuminate\Database\Eloquent\Builder<LinkedWithdrawalAccount>|LinkedWithdrawalAccount active()
-     * @method static \Illuminate\Database\Eloquent\Builder<LinkedWithdrawalAccount>|LinkedWithdrawalAccount verified()
+     * @method static \Illuminate\Database\Eloquent\Builder<LinkedWithdrawalAccount>|LinkedWithdrawalAccount active() {@see App\Models\LinkedWithdrawalAccount::scopeActive()}
+     * @method static \Illuminate\Database\Eloquent\Builder<LinkedWithdrawalAccount>|LinkedWithdrawalAccount verified() {@see App\Models\LinkedWithdrawalAccount::scopeVerified()}
      * @method static mixed select($columns)
      * @method static mixed selectSub($query, $as)
      * @method static mixed selectRaw($expression, array $bindings)
@@ -4505,8 +4505,8 @@ namespace App\Models {
      * @method static \Illuminate\Database\Eloquent\Builder<LoanPlan>|LoanPlan newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<LoanPlan>|LoanPlan newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<LoanPlan>|LoanPlan query()
-     * @method static \Illuminate\Database\Eloquent\Builder<LoanPlan>|LoanPlan active()
-     * @method static \Illuminate\Database\Eloquent\Builder<LoanPlan>|LoanPlan ordered()
+     * @method static \Illuminate\Database\Eloquent\Builder<LoanPlan>|LoanPlan active() {@see App\Models\LoanPlan::scopeActive()}
+     * @method static \Illuminate\Database\Eloquent\Builder<LoanPlan>|LoanPlan ordered() {@see App\Models\LoanPlan::scopeOrdered()}
      * @method static mixed select($columns)
      * @method static mixed selectSub($query, $as)
      * @method static mixed selectRaw($expression, array $bindings)
@@ -4830,8 +4830,8 @@ namespace App\Models {
      * @method static \Illuminate\Database\Eloquent\Builder<Notification>|Notification newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<Notification>|Notification newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<Notification>|Notification query()
-     * @method static \Illuminate\Database\Eloquent\Builder<Notification>|Notification read()
-     * @method static \Illuminate\Database\Eloquent\Builder<Notification>|Notification unread()
+     * @method static \Illuminate\Database\Eloquent\Builder<Notification>|Notification read() {@see App\Models\Notification::scopeRead()}
+     * @method static \Illuminate\Database\Eloquent\Builder<Notification>|Notification unread() {@see App\Models\Notification::scopeUnread()}
      * @method static mixed select($columns)
      * @method static mixed selectSub($query, $as)
      * @method static mixed selectRaw($expression, array $bindings)
@@ -5181,14 +5181,14 @@ namespace App\Models {
      * @method static \Illuminate\Database\Eloquent\Builder<PaymentGateway>|PaymentGateway newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<PaymentGateway>|PaymentGateway newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<PaymentGateway>|PaymentGateway query()
-     * @method static \Illuminate\Database\Eloquent\Builder<PaymentGateway>|PaymentGateway active()
-     * @method static \Illuminate\Database\Eloquent\Builder<PaymentGateway>|PaymentGateway automatic()
-     * @method static \Illuminate\Database\Eloquent\Builder<PaymentGateway>|PaymentGateway manual()
-     * @method static \Illuminate\Database\Eloquent\Builder<PaymentGateway>|PaymentGateway forCategory(string $category)
-     * @method static \Illuminate\Database\Eloquent\Builder<PaymentGateway>|PaymentGateway forDeposit()
-     * @method static \Illuminate\Database\Eloquent\Builder<PaymentGateway>|PaymentGateway forWithdrawal()
-     * @method static \Illuminate\Database\Eloquent\Builder<PaymentGateway>|PaymentGateway forPayment()
-     * @method static \Illuminate\Database\Eloquent\Builder<PaymentGateway>|PaymentGateway ordered()
+     * @method static \Illuminate\Database\Eloquent\Builder<PaymentGateway>|PaymentGateway active() {@see App\Models\PaymentGateway::scopeActive()}
+     * @method static \Illuminate\Database\Eloquent\Builder<PaymentGateway>|PaymentGateway automatic() {@see App\Models\PaymentGateway::scopeAutomatic()}
+     * @method static \Illuminate\Database\Eloquent\Builder<PaymentGateway>|PaymentGateway manual() {@see App\Models\PaymentGateway::scopeManual()}
+     * @method static \Illuminate\Database\Eloquent\Builder<PaymentGateway>|PaymentGateway forCategory(string $category) {@see App\Models\PaymentGateway::scopeForCategory()}
+     * @method static \Illuminate\Database\Eloquent\Builder<PaymentGateway>|PaymentGateway forDeposit() {@see App\Models\PaymentGateway::scopeForDeposit()}
+     * @method static \Illuminate\Database\Eloquent\Builder<PaymentGateway>|PaymentGateway forWithdrawal() {@see App\Models\PaymentGateway::scopeForWithdrawal()}
+     * @method static \Illuminate\Database\Eloquent\Builder<PaymentGateway>|PaymentGateway forPayment() {@see App\Models\PaymentGateway::scopeForPayment()}
+     * @method static \Illuminate\Database\Eloquent\Builder<PaymentGateway>|PaymentGateway ordered() {@see App\Models\PaymentGateway::scopeOrdered()}
      * @method static mixed select($columns)
      * @method static mixed selectSub($query, $as)
      * @method static mixed selectRaw($expression, array $bindings)
@@ -7128,8 +7128,8 @@ namespace App\Models {
      * @method static \Illuminate\Database\Eloquent\Builder<Testimonial>|Testimonial newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<Testimonial>|Testimonial newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<Testimonial>|Testimonial query()
-     * @method static \Illuminate\Database\Eloquent\Builder<Testimonial>|Testimonial active()
-     * @method static \Illuminate\Database\Eloquent\Builder<Testimonial>|Testimonial ordered()
+     * @method static \Illuminate\Database\Eloquent\Builder<Testimonial>|Testimonial active() {@see App\Models\Testimonial::scopeActive()}
+     * @method static \Illuminate\Database\Eloquent\Builder<Testimonial>|Testimonial ordered() {@see App\Models\Testimonial::scopeOrdered()}
      * @method static mixed select($columns)
      * @method static mixed selectSub($query, $as)
      * @method static mixed selectRaw($expression, array $bindings)
@@ -8135,8 +8135,8 @@ namespace App\Models {
      * @method static \Illuminate\Database\Eloquent\Builder<Voucher>|Voucher newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<Voucher>|Voucher newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<Voucher>|Voucher query()
-     * @method static \Illuminate\Database\Eloquent\Builder<Voucher>|Voucher active()
-     * @method static \Illuminate\Database\Eloquent\Builder<Voucher>|Voucher available()
+     * @method static \Illuminate\Database\Eloquent\Builder<Voucher>|Voucher active() {@see App\Models\Voucher::scopeActive()}
+     * @method static \Illuminate\Database\Eloquent\Builder<Voucher>|Voucher available() {@see App\Models\Voucher::scopeAvailable()}
      * @method static mixed select($columns)
      * @method static mixed selectSub($query, $as)
      * @method static mixed selectRaw($expression, array $bindings)
@@ -9453,8 +9453,8 @@ namespace Illuminate\Notifications {
      * @method static \Illuminate\Database\Eloquent\Builder<DatabaseNotification>|DatabaseNotification newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<DatabaseNotification>|DatabaseNotification newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<DatabaseNotification>|DatabaseNotification query()
-     * @method static \Illuminate\Database\Eloquent\Builder<DatabaseNotification>|DatabaseNotification read()
-     * @method static \Illuminate\Database\Eloquent\Builder<DatabaseNotification>|DatabaseNotification unread()
+     * @method static \Illuminate\Database\Eloquent\Builder<DatabaseNotification>|DatabaseNotification read() {@see Illuminate\Notifications\DatabaseNotification::scopeRead()}
+     * @method static \Illuminate\Database\Eloquent\Builder<DatabaseNotification>|DatabaseNotification unread() {@see Illuminate\Notifications\DatabaseNotification::scopeUnread()}
      * @method static mixed select($columns)
      * @method static mixed selectSub($query, $as)
      * @method static mixed selectRaw($expression, array $bindings)

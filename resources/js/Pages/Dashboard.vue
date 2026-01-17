@@ -33,7 +33,7 @@ const copied = ref(false);
 // Copy referral code to clipboard
 const copyReferralCode = async () => {
     if (!props.user?.referral_code) return;
-    
+
     try {
         await navigator.clipboard.writeText(props.user.referral_code);
         copied.value = true;
@@ -73,6 +73,7 @@ const getRankClasses = computed(() => {
 </script>
 
 <template>
+
     <Head title="Dashboard" />
 
     <DashboardLayout>
@@ -88,10 +89,7 @@ const getRankClasses = computed(() => {
                     <p class="text-gray-500 dark:text-gray-400 mt-1">Here's what's happening with your account.</p>
                 </div>
                 <div v-if="user?.rank" class="hidden md:flex items-center">
-                    <span 
-                        class="px-3 py-1 text-xs font-medium rounded-full"
-                        :class="getRankClasses"
-                    >
+                    <span class="px-3 py-1 text-xs font-medium rounded-full" :class="getRankClasses">
                         {{ user.rank.name }}
                     </span>
                 </div>
@@ -101,32 +99,21 @@ const getRankClasses = computed(() => {
             <KycBanner :kyc-status="kycStatus" />
 
             <!-- Balance Cards -->
-            <BalanceCards 
-                :accounts="accounts" 
-                :total-balance="totalBalance"
-                :currency-symbol="settings.currency_symbol"
-            />
+            <BalanceCards :accounts="accounts" :total-balance="totalBalance"
+                :currency-symbol="settings.currency_symbol" />
 
             <!-- Quick Actions -->
             <QuickActions />
 
             <!-- Stats Overview -->
-            <StatsOverview 
-                :stats="stats"
-                :currency-symbol="settings.currency_symbol"
-            />
+            <StatsOverview :stats="stats" :currency-symbol="settings.currency_symbol" />
 
             <!-- Recent Transactions -->
-            <RecentTransactions 
-                :transactions="recentTransactions"
-                :currency-symbol="settings.currency_symbol"
-            />
+            <RecentTransactions :transactions="recentTransactions" :currency-symbol="settings.currency_symbol" />
 
             <!-- Referral Card (if enabled) -->
-            <div 
-                v-if="features.referrals !== false && user?.referral_code" 
-                class="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl p-6 text-white"
-            >
+            <div v-if="features.referrals !== false && user?.referral_code"
+                class="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl p-6 text-white">
                 <div class="flex items-start justify-between">
                     <div>
                         <h3 class="text-lg font-semibold">Invite Friends & Earn</h3>
@@ -138,11 +125,9 @@ const getRankClasses = computed(() => {
                                 <span class="text-sm text-purple-100">Your Code:</span>
                                 <span class="ml-2 font-mono font-bold select-all">{{ user.referral_code }}</span>
                             </div>
-                            <button 
-                                @click="copyReferralCode"
+                            <button @click="copyReferralCode"
                                 class="px-4 py-2 bg-white text-purple-600 rounded-lg text-sm font-medium hover:bg-purple-50 transition-colors inline-flex items-center"
-                                :class="{ 'bg-green-100 text-green-600': copied }"
-                            >
+                                :class="{ 'bg-green-100 text-green-600': copied }">
                                 <i :class="copied ? 'pi pi-check' : 'pi pi-copy'" class="mr-1"></i>
                                 {{ copied ? 'Copied!' : 'Copy' }}
                             </button>
@@ -155,30 +140,28 @@ const getRankClasses = computed(() => {
             </div>
 
             <!-- Recent Notifications Preview -->
-            <div 
-                v-if="recentNotifications && recentNotifications.length > 0"
-                class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden"
-            >
+            <div v-if="recentNotifications && recentNotifications.length > 0"
+                class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
                 <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
                         Recent Notifications
-                        <span v-if="unreadNotifications > 0" class="ml-2 px-2 py-0.5 text-xs bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 rounded-full">
+                        <span v-if="unreadNotifications > 0"
+                            class="ml-2 px-2 py-0.5 text-xs bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 rounded-full">
                             {{ unreadNotifications }} new
                         </span>
                     </h2>
-                    <Link :href="route('notifications.index')" class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">
-                        View All
+                    <Link :href="route('notifications.index')"
+                        class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">
+                    View All
                     </Link>
                 </div>
                 <div class="divide-y divide-gray-100 dark:divide-gray-700">
-                    <div 
-                        v-for="notification in recentNotifications.slice(0, 3)" 
-                        :key="notification.id"
+                    <div v-for="notification in recentNotifications.slice(0, 3)" :key="notification.id"
                         class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                        :class="{ 'bg-blue-50/50 dark:bg-blue-900/20': !notification.read }"
-                    >
+                        :class="{ 'bg-blue-50/50 dark:bg-blue-900/20': !notification.read }">
                         <div class="flex items-start">
-                            <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center flex-shrink-0">
+                            <div
+                                class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center flex-shrink-0">
                                 <i class="pi pi-bell text-blue-600 dark:text-blue-400 text-sm"></i>
                             </div>
                             <div class="ml-3 flex-1">
@@ -188,9 +171,11 @@ const getRankClasses = computed(() => {
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                                     {{ notification.data?.message || 'New notification' }}
                                 </p>
-                                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ notification.created_at }}</p>
+                                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ notification.created_at }}
+                                </p>
                             </div>
-                            <div v-if="!notification.read" class="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full"></div>
+                            <div v-if="!notification.read" class="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full">
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -55,7 +55,7 @@ const getStatusIcon = (status) => {
     <DashboardLayout>
         <div class="py-6 px-4 sm:px-6 lg:px-8">
             <!-- Back Link -->
-            <Link 
+            <Link
                 :href="route('my-applications.index')"
                 class="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 mb-6"
             >
@@ -77,7 +77,7 @@ const getStatusIcon = (status) => {
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" v-html="getStatusIcon(application.status)"></svg>
                         <span class="font-medium">{{ application.status_label }}</span>
                     </div>
-                    
+
                     <!-- Cancel Button -->
                     <button
                         v-if="application.can_cancel"
@@ -102,7 +102,7 @@ const getStatusIcon = (status) => {
                                     {{ application.funding_source.category }}
                                 </p>
                             </div>
-                            <Link 
+                            <Link
                                 :href="route('funding-sources.show', application.funding_source.id)"
                                 class="text-blue-600 hover:text-blue-800 text-sm font-medium"
                             >
@@ -144,7 +144,7 @@ const getStatusIcon = (status) => {
                                 <dt class="text-sm text-gray-500 capitalize">{{ key.replace(/_/g, ' ') }}</dt>
                                 <dd class="mt-1 text-gray-900">
                                     <template v-if="typeof value === 'object' && value.path">
-                                        <a :href="`/storage/${value.path}`" target="_blank" class="text-blue-600 hover:underline">
+                                        <a :href="`/uploads/${value.path}`" target="_blank" class="text-blue-600 hover:underline">
                                             {{ value.name || 'View File' }}
                                         </a>
                                     </template>
@@ -165,8 +165,8 @@ const getStatusIcon = (status) => {
                                     </svg>
                                     <span class="ml-3 text-sm text-gray-900">{{ doc.name }}</span>
                                 </div>
-                                <a 
-                                    :href="`/storage/${doc.path}`" 
+                                <a
+                                    :href="`/uploads/${doc.path}`"
                                     target="_blank"
                                     class="text-blue-600 hover:text-blue-800 text-sm font-medium"
                                 >
@@ -200,7 +200,7 @@ const getStatusIcon = (status) => {
                                     <p class="text-xs text-gray-500">{{ application.created_at }}</p>
                                 </div>
                             </div>
-                            
+
                             <div v-if="application.reviewed_at" class="flex items-start">
                                 <div class="flex-shrink-0 w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
                                     <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -212,7 +212,7 @@ const getStatusIcon = (status) => {
                                     <p class="text-xs text-gray-500">{{ application.reviewed_at }}</p>
                                 </div>
                             </div>
-                            
+
                             <div v-if="application.disbursed_at" class="flex items-start">
                                 <div class="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
                                     <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -233,7 +233,7 @@ const getStatusIcon = (status) => {
                         <p class="text-sm text-gray-600 mb-4">
                             If you have questions about your application, please contact our support team.
                         </p>
-                        <Link 
+                        <Link
                             :href="route('support-tickets.create')"
                             class="text-blue-600 hover:text-blue-800 text-sm font-medium"
                         >
@@ -248,7 +248,7 @@ const getStatusIcon = (status) => {
         <div v-if="showCancelModal" class="fixed inset-0 z-50 overflow-y-auto">
             <div class="flex items-center justify-center min-h-screen px-4">
                 <div class="fixed inset-0 bg-black opacity-50" @click="showCancelModal = false"></div>
-                
+
                 <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Cancel Application</h3>
                     <p class="text-gray-600 mb-6">

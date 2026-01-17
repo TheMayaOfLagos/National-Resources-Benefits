@@ -48,18 +48,18 @@ const isImage = (path) => {
                 <Link :href="route('kyc.index')" class="text-blue-600 hover:text-blue-800 dark:text-blue-400">
                     KYC Verification
                 </Link>
-                <i class="pi pi-chevron-right text-gray-400 text-xs"></i>
+                <i class="text-xs text-gray-400 pi pi-chevron-right"></i>
                 <span class="text-gray-600 dark:text-gray-400">{{ document.type }}</span>
             </nav>
 
             <!-- Page Header -->
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ document.type }}</h1>
-                    <p class="text-gray-600 dark:text-gray-400 mt-1">Submitted: {{ document.submitted_at }}</p>
+                    <p class="mt-1 text-gray-600 dark:text-gray-400">Submitted: {{ document.submitted_at }}</p>
                 </div>
-                <Tag 
-                    :severity="getStatusSeverity(document.status)" 
+                <Tag
+                    :severity="getStatusSeverity(document.status)"
                     :value="getStatusText(document.status)"
                     class="text-sm"
                 />
@@ -68,15 +68,15 @@ const isImage = (path) => {
             <!-- Status Timeline -->
             <Card class="shadow-sm">
                 <template #content>
-                    <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Status Timeline</h3>
+                    <h3 class="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Status Timeline</h3>
                     <div class="relative">
                         <!-- Submitted -->
                         <div class="flex items-start gap-4 pb-6">
                             <div class="flex flex-col items-center">
-                                <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
-                                    <i class="pi pi-upload text-white text-sm"></i>
+                                <div class="flex items-center justify-center w-8 h-8 bg-blue-500 rounded-full">
+                                    <i class="text-sm text-white pi pi-upload"></i>
                                 </div>
-                                <div class="w-0.5 h-full bg-gray-200 dark:bg-gray-700 mt-2" 
+                                <div class="w-0.5 h-full bg-gray-200 dark:bg-gray-700 mt-2"
                                      :class="{ 'bg-green-500': document.status === 'approved', 'bg-red-500': document.status === 'rejected' }">
                                 </div>
                             </div>
@@ -89,8 +89,8 @@ const isImage = (path) => {
                         <!-- Review (Pending) -->
                         <div class="flex items-start gap-4 pb-6" v-if="document.status === 'pending'">
                             <div class="flex flex-col items-center">
-                                <div class="w-8 h-8 rounded-full bg-yellow-500 flex items-center justify-center animate-pulse">
-                                    <i class="pi pi-clock text-white text-sm"></i>
+                                <div class="flex items-center justify-center w-8 h-8 bg-yellow-500 rounded-full animate-pulse">
+                                    <i class="text-sm text-white pi pi-clock"></i>
                                 </div>
                             </div>
                             <div>
@@ -101,8 +101,8 @@ const isImage = (path) => {
 
                         <!-- Approved -->
                         <div class="flex items-start gap-4" v-if="document.status === 'approved'">
-                            <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
-                                <i class="pi pi-check text-white text-sm"></i>
+                            <div class="flex items-center justify-center w-8 h-8 bg-green-500 rounded-full">
+                                <i class="text-sm text-white pi pi-check"></i>
                             </div>
                             <div>
                                 <p class="font-medium text-gray-900 dark:text-white">Approved</p>
@@ -112,8 +112,8 @@ const isImage = (path) => {
 
                         <!-- Rejected -->
                         <div class="flex items-start gap-4" v-if="document.status === 'rejected'">
-                            <div class="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center">
-                                <i class="pi pi-times text-white text-sm"></i>
+                            <div class="flex items-center justify-center w-8 h-8 bg-red-500 rounded-full">
+                                <i class="text-sm text-white pi pi-times"></i>
                             </div>
                             <div>
                                 <p class="font-medium text-gray-900 dark:text-white">Rejected</p>
@@ -125,16 +125,16 @@ const isImage = (path) => {
             </Card>
 
             <!-- Rejection Reason -->
-            <Card v-if="document.status === 'rejected' && document.rejection_reason" class="shadow-sm border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
+            <Card v-if="document.status === 'rejected' && document.rejection_reason" class="border-red-200 shadow-sm dark:border-red-800 bg-red-50 dark:bg-red-900/20">
                 <template #content>
                     <div class="flex items-start gap-4">
-                        <i class="pi pi-exclamation-triangle text-red-500 text-2xl flex-shrink-0"></i>
+                        <i class="flex-shrink-0 text-2xl text-red-500 pi pi-exclamation-triangle"></i>
                         <div>
-                            <h3 class="font-semibold text-red-900 dark:text-red-100 mb-1">Rejection Reason</h3>
+                            <h3 class="mb-1 font-semibold text-red-900 dark:text-red-100">Rejection Reason</h3>
                             <p class="text-red-700 dark:text-red-300">{{ document.rejection_reason }}</p>
-                            <Link 
+                            <Link
                                 v-if="document.template"
-                                :href="route('kyc.create', document.template.id)" 
+                                :href="route('kyc.create', document.template.id)"
                                 class="inline-block mt-4"
                             >
                                 <Button label="Resubmit Document" icon="pi pi-refresh" severity="warn" size="small" />
@@ -151,20 +151,20 @@ const isImage = (path) => {
                 </template>
                 <template #content>
                     <div class="divide-y divide-gray-200 dark:divide-gray-700">
-                        <div 
-                            v-for="(value, key) in document.data" 
+                        <div
+                            v-for="(value, key) in document.data"
                             :key="key"
-                            class="py-3 flex flex-col sm:flex-row sm:justify-between gap-1"
+                            class="flex flex-col gap-1 py-3 sm:flex-row sm:justify-between"
                         >
                             <span class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ key }}</span>
-                            <!-- Check if value is a URL (file) -->
-                            <template v-if="value && typeof value === 'string' && value.startsWith('/storage/')">
-                                <a 
-                                    :href="value" 
+                            <!-- Check if value is a URL (file) - supports both /storage/ and /uploads/ paths -->
+                            <template v-if="value && typeof value === 'string' && (value.startsWith('/storage/') || value.startsWith('/uploads/'))">
+                                <a
+                                    :href="value"
                                     target="_blank"
-                                    class="text-blue-600 hover:text-blue-800 dark:text-blue-400 text-sm flex items-center gap-1"
+                                    class="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400"
                                 >
-                                    <i class="pi pi-external-link text-xs"></i>
+                                    <i class="text-xs pi pi-external-link"></i>
                                     View Document
                                 </a>
                             </template>
@@ -182,22 +182,22 @@ const isImage = (path) => {
                     <span class="text-lg">Document Preview</span>
                 </template>
                 <template #content>
-                    <div class="rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                    <div class="overflow-hidden bg-gray-100 rounded-lg dark:bg-gray-800">
                         <!-- Image Preview -->
                         <template v-if="isImage(document.document_path)">
-                            <Image 
-                                :src="document.document_path" 
+                            <Image
+                                :src="document.document_path"
                                 :alt="document.type"
                                 preview
-                                class="w-full max-h-96 object-contain"
+                                class="object-contain w-full max-h-96"
                             />
                         </template>
-                        
+
                         <!-- PDF Preview -->
                         <template v-else>
                             <div class="p-8 text-center">
-                                <i class="pi pi-file-pdf text-5xl text-red-500 mb-4"></i>
-                                <p class="text-gray-600 dark:text-gray-400 mb-4">PDF Document</p>
+                                <i class="mb-4 text-5xl text-red-500 pi pi-file-pdf"></i>
+                                <p class="mb-4 text-gray-600 dark:text-gray-400">PDF Document</p>
                                 <a :href="document.document_path" target="_blank">
                                     <Button label="Open PDF" icon="pi pi-external-link" severity="secondary" outlined />
                                 </a>
@@ -211,12 +211,12 @@ const isImage = (path) => {
             <Card v-if="document.template" class="shadow-sm">
                 <template #content>
                     <div class="flex items-start gap-4">
-                        <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
-                            <i class="pi pi-file-edit text-blue-500 text-xl"></i>
+                        <div class="flex items-center justify-center flex-shrink-0 w-12 h-12 bg-blue-100 rounded-full dark:bg-blue-900/30">
+                            <i class="text-xl text-blue-500 pi pi-file-edit"></i>
                         </div>
                         <div>
                             <h3 class="font-semibold text-gray-900 dark:text-white">{{ document.template.title }}</h3>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ document.template.description }}</p>
+                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ document.template.description }}</p>
                         </div>
                     </div>
                 </template>
@@ -227,8 +227,8 @@ const isImage = (path) => {
                 <Link :href="route('kyc.index')">
                     <Button label="Back to KYC" icon="pi pi-arrow-left" severity="secondary" outlined />
                 </Link>
-                
-                <Link 
+
+                <Link
                     v-if="document.status === 'rejected' && document.template"
                     :href="route('kyc.create', document.template.id)"
                 >

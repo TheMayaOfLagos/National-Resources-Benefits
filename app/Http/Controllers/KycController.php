@@ -56,7 +56,7 @@ class KycController extends Controller
                     'template_id' => $doc->kyc_template_id,
                     'status' => $doc->status,
                     'rejection_reason' => $doc->rejection_reason,
-                    'document_path' => $doc->document_path ? Storage::url($doc->document_path) : null,
+                    'document_path' => $doc->document_path ? asset('uploads/' . $doc->document_path) : null,
                     'data' => $doc->data,
                     'submitted_at' => $doc->created_at->format('M d, Y H:i'),
                     'verified_at' => $doc->verified_at?->format('M d, Y H:i'),
@@ -177,8 +177,8 @@ class KycController extends Controller
                 if ($request->hasFile("fields.{$index}")) {
                     $file = $request->file("fields.{$index}");
                     $path = $file->store('kyc-documents/' . $user->id, 'public');
-                    $data[$label] = Storage::url($path);
-                    
+                    $data[$label] = asset('uploads/' . $path);
+
                     // Use first file as the main document_path
                     if (!$documentPath) {
                         $documentPath = $path;
@@ -226,7 +226,7 @@ class KycController extends Controller
                 ] : null,
                 'status' => $document->status,
                 'rejection_reason' => $document->rejection_reason,
-                'document_path' => $document->document_path ? Storage::url($document->document_path) : null,
+                'document_path' => $document->document_path ? asset('uploads/' . $document->document_path) : null,
                 'data' => $document->data,
                 'submitted_at' => $document->created_at->format('M d, Y H:i'),
                 'verified_at' => $document->verified_at?->format('M d, Y H:i'),

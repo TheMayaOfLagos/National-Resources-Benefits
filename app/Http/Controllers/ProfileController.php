@@ -32,7 +32,7 @@ class ProfileController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'phone' => $user->phone,
-                'avatar_url' => $user->avatar_url ? Storage::url($user->avatar_url) : null,
+                'avatar_url' => $user->avatar_url ? asset('uploads/' . $user->avatar_url) : null,
                 'city' => $user->city,
                 'state' => $user->state,
                 'zip_code' => $user->zip_code,

@@ -39,7 +39,7 @@
     <meta property="og:description" content="{{ $metaDescription }}">
     <meta property="og:site_name" content="{{ $siteName }}">
     @if($ogImage)
-        <meta property="og:image" content="{{ asset('storage/' . $ogImage) }}">
+        <meta property="og:image" content="{{ asset('uploads/' . $ogImage) }}">
     @endif
 
     {{-- Twitter Card --}}
@@ -47,13 +47,13 @@
     <meta name="twitter:title" content="{{ $metaTitle }}">
     <meta name="twitter:description" content="{{ $metaDescription }}">
     @if($ogImage)
-        <meta name="twitter:image" content="{{ asset('storage/' . $ogImage) }}">
+        <meta name="twitter:image" content="{{ asset('uploads/' . $ogImage) }}">
     @endif
 
     {{-- Favicon --}}
     @if($favicon)
-        <link rel="icon" type="image/x-icon" href="{{ asset('storage/' . $favicon) }}">
-        <link rel="shortcut icon" href="{{ asset('storage/' . $favicon) }}">
+        <link rel="icon" type="image/x-icon" href="{{ asset('uploads/' . $favicon) }}">
+        <link rel="shortcut icon" href="{{ asset('uploads/' . $favicon) }}">
     @else
         <link rel="icon" type="image/x-icon" href="/favicon.ico">
     @endif
@@ -91,7 +91,7 @@
             !function (f, b, e, v, n, t, s) {
                 if (f.fbq) return; n = f.fbq = function () {
                     n.callMethod ?
-                    n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+                        n.callMethod.apply(n, arguments) : n.queue.push(arguments)
                 };
                 if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
                 n.queue = []; t = b.createElement(e); t.async = !0;

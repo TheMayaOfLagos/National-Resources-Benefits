@@ -19,6 +19,7 @@ class LinkedAccountController extends Controller
         $user = $request->user();
 
         $linkedAccounts = $user->linkedWithdrawalAccounts()
+            ->active() // Only show active (non-deleted) accounts
             ->orderBy('is_default', 'desc')
             ->orderBy('created_at', 'desc')
             ->get()

@@ -22,7 +22,7 @@ class TransactionResource extends Resource
     protected static ?string $model = Transaction::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-banknotes';
-    
+
     protected static ?string $navigationGroup = 'Financial Management';
     protected static ?int $navigationSort = 2;
 
@@ -123,7 +123,7 @@ class TransactionResource extends Resource
                         Forms\Components\Textarea::make('description')
                             ->maxLength(65535)
                             ->columnSpanFull(),
-                        
+
                         Forms\Components\Section::make('Loan Details')
                             ->schema([
                                 Forms\Components\TextInput::make('metadata.interest_rate')
@@ -300,11 +300,133 @@ class TransactionResource extends Resource
                     ]),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('approve')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->modalHeading('Approve Transaction')
+                    ->modalDescription(fn (Transaction $record) => "Are you sure you want to approve this {$record->transaction_type} transaction of \${$record->amount}?")
+                    ->modalSubmitActionLabel('Yes, Approve')
+                    ->action(function (Transaction $record) {
+                        $record->update([
+                            'status' => 'completed',
+                            'completed_at' => now(),
+                        ]);
+
+                        // Note: The TransactionObserver will automatically update the account balance
+                        // for transaction types in its creditTypes/debitTypes arrays
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('Transaction Approved')
+                            ->body("Transaction {$record->reference_number} has been approved and balance updated.")
+                            ->success()
+                            ->send();
+                    })
+                    ->visible(fn (Transaction $record) => $record->status === 'pending'),
+
+                Tables\Actions\Action::make('decline')
+                    ->icon('heroicon-o-x-circle')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Decline Transaction')
+                    ->modalDescription(fn (Transaction $record) => "Are you sure you want to decline this {$record->transaction_type} transaction of \${$record->amount}?")
+                    ->modalSubmitActionLabel('Yes, Decline')
+                    ->form([
+                        Forms\Components\Textarea::make('decline_reason')
+                            ->label('Reason for Decline')
+                            ->placeholder('Enter the reason for declining this transaction...')
+                            ->rows(3),
+                    ])
+                    ->action(function (Transaction $record, array $data) {
+                        $metadata = $record->metadata ?? [];
+                        $metadata['decline_reason'] = $data['decline_reason'] ?? 'No reason provided';
+                        $metadata['declined_at'] = now()->toDateTimeString();
+                        $metadata['declined_by'] = \Illuminate\Support\Facades\Auth::user()?->name ?? 'Admin';
+
+                        $record->update([
+                            'status' => 'failed',
+                            'metadata' => $metadata,
+                        ]);
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('Transaction Declined')
+                            ->body("Transaction {$record->reference_number} has been declined.")
+                            ->warning()
+                            ->send();
+                    })
+                    ->visible(fn (Transaction $record) => $record->status === 'pending'),
+
                 Tables\Actions\ViewAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->visible(fn (Transaction $record) => $record->status === 'pending'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\BulkAction::make('bulk_approve')
+                        ->label('Approve Selected')
+                        ->icon('heroicon-o-check-circle')
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->modalHeading('Approve Selected Transactions')
+                        ->modalDescription('Are you sure you want to approve all selected pending transactions?')
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                            $approved = 0;
+                            foreach ($records as $record) {
+                                if ($record->status === 'pending') {
+                                    $record->update([
+                                        'status' => 'completed',
+                                        'completed_at' => now(),
+                                    ]);
+                                    $approved++;
+                                }
+                            }
+
+                            \Filament\Notifications\Notification::make()
+                                ->title('Transactions Approved')
+                                ->body("{$approved} transaction(s) have been approved.")
+                                ->success()
+                                ->send();
+                        })
+                        ->deselectRecordsAfterCompletion(),
+
+                    Tables\Actions\BulkAction::make('bulk_decline')
+                        ->label('Decline Selected')
+                        ->icon('heroicon-o-x-circle')
+                        ->color('danger')
+                        ->requiresConfirmation()
+                        ->modalHeading('Decline Selected Transactions')
+                        ->modalDescription('Are you sure you want to decline all selected pending transactions?')
+                        ->form([
+                            Forms\Components\Textarea::make('decline_reason')
+                                ->label('Reason for Decline')
+                                ->placeholder('Enter the reason for declining these transactions...')
+                                ->rows(3),
+                        ])
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records, array $data) {
+                            $declined = 0;
+                            foreach ($records as $record) {
+                                if ($record->status === 'pending') {
+                                    $metadata = $record->metadata ?? [];
+                                    $metadata['decline_reason'] = $data['decline_reason'] ?? 'No reason provided';
+                                    $metadata['declined_at'] = now()->toDateTimeString();
+                                    $metadata['declined_by'] = \Illuminate\Support\Facades\Auth::user()?->name ?? 'Admin';
+
+                                    $record->update([
+                                        'status' => 'failed',
+                                        'metadata' => $metadata,
+                                    ]);
+                                    $declined++;
+                                }
+                            }
+
+                            \Filament\Notifications\Notification::make()
+                                ->title('Transactions Declined')
+                                ->body("{$declined} transaction(s) have been declined.")
+                                ->warning()
+                                ->send();
+                        })
+                        ->deselectRecordsAfterCompletion(),
+
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);

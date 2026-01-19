@@ -17,7 +17,7 @@ class LinkedAccountController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        
+
         $linkedAccounts = $user->linkedWithdrawalAccounts()
             ->orderBy('is_default', 'desc')
             ->orderBy('created_at', 'desc')
@@ -50,7 +50,7 @@ class LinkedAccountController extends Controller
     public function getFormFields(Request $request)
     {
         $user = $request->user();
-        
+
         return response()->json([
             'formFields' => WithdrawalFormField::getActiveFields(),
             'accountLimit' => LinkedWithdrawalAccount::getAccountLimit(),
@@ -65,7 +65,7 @@ class LinkedAccountController extends Controller
     public function getLinkedAccounts(Request $request)
     {
         $user = $request->user();
-        
+
         $accounts = $user->linkedWithdrawalAccounts()
             ->active()
             ->orderBy('is_default', 'desc')
@@ -104,18 +104,18 @@ class LinkedAccountController extends Controller
         $rules = [
             'account_name' => ['required', 'string', 'max:255'],
         ];
-        
+
         $formFields = WithdrawalFormField::getActiveFields();
-        
+
         foreach ($formFields as $field) {
             $fieldRules = [];
-            
+
             if ($field->is_required) {
                 $fieldRules[] = 'required';
             } else {
                 $fieldRules[] = 'nullable';
             }
-            
+
             // Add type-specific rules
             switch ($field->type) {
                 case 'email':
@@ -131,12 +131,12 @@ class LinkedAccountController extends Controller
                     }
                     break;
             }
-            
+
             // Add custom validation rules
             if ($field->validation_rules) {
                 $fieldRules = array_merge($fieldRules, $field->validation_rules);
             }
-            
+
             $rules['account_data.' . $field->name] = $fieldRules;
         }
 
@@ -167,7 +167,7 @@ class LinkedAccountController extends Controller
     public function update(Request $request, LinkedWithdrawalAccount $linkedAccount)
     {
         // Ensure user owns this account
-        if ($linkedAccount->user_id !== $request->user()->id) {
+        if ((int) $linkedAccount->user_id !== (int) $request->user()->id) {
             abort(403);
         }
 
@@ -188,7 +188,7 @@ class LinkedAccountController extends Controller
     public function setDefault(Request $request, LinkedWithdrawalAccount $linkedAccount)
     {
         // Ensure user owns this account
-        if ($linkedAccount->user_id !== $request->user()->id) {
+        if ((int) $linkedAccount->user_id !== (int) $request->user()->id) {
             abort(403);
         }
 
@@ -203,7 +203,7 @@ class LinkedAccountController extends Controller
     public function destroy(Request $request, LinkedWithdrawalAccount $linkedAccount)
     {
         // Ensure user owns this account
-        if ($linkedAccount->user_id !== $request->user()->id) {
+        if ((int) $linkedAccount->user_id !== (int) $request->user()->id) {
             abort(403);
         }
 
@@ -216,7 +216,7 @@ class LinkedAccountController extends Controller
                 ->linkedWithdrawalAccounts()
                 ->active()
                 ->first();
-            
+
             if ($newDefault) {
                 $newDefault->setAsDefault();
             }

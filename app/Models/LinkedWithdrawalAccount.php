@@ -21,6 +21,7 @@ class LinkedWithdrawalAccount extends Model
     ];
 
     protected $casts = [
+        'user_id' => 'integer',
         'account_data' => 'array',
         'is_default' => 'boolean',
         'is_verified' => 'boolean',
@@ -59,17 +60,17 @@ class LinkedWithdrawalAccount extends Model
     {
         $data = $this->account_data;
         $masked = '';
-        
+
         // Try to find and mask account number
         if (isset($data['account_number'])) {
             $num = $data['account_number'];
             $masked = '****' . substr($num, -4);
         }
-        
+
         if ($masked) {
             return $this->account_name . ' (' . $masked . ')';
         }
-        
+
         return $this->account_name;
     }
 
@@ -88,7 +89,7 @@ class LinkedWithdrawalAccount extends Model
     {
         $limit = (int) Setting::get('withdrawal_account_limit', 3);
         $count = static::where('user_id', $userId)->active()->count();
-        
+
         return $count >= $limit;
     }
 
@@ -109,7 +110,7 @@ class LinkedWithdrawalAccount extends Model
         static::where('user_id', $this->user_id)
             ->where('id', '!=', $this->id)
             ->update(['is_default' => false]);
-        
+
         $this->update(['is_default' => true]);
     }
 }

@@ -119,8 +119,11 @@ const totalBalance = () => {
                             <i class="text-2xl text-red-600 pi pi-ban dark:text-red-400"></i>
                         </div>
                         <div class="flex-grow">
-                            <h3 class="mb-2 text-lg font-semibold text-red-700 dark:text-red-400">Withdrawal Disabled</h3>
-                            <p class="mb-4 text-gray-600 dark:text-gray-400">{{ withdrawalMessage || 'Your withdrawal capability has been disabled. This restriction has been placed on your account by an administrator.' }}</p>
+                            <h3 class="mb-2 text-lg font-semibold text-red-700 dark:text-red-400">Withdrawal Disabled
+                            </h3>
+                            <p class="mb-4 text-gray-600 dark:text-gray-400">{{ withdrawalMessage || 'Your withdrawal
+                                capability has been disabled.This restriction has been placed on your account by an
+                                administrator.' }}</p>
                             <div class="p-4 rounded-lg bg-red-50 dark:bg-red-900/20">
                                 <h4 class="mb-2 font-medium text-red-800 dark:text-red-300">What you can do:</h4>
                                 <ul class="space-y-1 text-sm text-red-700 dark:text-red-400">
@@ -369,12 +372,10 @@ const totalBalance = () => {
         </Card>
 
         <!-- Withdrawal Method Selection -->
-        <div v-if="bankWithdrawalEnabled || expressWithdrawalEnabled" 
-            class="grid gap-6"
-            :class="[
-                { 'opacity-50 pointer-events-none': !canWithdraw || withdrawalStatus !== 'approved' || requiresVerification },
-                (bankWithdrawalEnabled && expressWithdrawalEnabled) ? 'md:grid-cols-2' : 'md:grid-cols-1 max-w-xl mx-auto'
-            ]">
+        <div v-if="bankWithdrawalEnabled || expressWithdrawalEnabled" class="grid gap-6" :class="[
+            { 'opacity-50 pointer-events-none': !canWithdraw || withdrawalStatus !== 'approved' || requiresVerification },
+            (bankWithdrawalEnabled && expressWithdrawalEnabled) ? 'md:grid-cols-2' : 'md:grid-cols-1 max-w-xl mx-auto'
+        ]">
             <!-- Manual/Bank Withdrawal Card -->
             <Card v-if="bankWithdrawalEnabled" class="transition-shadow hover:shadow-lg">
                 <template #header>
@@ -406,17 +407,19 @@ const totalBalance = () => {
                             Processing time: 1-5 business days
                         </p>
                         <!-- Show linked accounts info if user has them -->
-                        <div v-if="linkedAccountsCount > 0" class="p-2 mb-3 text-xs text-left text-green-700 rounded-lg bg-green-50 dark:bg-green-900/20 dark:text-green-400">
+                        <div v-if="linkedAccountsCount > 0"
+                            class="p-2 mb-3 text-xs text-left text-green-700 rounded-lg bg-green-50 dark:bg-green-900/20 dark:text-green-400">
                             <i class="mr-1 pi pi-check-circle"></i>
-                            You have {{ linkedAccountsCount }} linked bank account{{ linkedAccountsCount > 1 ? 's' : '' }} ready for withdrawal
+                            You have {{ linkedAccountsCount }} linked bank account{{ linkedAccountsCount > 1 ? 's' : ''
+                            }} ready for withdrawal
                         </div>
                         <Link :href="route('withdraw.manual')">
-                            <Button label="Request Bank Withdrawal" icon="pi pi-arrow-right" iconPos="right" class="w-full"
-                                :disabled="!hasBankWithdrawalOption" />
+                        <Button label="Request Bank Withdrawal" icon="pi pi-arrow-right" iconPos="right" class="w-full"
+                            :disabled="!hasBankWithdrawalOption" />
                         </Link>
                         <p v-if="!hasBankWithdrawalOption" class="mt-2 text-xs text-orange-500">
                             <Link :href="route('linked-accounts.index')" class="underline hover:text-orange-600">
-                                Link a bank account
+                            Link a bank account
                             </Link>
                             to enable withdrawals
                         </p>
@@ -455,8 +458,8 @@ const totalBalance = () => {
                             Processing time: 1-24 hours
                         </p>
                         <Link :href="route('withdraw.automatic')">
-                            <Button label="Request Express Withdrawal" icon="pi pi-arrow-right" iconPos="right"
-                                severity="help" class="w-full" :disabled="!hasExpressWithdrawalOption" />
+                        <Button label="Request Express Withdrawal" icon="pi pi-arrow-right" iconPos="right"
+                            severity="help" class="w-full" :disabled="!hasExpressWithdrawalOption" />
                         </Link>
                         <p v-if="!hasExpressWithdrawalOption" class="mt-2 text-xs text-orange-500">
                             No express methods available
@@ -476,7 +479,7 @@ const totalBalance = () => {
                         Withdrawal services are currently not available. Please contact support for assistance.
                     </p>
                     <Link :href="route('support.index')" class="mt-4">
-                        <Button label="Contact Support" icon="pi pi-envelope" severity="secondary" outlined class="mt-4" />
+                    <Button label="Contact Support" icon="pi pi-envelope" severity="secondary" outlined class="mt-4" />
                     </Link>
                 </div>
             </template>

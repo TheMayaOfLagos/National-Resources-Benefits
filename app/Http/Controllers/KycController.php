@@ -210,8 +210,8 @@ class KycController extends Controller
     {
         $user = $request->user();
 
-        // Ensure the document belongs to the current user
-        if ($document->user_id !== $user->id) {
+        // Ensure the document belongs to the current user (cast to int for type-safe comparison)
+        if ((int) $document->user_id !== (int) $user->id) {
             abort(403);
         }
 

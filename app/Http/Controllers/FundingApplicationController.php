@@ -84,7 +84,7 @@ class FundingApplicationController extends Controller
                 } else {
                     $fieldRules[] = 'nullable';
                 }
-                
+
                 switch ($field['type'] ?? 'text') {
                     case 'number':
                         $fieldRules[] = 'numeric';
@@ -95,7 +95,7 @@ class FundingApplicationController extends Controller
                     default:
                         $fieldRules[] = 'string|max:1000';
                 }
-                
+
                 $rules['custom_fields.' . $field['name']] = $fieldRules;
             }
         }
@@ -153,7 +153,7 @@ class FundingApplicationController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        
+
         $query = $user->fundingApplications()
             ->with('fundingSource:id,title')
             ->latest();
@@ -192,8 +192,8 @@ class FundingApplicationController extends Controller
     {
         $user = auth()->user();
 
-        // Ensure user owns this application
-        if ($application->user_id !== $user->id) {
+        // Ensure user owns this application (cast to int for type-safe comparison)
+        if ((int) $application->user_id !== (int) $user->id) {
             abort(403);
         }
 
@@ -232,8 +232,8 @@ class FundingApplicationController extends Controller
     {
         $user = auth()->user();
 
-        // Ensure user owns this application
-        if ($application->user_id !== $user->id) {
+        // Ensure user owns this application (cast to int for type-safe comparison)
+        if ((int) $application->user_id !== (int) $user->id) {
             abort(403);
         }
 

@@ -42,7 +42,7 @@ class AccountController extends Controller
 
         // Calculate totals
         $totalBalance = $accounts->sum('balance');
-        
+
         // Get stats per account
         $stats = [
             'total_accounts' => $accounts->count(),
@@ -64,7 +64,8 @@ class AccountController extends Controller
         $user = $request->user();
 
         // Ensure the account belongs to the current user
-        if ($account->user_id !== $user->id) {
+        // Use (int) cast to handle potential string/int type mismatch in production
+        if ((int) $account->user_id !== (int) $user->id) {
             abort(403, 'Unauthorized access to this account.');
         }
 

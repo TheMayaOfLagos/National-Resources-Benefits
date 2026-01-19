@@ -60,6 +60,15 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         'withdrawal_status',
         'withdrawal_message',
 
+        // Withdrawal Security
+        'withdrawal_passcode',
+        'withdrawal_passcode_set_at',
+        'require_withdrawal_passcode',
+        'withdrawal_otp',
+        'withdrawal_otp_expires_at',
+        'passcode_failed_attempts',
+        'passcode_locked_until',
+
         // Verification codes
         'email_verification_code',
         'email_verification_code_expires_at',
@@ -97,6 +106,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         'remember_token',
         'two_factor_secret',
         'two_factor_recovery_codes',
+        'withdrawal_passcode',
+        'withdrawal_otp',
     ];
 
     /**
@@ -112,6 +123,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         'can_request' => 'boolean',
         'can_withdraw' => 'boolean',
         'can_use_voucher' => 'boolean',
+        'require_withdrawal_passcode' => 'boolean',
         'kyc_verified_at' => 'datetime',
         'email_verified_at' => 'datetime',
         'email_verification_code_expires_at' => 'datetime',
@@ -121,6 +133,10 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         'two_factor_enabled' => 'boolean',
         'two_factor_recovery_codes' => 'encrypted:array',
         'password' => 'hashed',
+        'withdrawal_passcode' => 'hashed',
+        'withdrawal_passcode_set_at' => 'datetime',
+        'withdrawal_otp_expires_at' => 'datetime',
+        'passcode_locked_until' => 'datetime',
     ];
 
     /**
@@ -215,6 +231,132 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
             'login_otp' => null,
             'login_otp_expires_at' => null,
             'login_otp_verified' => false,
+        ]);
+    }
+
+    /**
+     * Check if user has set up a withdrawal passcode.
+     */
+    public function hasWithdrawalPasscode(): bool
+    {
+        return !empty($this->withdrawal_passcode);
+    }
+
+    /**
+     * Check if user requires passcode for withdrawal.
+     */
+    public function requiresWithdrawalPasscode(): bool
+    {
+        return $this->require_withdrawal_passcode;
+    }
+
+    /**
+     * Check if passcode is locked due to too many failed attempts.
+     */
+    public function isPasscodeLocked(): bool
+    {
+        return $this->passcode_locked_until && $this->passcode_locked_until->isFuture();
+    }
+
+    /**
+     * Get remaining lockout time in seconds.
+     */
+    public function getPasscodeLockoutRemaining(): int
+    {
+        if (!$this->isPasscodeLocked()) {
+            return 0;
+        }
+        return now()->diffInSeconds($this->passcode_locked_until);
+    }
+
+    /**
+     * Verify withdrawal passcode.
+     */
+    public function verifyWithdrawalPasscode(string $passcode): bool
+    {
+        if ($this->isPasscodeLocked()) {
+            return false;
+        }
+
+        if (!\Illuminate\Support\Facades\Hash::check($passcode, $this->withdrawal_passcode)) {
+            $this->incrementPasscodeFailedAttempts();
+            return false;
+        }
+
+        // Reset failed attempts on success
+        $this->update([
+            'passcode_failed_attempts' => 0,
+            'passcode_locked_until' => null,
+        ]);
+
+        return true;
+    }
+
+    /**
+     * Increment failed passcode attempts and lock if threshold reached.
+     */
+    protected function incrementPasscodeFailedAttempts(): void
+    {
+        $attempts = $this->passcode_failed_attempts + 1;
+        $maxAttempts = 5;
+        $lockoutMinutes = 15;
+
+        $updates = ['passcode_failed_attempts' => $attempts];
+
+        if ($attempts >= $maxAttempts) {
+            $updates['passcode_locked_until'] = now()->addMinutes($lockoutMinutes);
+            $updates['passcode_failed_attempts'] = 0;
+        }
+
+        $this->update($updates);
+    }
+
+    /**
+     * Generate and save a withdrawal OTP.
+     */
+    public function generateWithdrawalOtp(): string
+    {
+        $otp = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        $this->update([
+            'withdrawal_otp' => $otp,
+            'withdrawal_otp_expires_at' => now()->addMinutes(10),
+        ]);
+
+        return $otp;
+    }
+
+    /**
+     * Verify withdrawal OTP.
+     */
+    public function verifyWithdrawalOtp(string $otp): bool
+    {
+        if ($this->withdrawal_otp !== $otp) {
+            return false;
+        }
+
+        if ($this->withdrawal_otp_expires_at && $this->withdrawal_otp_expires_at->isPast()) {
+            return false;
+        }
+
+        $this->update([
+            'withdrawal_otp' => null,
+            'withdrawal_otp_expires_at' => null,
+        ]);
+
+        return true;
+    }
+
+    /**
+     * Set withdrawal passcode.
+     */
+    public function setWithdrawalPasscode(string $passcode): void
+    {
+        $this->update([
+            'withdrawal_passcode' => $passcode, // Will be hashed by cast
+            'withdrawal_passcode_set_at' => now(),
+            'passcode_failed_attempts' => 0,
+            'passcode_locked_until' => null,
         ]);
     }
 

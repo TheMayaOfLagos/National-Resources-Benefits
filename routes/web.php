@@ -9,6 +9,7 @@ use App\Http\Controllers\KycController;
 use App\Http\Controllers\LinkedAccountController;
 use App\Http\Controllers\LoanController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PasscodeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RankController;
 use App\Http\Controllers\ReferralController;
@@ -52,11 +53,19 @@ Route::middleware(['auth', 'otp.verified'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update.patch');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::delete('/profile/avatar', [ProfileController::class, 'removeAvatar'])->name('profile.avatar.remove');
-    
+
     // Security routes
     Route::get('/security', [ProfileController::class, 'security'])->name('profile.security');
     Route::put('/security/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
     Route::post('/security/sessions', [ProfileController::class, 'logoutOtherSessions'])->name('profile.sessions.destroy');
+
+    // Withdrawal Passcode Security routes
+    Route::prefix('security/passcode')->name('security.passcode.')->group(function () {
+        Route::get('/status', [PasscodeController::class, 'status'])->name('status');
+        Route::post('/setup', [PasscodeController::class, 'setup'])->name('setup');
+        Route::post('/verify', [PasscodeController::class, 'verify'])->name('verify');
+        Route::post('/remove', [PasscodeController::class, 'remove'])->name('remove');
+    });
 
     // Linked Withdrawal Accounts (accessible even if withdraw is disabled - user needs to set up accounts)
     Route::prefix('linked-accounts')->name('linked-accounts.')->group(function () {
@@ -121,7 +130,7 @@ Route::middleware(['auth', 'otp.verified'])->group(function () {
     Route::middleware('feature:applications')->group(function () {
         Route::get('/funding-sources/{fundingSource}/apply', [App\Http\Controllers\FundingApplicationController::class, 'create'])->name('funding-sources.apply');
         Route::post('/funding-sources/{fundingSource}/apply', [App\Http\Controllers\FundingApplicationController::class, 'store'])->name('funding-sources.apply.store');
-        
+
         // My Applications
         Route::prefix('my-applications')->name('my-applications.')->group(function () {
             Route::get('/', [App\Http\Controllers\FundingApplicationController::class, 'index'])->name('index');
@@ -179,25 +188,25 @@ Route::middleware(['auth', 'verified', 'kyc.verified'])->group(function () {
         Route::get('/', [TransferController::class, 'index'])->name('index');
         Route::get('/history', [TransferController::class, 'history'])->name('history');
         Route::get('/search-recipient', [TransferController::class, 'searchRecipient'])->name('search-recipient');
-        
+
         // Internal Transfer
         Route::middleware('feature:transfer.internal')->group(function () {
             Route::get('/internal', [TransferController::class, 'internal'])->name('internal');
             Route::post('/internal', [TransferController::class, 'storeInternal'])->name('store-internal');
         });
-        
+
         // Own Accounts Transfer
         Route::middleware('feature:transfer.own')->group(function () {
             Route::get('/own-accounts', [TransferController::class, 'ownAccounts'])->name('own-accounts');
             Route::post('/own-accounts', [TransferController::class, 'storeOwnAccounts'])->name('store-own-accounts');
         });
-        
+
         // Domestic Transfer
         Route::middleware('feature:transfer.domestic')->group(function () {
             Route::get('/domestic', [TransferController::class, 'domestic'])->name('domestic');
             Route::post('/domestic', [TransferController::class, 'storeDomestic'])->name('store-domestic');
         });
-        
+
         // Wire Transfer
         Route::middleware('feature:transfer.wire')->group(function () {
             Route::get('/wire', [TransferController::class, 'wire'])->name('wire');
@@ -214,6 +223,11 @@ Route::middleware(['auth', 'verified', 'kyc.verified'])->group(function () {
         Route::post('/verify', [WithdrawController::class, 'verifyCode'])->name('verify.code');
         Route::post('/store', [WithdrawController::class, 'store'])->name('store');
         Route::get('/history', [WithdrawController::class, 'history'])->name('history');
+
+        // Withdrawal Passcode/OTP verification
+        Route::post('/verify-passcode', [PasscodeController::class, 'verify'])->name('verify-passcode');
+        Route::post('/send-otp', [PasscodeController::class, 'sendOtp'])->name('send-otp');
+        Route::post('/verify-otp', [PasscodeController::class, 'verifyOtp'])->name('verify-otp');
     });
 
     // Voucher Redemption

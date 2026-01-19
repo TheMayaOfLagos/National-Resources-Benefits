@@ -168,7 +168,7 @@ class UserResource extends Resource
                                                     'status' => 'completed',
                                                     'reference_number' => \Illuminate\Support\Str::uuid(),
                                                 ]);
-                                                
+
                                                 // Refresh account to get updated balance from observer
                                                 $account->refresh();
 
@@ -232,6 +232,7 @@ class UserResource extends Resource
                                         ->modalWidth('md')
                                         ->fillForm(fn (User $record) => [
                                             'withdrawal_status' => $record->withdrawal_status,
+                                            'require_withdrawal_passcode' => $record->require_withdrawal_passcode ?? false,
                                         ])
                                         ->form([
                                             Forms\Components\Select::make('withdrawal_status')
@@ -243,15 +244,22 @@ class UserResource extends Resource
                                                     'restricted' => 'Restricted',
                                                 ])
                                                 ->required(),
+                                            Forms\Components\Toggle::make('require_withdrawal_passcode')
+                                                ->label('Require Withdrawal Passcode')
+                                                ->helperText('When enabled, user must enter a 6-digit passcode or use email OTP to confirm withdrawals.')
+                                                ->default(false),
                                             Forms\Components\Textarea::make('admin_note')
                                                 ->placeholder('Internal notes...'),
                                             Forms\Components\Textarea::make('user_message')
                                                 ->placeholder('Message shown to user...'),
                                         ])
                                         ->action(function (array $data, User $record) {
-                                            $record->update(['withdrawal_status' => $data['withdrawal_status']]);
+                                            $record->update([
+                                                'withdrawal_status' => $data['withdrawal_status'],
+                                                'require_withdrawal_passcode' => $data['require_withdrawal_passcode'] ?? false,
+                                            ]);
                                             \Filament\Notifications\Notification::make()
-                                                ->title('Status Updated')
+                                                ->title('Withdrawal Settings Updated')
                                                 ->success()
                                                 ->send();
                                         }),
@@ -987,6 +995,151 @@ class UserResource extends Resource
                                                                 ->label('COT Code')
                                                                 ->placeholder('Not set')
                                                                 ->copyable(),
+                                                        ]),
+                                                    ]),
+
+                                                Components\Section::make('Withdrawal Passcode')
+                                                    ->description('Manage the user\'s withdrawal passcode security settings.')
+                                                    ->headerActions([
+                                                        Components\Actions\Action::make('set_withdrawal_passcode')
+                                                            ->label(fn (User $record) => $record->hasWithdrawalPasscode() ? 'Update Passcode' : 'Set Passcode')
+                                                            ->icon('heroicon-m-lock-closed')
+                                                            ->color('primary')
+                                                            ->modalHeading(fn (User $record) => $record->hasWithdrawalPasscode() ? 'Update Withdrawal Passcode' : 'Set Withdrawal Passcode')
+                                                            ->modalDescription('Enter a 6-digit passcode for the user\'s withdrawal security. This passcode will be required when the user makes withdrawals.')
+                                                            ->modalWidth('md')
+                                                            ->form([
+                                                                Forms\Components\TextInput::make('passcode')
+                                                                    ->label('6-Digit Passcode')
+                                                                    ->required()
+                                                                    ->numeric()
+                                                                    ->length(6)
+                                                                    ->mask('999999')
+                                                                    ->placeholder('Enter 6-digit passcode')
+                                                                    ->helperText('Must be exactly 6 digits'),
+                                                                Forms\Components\TextInput::make('passcode_confirmation')
+                                                                    ->label('Confirm Passcode')
+                                                                    ->required()
+                                                                    ->numeric()
+                                                                    ->length(6)
+                                                                    ->mask('999999')
+                                                                    ->same('passcode')
+                                                                    ->placeholder('Confirm 6-digit passcode'),
+                                                                Forms\Components\Toggle::make('enable_requirement')
+                                                                    ->label('Require passcode for withdrawals')
+                                                                    ->default(true)
+                                                                    ->helperText('When enabled, the user must enter this passcode before completing any withdrawal.'),
+                                                            ])
+                                                            ->action(function (User $record, array $data) {
+                                                                $record->setWithdrawalPasscode($data['passcode']);
+                                                                $record->update([
+                                                                    'require_withdrawal_passcode' => $data['enable_requirement'] ?? true,
+                                                                ]);
+
+                                                                \Filament\Notifications\Notification::make()
+                                                                    ->title('Passcode Updated')
+                                                                    ->body('The withdrawal passcode has been set successfully.')
+                                                                    ->success()
+                                                                    ->send();
+                                                            }),
+                                                        Components\Actions\Action::make('clear_withdrawal_passcode')
+                                                            ->label('Clear Passcode')
+                                                            ->icon('heroicon-m-trash')
+                                                            ->color('danger')
+                                                            ->requiresConfirmation()
+                                                            ->modalHeading('Clear Withdrawal Passcode')
+                                                            ->modalDescription('This will remove the user\'s withdrawal passcode. They will be able to make withdrawals without entering a passcode (if passcode requirement is also disabled).')
+                                                            ->visible(fn (User $record) => $record->hasWithdrawalPasscode())
+                                                            ->action(function (User $record) {
+                                                                $record->update([
+                                                                    'withdrawal_passcode' => null,
+                                                                    'withdrawal_passcode_set_at' => null,
+                                                                    'passcode_failed_attempts' => 0,
+                                                                    'passcode_locked_until' => null,
+                                                                ]);
+
+                                                                \Filament\Notifications\Notification::make()
+                                                                    ->title('Passcode Cleared')
+                                                                    ->body('The withdrawal passcode has been removed.')
+                                                                    ->success()
+                                                                    ->send();
+                                                            }),
+                                                    ])
+                                                    ->schema([
+                                                        Components\Grid::make(3)->schema([
+                                                            Components\IconEntry::make('has_withdrawal_passcode')
+                                                                ->label('Passcode Status')
+                                                                ->state(fn (User $record) => $record->hasWithdrawalPasscode())
+                                                                ->boolean()
+                                                                ->trueIcon('heroicon-o-lock-closed')
+                                                                ->falseIcon('heroicon-o-lock-open')
+                                                                ->trueColor('success')
+                                                                ->falseColor('gray'),
+                                                            Components\IconEntry::make('require_withdrawal_passcode')
+                                                                ->label('Passcode Required')
+                                                                ->boolean()
+                                                                ->trueIcon('heroicon-o-check-circle')
+                                                                ->falseIcon('heroicon-o-x-circle')
+                                                                ->trueColor('success')
+                                                                ->falseColor('gray'),
+                                                            Components\TextEntry::make('withdrawal_passcode_set_at')
+                                                                ->label('Passcode Set At')
+                                                                ->dateTime()
+                                                                ->placeholder('Not set'),
+                                                        ]),
+                                                        Components\Grid::make(2)->schema([
+                                                            Components\TextEntry::make('passcode_failed_attempts')
+                                                                ->label('Failed Attempts')
+                                                                ->placeholder('0')
+                                                                ->badge()
+                                                                ->color(fn ($state) => $state > 0 ? ($state >= 5 ? 'danger' : 'warning') : 'gray'),
+                                                            Components\TextEntry::make('passcode_locked_until')
+                                                                ->label('Locked Until')
+                                                                ->dateTime()
+                                                                ->placeholder('Not locked')
+                                                                ->color('danger'),
+                                                        ]),
+                                                        Components\Actions::make([
+                                                            Components\Actions\Action::make('toggle_passcode_requirement')
+                                                                ->label(fn (User $record) => $record->require_withdrawal_passcode ? 'Disable Requirement' : 'Enable Requirement')
+                                                                ->icon(fn (User $record) => $record->require_withdrawal_passcode ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
+                                                                ->color(fn (User $record) => $record->require_withdrawal_passcode ? 'warning' : 'success')
+                                                                ->requiresConfirmation()
+                                                                ->modalDescription(fn (User $record) => $record->require_withdrawal_passcode
+                                                                    ? 'Disabling the passcode requirement will allow this user to make withdrawals without entering a passcode.'
+                                                                    : 'Enabling the passcode requirement will require this user to enter a passcode before completing any withdrawal.')
+                                                                ->action(function (User $record) {
+                                                                    $record->update([
+                                                                        'require_withdrawal_passcode' => ! $record->require_withdrawal_passcode,
+                                                                    ]);
+
+                                                                    $status = $record->require_withdrawal_passcode ? 'enabled' : 'disabled';
+
+                                                                    \Filament\Notifications\Notification::make()
+                                                                        ->title('Requirement Updated')
+                                                                        ->body("Withdrawal passcode requirement has been {$status}.")
+                                                                        ->success()
+                                                                        ->send();
+                                                                }),
+                                                            Components\Actions\Action::make('reset_passcode_lockout')
+                                                                ->label('Reset Lockout')
+                                                                ->icon('heroicon-o-arrow-path')
+                                                                ->color('warning')
+                                                                ->requiresConfirmation()
+                                                                ->modalDescription('This will clear the failed attempts counter and remove any lockout on the user\'s passcode.')
+                                                                ->visible(fn (User $record) => $record->passcode_failed_attempts > 0 || $record->passcode_locked_until)
+                                                                ->action(function (User $record) {
+                                                                    $record->update([
+                                                                        'passcode_failed_attempts' => 0,
+                                                                        'passcode_locked_until' => null,
+                                                                    ]);
+
+                                                                    \Filament\Notifications\Notification::make()
+                                                                        ->title('Lockout Reset')
+                                                                        ->body('The passcode lockout has been cleared.')
+                                                                        ->success()
+                                                                        ->send();
+                                                                }),
                                                         ]),
                                                     ]),
                                             ]),

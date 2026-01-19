@@ -121,9 +121,7 @@ const totalBalance = () => {
                         <div class="flex-grow">
                             <h3 class="mb-2 text-lg font-semibold text-red-700 dark:text-red-400">Withdrawal Disabled
                             </h3>
-                            <p class="mb-4 text-gray-600 dark:text-gray-400">{{ withdrawalMessage || 'Your withdrawal
-                                capability has been disabled.This restriction has been placed on your account by an
-                                administrator.' }}</p>
+                            <p class="mb-4 text-gray-600 dark:text-gray-400">{{ withdrawalMessage || 'Your withdrawal administrator.' }}</p>
                             <div class="p-4 rounded-lg bg-red-50 dark:bg-red-900/20">
                                 <h4 class="mb-2 font-medium text-red-800 dark:text-red-300">What you can do:</h4>
                                 <ul class="space-y-1 text-sm text-red-700 dark:text-red-400">

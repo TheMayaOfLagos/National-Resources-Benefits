@@ -1,6 +1,6 @@
 <script setup>
 import { Head, Link, useForm, usePage, router } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import DashboardLayout from '@/Layouts/DashboardLayout.vue';
 import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
@@ -11,6 +11,7 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Tag from 'primevue/tag';
 import { useToast } from 'primevue/usetoast';
+import axios from 'axios';
 
 const props = defineProps({
     user: Object,
@@ -47,6 +48,21 @@ const showEnableTwoFactorDialog = ref(false);
 const showConfirmTwoFactorDialog = ref(false);
 const showRecoveryCodesDialog = ref(false);
 const showDisableTwoFactorDialog = ref(false);
+const showSetPasscodeDialog = ref(false);
+const showRemovePasscodeDialog = ref(false);
+
+// Withdrawal Passcode state
+const passcodeStatus = ref({
+    has_passcode: false,
+    requires_passcode: false,
+    is_locked: false,
+    lockout_remaining: 0,
+});
+const passcodeLoading = ref(false);
+const newPasscode = ref('');
+const confirmPasscode = ref('');
+const currentPasscode = ref('');
+const passcodeError = ref('');
 
 // Two-Factor state
 const twoFactorQrCode = ref(null);
@@ -69,6 +85,119 @@ const disableTwoFactorForm = useForm({
 
 // Computed
 const twoFactorEnabled = computed(() => props.user?.two_factor_enabled && props.user?.two_factor_confirmed_at);
+const isPasscodeValid = computed(() => /^\d{6}$/.test(newPasscode.value));
+const isConfirmPasscodeValid = computed(() => /^\d{6}$/.test(confirmPasscode.value));
+const isCurrentPasscodeValid = computed(() => /^\d{6}$/.test(currentPasscode.value));
+const passcodesMatch = computed(() => newPasscode.value === confirmPasscode.value);
+
+// Fetch passcode status on mount
+onMounted(async () => {
+    await fetchPasscodeStatus();
+});
+
+// Withdrawal Passcode Methods
+const fetchPasscodeStatus = async () => {
+    try {
+        const response = await axios.get(route('security.passcode.status'));
+        passcodeStatus.value = response.data;
+    } catch (error) {
+        console.error('Failed to fetch passcode status:', error);
+    }
+};
+
+const resetPasscodeInputs = () => {
+    newPasscode.value = '';
+    confirmPasscode.value = '';
+    currentPasscode.value = '';
+    passcodeError.value = '';
+};
+
+const setupPasscode = async () => {
+    if (!isPasscodeValid.value || !isConfirmPasscodeValid.value) {
+        passcodeError.value = 'Please enter a valid 6-digit passcode.';
+        return;
+    }
+
+    if (!passcodesMatch.value) {
+        passcodeError.value = 'Passcodes do not match.';
+        return;
+    }
+
+    passcodeLoading.value = true;
+    passcodeError.value = '';
+
+    try {
+        const data = {
+            passcode: newPasscode.value,
+            passcode_confirmation: confirmPasscode.value,
+        };
+
+        // If changing existing passcode, include current passcode
+        if (passcodeStatus.value.has_passcode && isCurrentPasscodeValid.value) {
+            data.current_passcode = currentPasscode.value;
+        }
+
+        const response = await axios.post(route('security.passcode.setup'), data);
+
+        if (response.data.success) {
+            showSetPasscodeDialog.value = false;
+            resetPasscodeInputs();
+            await fetchPasscodeStatus();
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Withdrawal passcode has been set successfully',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        passcodeError.value = error.response?.data?.message || 'Failed to set passcode. Please try again.';
+    } finally {
+        passcodeLoading.value = false;
+    }
+};
+
+const removePasscode = async () => {
+    if (!isCurrentPasscodeValid.value) {
+        passcodeError.value = 'Please enter your current passcode.';
+        return;
+    }
+
+    passcodeLoading.value = true;
+    passcodeError.value = '';
+
+    try {
+        const response = await axios.post(route('security.passcode.remove'), {
+            passcode: currentPasscode.value,
+        });
+
+        if (response.data.success) {
+            showRemovePasscodeDialog.value = false;
+            resetPasscodeInputs();
+            await fetchPasscodeStatus();
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Withdrawal passcode has been removed',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        passcodeError.value = error.response?.data?.message || 'Failed to remove passcode. Please try again.';
+    } finally {
+        passcodeLoading.value = false;
+    }
+};
+
+const openSetPasscodeDialog = () => {
+    resetPasscodeInputs();
+    showSetPasscodeDialog.value = true;
+};
+
+const openRemovePasscodeDialog = () => {
+    resetPasscodeInputs();
+    showRemovePasscodeDialog.value = true;
+};
 
 // Two-Factor Methods
 const enableTwoFactor = () => {
@@ -379,6 +508,71 @@ const getBrowserIcon = (browser) => {
                 </div>
             </div>
 
+            <!-- Withdrawal Passcode -->
+            <div class="p-6 bg-white border border-gray-100 shadow-sm dark:bg-gray-800 rounded-xl dark:border-gray-700">
+                <div class="flex items-start justify-between mb-6">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Withdrawal Passcode</h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                            Set a 6-digit PIN to secure your withdrawal transactions.
+                        </p>
+                    </div>
+                    <div
+                        class="flex items-center justify-center w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/50">
+                        <i class="text-amber-600 pi pi-lock dark:text-amber-400"></i>
+                    </div>
+                </div>
+
+                <!-- Passcode Status -->
+                <div v-if="passcodeStatus.has_passcode"
+                    class="p-4 mb-4 border border-green-200 rounded-lg bg-green-50 dark:bg-green-900/20 dark:border-green-800">
+                    <div class="flex items-center gap-2">
+                        <i class="text-green-600 pi pi-check-circle dark:text-green-400"></i>
+                        <span class="font-medium text-green-700 dark:text-green-300">
+                            Withdrawal passcode is active
+                        </span>
+                    </div>
+                    <p class="mt-2 text-sm text-green-600 dark:text-green-400">
+                        You will be required to enter your passcode or use email OTP to confirm withdrawals.
+                    </p>
+                </div>
+
+                <div v-else
+                    class="p-4 mb-4 border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-700/50 dark:border-gray-600">
+                    <div class="flex items-center gap-2">
+                        <i class="text-gray-500 pi pi-info-circle dark:text-gray-400"></i>
+                        <span class="font-medium text-gray-700 dark:text-gray-300">
+                            No withdrawal passcode set
+                        </span>
+                    </div>
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        {{ passcodeStatus.requires_passcode
+                            ? 'Your account requires a withdrawal passcode. Please set one up to make withdrawals.'
+                            : 'Adding a withdrawal passcode provides extra security for your transactions.'
+                        }}
+                    </p>
+                </div>
+
+                <!-- Required Badge -->
+                <div v-if="passcodeStatus.requires_passcode && !passcodeStatus.has_passcode" class="mb-4">
+                    <Tag value="Required" severity="warning" icon="pi pi-exclamation-triangle" />
+                    <span class="ml-2 text-sm text-amber-600 dark:text-amber-400">
+                        You must set up a passcode to withdraw funds.
+                    </span>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap gap-3">
+                    <Button v-if="!passcodeStatus.has_passcode" label="Set Up Passcode" icon="pi pi-plus"
+                        @click="openSetPasscodeDialog" />
+                    <Button v-if="passcodeStatus.has_passcode" label="Change Passcode" icon="pi pi-pencil"
+                        severity="secondary" @click="openSetPasscodeDialog" />
+                    <Button v-if="passcodeStatus.has_passcode && !passcodeStatus.requires_passcode"
+                        label="Remove Passcode" icon="pi pi-trash" severity="danger" outlined
+                        @click="openRemovePasscodeDialog" />
+                </div>
+            </div>
+
             <!-- Two-Factor Authentication -->
             <div class="p-6 bg-white border border-gray-100 shadow-sm dark:bg-gray-800 rounded-xl dark:border-gray-700">
                 <div class="flex items-start justify-between">
@@ -656,6 +850,7 @@ const getBrowserIcon = (browser) => {
                     </div>
                 </div>
 
+
                 <!-- Action Buttons -->
                 <div class="flex gap-2">
                     <Button label="Copy Codes" icon="pi pi-copy" severity="secondary" class="flex-1"
@@ -698,6 +893,109 @@ const getBrowserIcon = (browser) => {
                 <Button label="Cancel" severity="secondary" @click="showDisableTwoFactorDialog = false" />
                 <Button label="Disable 2FA" severity="danger" :loading="disableTwoFactorForm.processing"
                     @click="disableTwoFactor" />
+            </template>
+        </Dialog>
+
+        <!-- Set/Change Passcode Dialog -->
+        <Dialog v-model:visible="showSetPasscodeDialog"
+            :header="passcodeStatus.has_passcode ? 'Change Withdrawal Passcode' : 'Set Up Withdrawal Passcode'"
+            :modal="true" :style="{ width: '450px' }" @hide="resetPasscodeInputs">
+            <div class="space-y-6">
+                <!-- Current Passcode (only when changing) -->
+                <div v-if="passcodeStatus.has_passcode">
+                    <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Current Passcode
+                    </label>
+                    <InputText v-model="currentPasscode" type="password" placeholder="Enter current 6-digit passcode"
+                        maxlength="6" class="w-full" :disabled="passcodeLoading" />
+                    <small class="text-gray-500">Enter your current 6-digit passcode</small>
+                </div>
+
+                <!-- New Passcode -->
+                <div>
+                    <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ passcodeStatus.has_passcode ? 'New Passcode' : 'Enter 6-digit Passcode' }}
+                    </label>
+                    <InputText v-model="newPasscode" type="password" placeholder="Enter 6-digit passcode"
+                        maxlength="6" class="w-full" :disabled="passcodeLoading" />
+                    <small class="text-gray-500">Must be exactly 6 digits</small>
+                </div>
+
+                <!-- Confirm Passcode -->
+                <div>
+                    <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Confirm Passcode
+                    </label>
+                    <InputText v-model="confirmPasscode" type="password" placeholder="Confirm 6-digit passcode"
+                        maxlength="6" class="w-full" :disabled="passcodeLoading" />
+                    <div v-if="isPasscodeValid && isConfirmPasscodeValid && !passcodesMatch"
+                        class="mt-2">
+                        <small class="text-red-500">Passcodes do not match</small>
+                    </div>
+                    <div v-if="isPasscodeValid && isConfirmPasscodeValid && passcodesMatch"
+                        class="mt-2">
+                        <small class="text-green-500"><i class="mr-1 pi pi-check"></i>Passcodes match</small>
+                    </div>
+                </div>
+
+                <!-- Error Message -->
+                <Message v-if="passcodeError" severity="error" :closable="false">
+                    {{ passcodeError }}
+                </Message>
+
+                <!-- Info -->
+                <div class="p-3 text-sm text-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                    <i class="mr-2 pi pi-info-circle"></i>
+                    Your passcode will be required to confirm withdrawal transactions. You can also use email OTP as an
+                    alternative.
+                </div>
+            </div>
+
+            <template #footer>
+                <Button label="Cancel" severity="secondary" @click="showSetPasscodeDialog = false"
+                    :disabled="passcodeLoading" />
+                <Button :label="passcodeStatus.has_passcode ? 'Update Passcode' : 'Set Passcode'" icon="pi pi-check"
+                    :loading="passcodeLoading"
+                    :disabled="!isPasscodeValid || !isConfirmPasscodeValid || !passcodesMatch || (passcodeStatus.has_passcode && !isCurrentPasscodeValid)"
+                    @click="setupPasscode" />
+            </template>
+        </Dialog>
+
+        <!-- Remove Passcode Dialog -->
+        <Dialog v-model:visible="showRemovePasscodeDialog" header="Remove Withdrawal Passcode" :modal="true"
+            :style="{ width: '450px' }" @hide="resetPasscodeInputs">
+            <div class="space-y-6">
+                <div class="text-center">
+                    <div
+                        class="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full dark:bg-red-900/50">
+                        <i class="text-3xl text-red-500 pi pi-trash"></i>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300">
+                        Are you sure you want to remove your withdrawal passcode? This will make your withdrawals less
+                        secure.
+                    </p>
+                </div>
+
+                <!-- Current Passcode -->
+                <div>
+                    <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Enter your current passcode to confirm
+                    </label>
+                    <InputText v-model="currentPasscode" type="password" placeholder="Enter current 6-digit passcode"
+                        maxlength="6" class="w-full" :disabled="passcodeLoading" />
+                </div>
+
+                <!-- Error Message -->
+                <Message v-if="passcodeError" severity="error" :closable="false">
+                    {{ passcodeError }}
+                </Message>
+            </div>
+
+            <template #footer>
+                <Button label="Cancel" severity="secondary" @click="showRemovePasscodeDialog = false"
+                    :disabled="passcodeLoading" />
+                <Button label="Remove Passcode" icon="pi pi-trash" severity="danger" :loading="passcodeLoading"
+                    :disabled="!isCurrentPasscodeValid" @click="removePasscode" />
             </template>
         </Dialog>
     </DashboardLayout>

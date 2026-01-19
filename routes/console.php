@@ -2,10 +2,23 @@
 
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 use Mailtrap\Helper\ResponseHelper;
 use Mailtrap\MailtrapClient;
 use Mailtrap\Mime\MailtrapEmail;
 use Symfony\Component\Mime\Address;
+
+/*
+|--------------------------------------------------------------------------
+| Console Routes & Scheduling
+|--------------------------------------------------------------------------
+*/
+
+// Schedule the queue worker to process jobs every minute
+Schedule::command('queue:work --stop-when-empty --max-time=50')->everyMinute()->withoutOverlapping();
+
+// Alternative: Process emails specifically (if you have a separate email queue)
+// Schedule::command('queue:work --queue=emails --stop-when-empty --max-time=50')->everyMinute()->withoutOverlapping();
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());

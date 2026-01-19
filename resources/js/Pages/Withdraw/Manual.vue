@@ -14,6 +14,7 @@ import Divider from 'primevue/divider';
 import Dropdown from 'primevue/dropdown';
 import Textarea from 'primevue/textarea';
 import Badge from 'primevue/badge';
+import PasscodeDialog from '@/Components/PasscodeDialog.vue';
 
 defineOptions({ layout: DashboardLayout });
 
@@ -51,6 +52,15 @@ const props = defineProps({
         type: String,
         default: null,
     },
+    passcodeStatus: {
+        type: Object,
+        default: () => ({
+            has_passcode: false,
+            requires_passcode: false,
+            is_locked: false,
+            lockout_remaining: 0,
+        }),
+    },
 });
 
 const page = usePage();
@@ -58,8 +68,10 @@ const flash = computed(() => page.props.flash || {});
 
 const currentStep = ref(0);
 const showConfirmDialog = ref(false);
+const showPasscodeDialog = ref(false);
 const showLinkAccountDialog = ref(false);
 const useLinkedAccount = ref(true);
+const passcodeVerified = ref(false);
 
 // Dynamic steps based on whether admin methods are available
 const steps = computed(() => {
@@ -289,11 +301,34 @@ const setMaxAmount = () => {
     form.amount = Math.floor(maxWithdrawable.value * 100) / 100;
 };
 
+// Handle confirm button click - check if passcode is required
+const handleConfirmClick = () => {
+    if (props.passcodeStatus.requires_passcode) {
+        showConfirmDialog.value = false;
+        showPasscodeDialog.value = true;
+    } else {
+        submitWithdrawal();
+    }
+};
+
+// Handle passcode verification success
+const handlePasscodeVerified = (result) => {
+    passcodeVerified.value = true;
+    showPasscodeDialog.value = false;
+    submitWithdrawal();
+};
+
+// Handle setup required - redirect to security settings
+const handleSetupRequired = () => {
+    router.visit(route('profile.security'));
+};
+
 const submitWithdrawal = () => {
     form.post(route('withdraw.store'), {
         preserveScroll: true,
         onSuccess: () => {
             showConfirmDialog.value = false;
+            passcodeVerified.value = false;
             form.reset();
             currentStep.value = 0;
         },
@@ -582,12 +617,12 @@ const submitWithdrawal = () => {
                         <div class="flex justify-between mb-2 text-sm">
                             <span class="text-gray-500">Minimum Withdrawal:</span>
                             <span class="font-medium">{{ settings.currency_symbol }}{{ minLimit.toLocaleString()
-                                }}</span>
+                            }}</span>
                         </div>
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-500">Maximum Withdrawal:</span>
                             <span class="font-medium">{{ settings.currency_symbol }}{{ maxLimit.toLocaleString()
-                                }}</span>
+                            }}</span>
                         </div>
                     </div>
 
@@ -818,18 +853,24 @@ const submitWithdrawal = () => {
                         <div class="p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
                             <h4 class="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">Bank Details</h4>
                             <div v-if="useLinkedAccount && selectedLinkedAccount" class="space-y-1 text-sm">
-                                <p class="font-medium text-gray-900 dark:text-white">{{ selectedLinkedAccount.account_name }}</p>
+                                <p class="font-medium text-gray-900 dark:text-white">{{
+                                    selectedLinkedAccount.account_name }}</p>
                                 <p class="text-gray-500">{{ selectedLinkedAccount.display_name }}</p>
                             </div>
                             <div v-else class="grid grid-cols-2 gap-2 text-sm">
                                 <p class="text-gray-500">Bank:</p>
-                                <p class="font-medium text-gray-900 dark:text-white">{{ form.bank_details.bank_name }}</p>
+                                <p class="font-medium text-gray-900 dark:text-white">{{ form.bank_details.bank_name }}
+                                </p>
                                 <p class="text-gray-500">Account Name:</p>
-                                <p class="font-medium text-gray-900 dark:text-white">{{ form.bank_details.account_name }}</p>
+                                <p class="font-medium text-gray-900 dark:text-white">{{ form.bank_details.account_name
+                                    }}</p>
                                 <p class="text-gray-500">Account Number:</p>
-                                <p class="font-medium text-gray-900 dark:text-white">****{{ form.bank_details.account_number?.slice(-4) }}</p>
+                                <p class="font-medium text-gray-900 dark:text-white">****{{
+                                    form.bank_details.account_number?.slice(-4) }}</p>
                                 <p v-if="form.bank_details.routing_number" class="text-gray-500">Routing:</p>
-                                <p v-if="form.bank_details.routing_number" class="font-medium text-gray-900 dark:text-white">{{ form.bank_details.routing_number }}</p>
+                                <p v-if="form.bank_details.routing_number"
+                                    class="font-medium text-gray-900 dark:text-white">{{
+                                    form.bank_details.routing_number }}</p>
                             </div>
                         </div>
 
@@ -889,9 +930,13 @@ const submitWithdrawal = () => {
             <template #footer>
                 <Button label="Cancel" severity="secondary" outlined @click="showConfirmDialog = false" />
                 <Button label="Confirm Withdrawal" severity="success" :loading="form.processing"
-                    @click="submitWithdrawal" />
+                    @click="handleConfirmClick" />
             </template>
         </Dialog>
+
+        <!-- Passcode Verification Dialog -->
+        <PasscodeDialog :show="showPasscodeDialog" :passcode-status="passcodeStatus" @close="showPasscodeDialog = false"
+            @verified="handlePasscodeVerified" @setup-required="handleSetupRequired" />
 
         <!-- Link Account Dialog -->
         <Dialog v-model:visible="showLinkAccountDialog" modal header="Link Withdrawal Account"

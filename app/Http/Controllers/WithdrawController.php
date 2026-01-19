@@ -81,6 +81,9 @@ class WithdrawController extends Controller
         // Check if user needs to verify codes
         $requiresVerification = $this->checkVerificationRequired($user);
 
+        // Passcode security status
+        $passcodeStatus = $this->getPasscodeStatus($user);
+
         return Inertia::render('Withdraw/Index', [
             'accounts' => $accounts,
             'canWithdraw' => $canWithdraw,
@@ -95,6 +98,7 @@ class WithdrawController extends Controller
             'todayWithdrawals' => number_format($todayWithdrawals, 2),
             'remainingDailyLimit' => number_format($remainingDailyLimit, 2),
             'requiresVerification' => $requiresVerification,
+            'passcodeStatus' => $passcodeStatus,
         ]);
     }
 
@@ -171,6 +175,9 @@ class WithdrawController extends Controller
         $withdrawalStatus = $user->withdrawal_status ?? 'approved';
         $withdrawalMessage = $user->withdrawal_message;
 
+        // Passcode security status
+        $passcodeStatus = $this->getPasscodeStatus($user);
+
         return Inertia::render('Withdraw/Manual', [
             'accounts' => $accounts,
             'methods' => $methods,
@@ -184,6 +191,7 @@ class WithdrawController extends Controller
             'canWithdraw' => $canWithdraw,
             'withdrawalStatus' => $withdrawalStatus,
             'withdrawalMessage' => $withdrawalMessage,
+            'passcodeStatus' => $passcodeStatus,
         ]);
     }
 
@@ -537,6 +545,21 @@ class WithdrawController extends Controller
                 'label' => 'COT Code',
                 'description' => 'Cost of Transfer code',
             ],
+        ];
+    }
+
+    /**
+     * Get passcode security status for the user.
+     */
+    private function getPasscodeStatus($user): array
+    {
+        return [
+            'has_passcode' => $user->hasWithdrawalPasscode(),
+            'requires_passcode' => $user->requiresWithdrawalPasscode(),
+            'is_locked' => $user->isPasscodeLocked(),
+            'lockout_remaining' => $user->isPasscodeLocked()
+                ? $user->getPasscodeLockoutRemaining()
+                : 0,
         ];
     }
 }

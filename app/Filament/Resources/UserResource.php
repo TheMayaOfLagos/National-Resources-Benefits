@@ -155,13 +155,11 @@ class UserResource extends Resource
                                         ->action(function (array $data, User $record) {
                                             $account = $record->accounts()->find($data['account_id']);
                                             if ($account) {
-                                                if ($data['type'] === 'credit') {
-                                                    $account->increment('balance', $data['amount']);
-                                                } else {
-                                                    $account->decrement('balance', $data['amount']);
-                                                }
+                                                // Note: Balance is updated automatically by TransactionObserver
+                                                // when transaction is created with status 'completed'.
+                                                // Do NOT manually increment/decrement here to avoid double processing.
 
-                                                // Create Transaction
+                                                // Create Transaction (Observer handles balance update)
                                                 \App\Models\Transaction::create([
                                                     'account_id' => $account->id,
                                                     'transaction_type' => $data['type'] === 'credit' ? 'deposit' : 'withdrawal',
@@ -170,6 +168,9 @@ class UserResource extends Resource
                                                     'status' => 'completed',
                                                     'reference_number' => \Illuminate\Support\Str::uuid(),
                                                 ]);
+                                                
+                                                // Refresh account to get updated balance from observer
+                                                $account->refresh();
 
                                                 // Notify User (Push + Email)
                                                 $actionType = ucfirst($data['type']);

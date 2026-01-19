@@ -17,9 +17,22 @@ const props = defineProps({
     settings: Object,
     manualMethodsCount: Number,
     automaticMethodsCount: Number,
+    linkedAccountsCount: Number,
+    bankWithdrawalEnabled: Boolean,
+    expressWithdrawalEnabled: Boolean,
     todayWithdrawals: String,
     remainingDailyLimit: String,
     requiresVerification: Boolean,
+});
+
+// Check if bank withdrawal is available (has methods OR has linked accounts)
+const hasBankWithdrawalOption = computed(() => {
+    return props.manualMethodsCount > 0 || props.linkedAccountsCount > 0;
+});
+
+// Check if express withdrawal is available
+const hasExpressWithdrawalOption = computed(() => {
+    return props.automaticMethodsCount > 0;
 });
 
 const getStatusSeverity = (status) => {
@@ -356,10 +369,14 @@ const totalBalance = () => {
         </Card>
 
         <!-- Withdrawal Method Selection -->
-        <div class="grid gap-6 md:grid-cols-2"
-            :class="{ 'opacity-50 pointer-events-none': !canWithdraw || withdrawalStatus !== 'approved' || requiresVerification }">
-            <!-- Manual Withdrawal Card -->
-            <Card class="transition-shadow hover:shadow-lg">
+        <div v-if="bankWithdrawalEnabled || expressWithdrawalEnabled" 
+            class="grid gap-6"
+            :class="[
+                { 'opacity-50 pointer-events-none': !canWithdraw || withdrawalStatus !== 'approved' || requiresVerification },
+                (bankWithdrawalEnabled && expressWithdrawalEnabled) ? 'md:grid-cols-2' : 'md:grid-cols-1 max-w-xl mx-auto'
+            ]">
+            <!-- Manual/Bank Withdrawal Card -->
+            <Card v-if="bankWithdrawalEnabled" class="transition-shadow hover:shadow-lg">
                 <template #header>
                     <div class="p-6 text-center text-white rounded-t-lg bg-gradient-to-r from-purple-500 to-purple-600">
                         <i class="mb-3 text-4xl pi pi-building"></i>
@@ -388,19 +405,27 @@ const totalBalance = () => {
                         <p class="mb-4 text-xs text-gray-400">
                             Processing time: 1-5 business days
                         </p>
+                        <!-- Show linked accounts info if user has them -->
+                        <div v-if="linkedAccountsCount > 0" class="p-2 mb-3 text-xs text-left text-green-700 rounded-lg bg-green-50 dark:bg-green-900/20 dark:text-green-400">
+                            <i class="mr-1 pi pi-check-circle"></i>
+                            You have {{ linkedAccountsCount }} linked bank account{{ linkedAccountsCount > 1 ? 's' : '' }} ready for withdrawal
+                        </div>
                         <Link :href="route('withdraw.manual')">
-                        <Button label="Request Bank Withdrawal" icon="pi pi-arrow-right" iconPos="right" class="w-full"
-                            :disabled="manualMethodsCount === 0" />
+                            <Button label="Request Bank Withdrawal" icon="pi pi-arrow-right" iconPos="right" class="w-full"
+                                :disabled="!hasBankWithdrawalOption" />
                         </Link>
-                        <p v-if="manualMethodsCount === 0" class="mt-2 text-xs text-orange-500">
-                            No bank withdrawal methods available
+                        <p v-if="!hasBankWithdrawalOption" class="mt-2 text-xs text-orange-500">
+                            <Link :href="route('linked-accounts.index')" class="underline hover:text-orange-600">
+                                Link a bank account
+                            </Link>
+                            to enable withdrawals
                         </p>
                     </div>
                 </template>
             </Card>
 
-            <!-- Automatic Withdrawal Card -->
-            <Card class="transition-shadow hover:shadow-lg">
+            <!-- Automatic/Express Withdrawal Card -->
+            <Card v-if="expressWithdrawalEnabled" class="transition-shadow hover:shadow-lg">
                 <template #header>
                     <div class="p-6 text-center text-white rounded-t-lg bg-gradient-to-r from-indigo-500 to-indigo-600">
                         <i class="mb-3 text-4xl pi pi-bolt"></i>
@@ -430,16 +455,32 @@ const totalBalance = () => {
                             Processing time: 1-24 hours
                         </p>
                         <Link :href="route('withdraw.automatic')">
-                        <Button label="Request Express Withdrawal" icon="pi pi-arrow-right" iconPos="right"
-                            severity="help" class="w-full" :disabled="automaticMethodsCount === 0" />
+                            <Button label="Request Express Withdrawal" icon="pi pi-arrow-right" iconPos="right"
+                                severity="help" class="w-full" :disabled="!hasExpressWithdrawalOption" />
                         </Link>
-                        <p v-if="automaticMethodsCount === 0" class="mt-2 text-xs text-orange-500">
+                        <p v-if="!hasExpressWithdrawalOption" class="mt-2 text-xs text-orange-500">
                             No express methods available
                         </p>
                     </div>
                 </template>
             </Card>
         </div>
+
+        <!-- No withdrawal methods available -->
+        <Card v-if="!bankWithdrawalEnabled && !expressWithdrawalEnabled" class="text-center">
+            <template #content>
+                <div class="py-8">
+                    <i class="mb-4 text-5xl text-gray-300 pi pi-ban dark:text-gray-600"></i>
+                    <h3 class="mb-2 text-lg font-semibold text-gray-700 dark:text-gray-300">Withdrawals Unavailable</h3>
+                    <p class="text-gray-500 dark:text-gray-400">
+                        Withdrawal services are currently not available. Please contact support for assistance.
+                    </p>
+                    <Link :href="route('support.index')" class="mt-4">
+                        <Button label="Contact Support" icon="pi pi-envelope" severity="secondary" outlined class="mt-4" />
+                    </Link>
+                </div>
+            </template>
+        </Card>
 
         <!-- Daily Withdrawal Summary -->
         <Card class="mt-6">

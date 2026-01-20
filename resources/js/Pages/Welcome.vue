@@ -270,6 +270,14 @@ const stopAutoSlide = () => {
 onMounted(() => {
     startAutoSlide();
     initializeCounters();
+
+    // Load JivoChat widget
+    if (!document.querySelector('script[src*="jivosite.com"]')) {
+        const script = document.createElement('script');
+        script.src = '//code.jivosite.com/widget/0CS8wuJuUN';
+        script.async = true;
+        document.head.appendChild(script);
+    }
 });
 
 onUnmounted(() => {
